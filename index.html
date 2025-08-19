@@ -414,6 +414,11 @@
             <!-- Campo de texto para edição de nós -->
             <textarea id="nodeEditorInput"></textarea>
             
+            <!-- PAINEL DE STATUS DE SALVAMENTO -->
+            <div id="saveStatusPanel" class="absolute top-28 left-4 bg-white/80 backdrop-blur-sm rounded-lg p-2 px-3 shadow-md text-xs text-gray-700 font-medium z-10">
+                <span id="saveStatusText" class="font-bold">Não salvo</span>
+            </div>
+
             <!-- Menu de Contexto do Post-it -->
             <div id="postitContextMenu">
                 <div class="mb-2">
@@ -638,6 +643,7 @@
         const genericColorPaletteContainer = document.getElementById('genericColorPaletteContainer');
         const genericColorPaletteTitle = document.getElementById('genericColorPaletteTitle');
         const closeGenericColorPaletteBtn = document.getElementById('closeGenericColorPalette');
+        const saveStatusText = document.getElementById('saveStatusText');
 
         // Variáveis para o seletor de emojis
         const emojiBtn = document.getElementById('emojiBtn');
@@ -649,6 +655,19 @@
         const removeAllEmojisBtn = document.getElementById('removeAllEmojisBtn');
         const EMOJI_FONT_SIZE = 16;
         let areEmojisLoaded = false;
+
+        // --- FUNÇÃO UTILITÁRIA DEBOUNCE ---
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
         // Estado do aplicativo
         let nodes = [];
@@ -763,6 +782,94 @@
             canvasTexture: 'lisa'
         };
 
+        // --- LÓGICA DE SALVAMENTO LOCAL ---
+
+        function updateSaveStatus(status, timestamp = null) {
+            const panel = saveStatusText.parentElement;
+            if (status === 'saved') {
+                const timeString = new Date(timestamp).toLocaleTimeString('pt-BR');
+                saveStatusText.textContent = `Salvo às ${timeString}`;
+                panel.classList.remove('bg-red-200', 'text-red-800');
+                panel.classList.add('bg-white/80', 'text-gray-700');
+            } else if (status === 'error') {
+                saveStatusText.textContent = 'QuotaExceededError';
+                panel.classList.remove('bg-white/80');
+                panel.classList.add('bg-red-200', 'text-red-800');
+            } else { // 'unsaved'
+                saveStatusText.textContent = 'Não salvo';
+                panel.classList.remove('bg-red-200', 'text-red-800');
+                panel.classList.add('bg-white/80', 'text-gray-700');
+            }
+        }
+
+        const saveStateToLocalStorage = debounce(() => {
+            try {
+                const projectData = {
+                    nodes: nodes,
+                    postits: postits,
+                    notes: appData.notes,
+                    globalNodeShape: globalNodeShape,
+                    globalLineType: globalLineType,
+                    projectName: appData.projectName,
+                    globalLayoutDirection: globalLayoutDirection,
+                    canvasTexture: canvasTexture,
+                    originX: originX,
+                    originY: originY,
+                    scale: scale
+                };
+                const dataStr = JSON.stringify(projectData);
+                localStorage.setItem('mindMapProgress', dataStr);
+                updateSaveStatus('saved', Date.now());
+            } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                    console.error('Erro de localStorage: Quota excedida.');
+                    updateSaveStatus('error');
+                } else {
+                    console.error('Erro ao salvar no localStorage:', e);
+                }
+            }
+        }, 500);
+
+        function loadStateFromLocalStorage() {
+            const savedData = localStorage.getItem('mindMapProgress');
+            if (savedData) {
+                try {
+                    const loadedData = JSON.parse(savedData);
+                    nodes = loadedData.nodes || [];
+                    postits = loadedData.postits || [];
+                    appData.notes = loadedData.notes || {};
+                    globalNodeShape = loadedData.globalNodeShape || 'square';
+                    globalLineType = loadedData.globalLineType || 'line';
+                    appData.projectName = loadedData.projectName || 'Meu Projeto';
+                    globalLayoutDirection = loadedData.globalLayoutDirection || 'right';
+                    canvasTexture = loadedData.canvasTexture || 'lisa';
+                    projectNameInput.value = appData.projectName;
+                    originX = loadedData.originX || canvas.width / 2;
+                    originY = loadedData.originY || canvas.height / 2;
+                    scale = loadedData.scale || 1.0;
+
+                    nodes.forEach(node => {
+                        const dims = calculateNodeDimensions(node);
+                        node.width = dims.width;
+                        node.height = dims.height;
+                    });
+                    
+                    history.length = 0;
+                    historyIndex = -1;
+                    saveState(); 
+
+                    redrawCanvas();
+                    updateSaveStatus('saved', Date.now());
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao carregar dados do localStorage:', error);
+                    localStorage.removeItem('mindMapProgress');
+                    return false;
+                }
+            }
+            return false;
+        }
+
         // Função para salvar o estado atual
         function saveState() {
             if (historyIndex < history.length - 1) {
@@ -779,6 +886,7 @@
                 canvasTexture: canvasTexture 
             }));
             historyIndex++;
+            saveStateToLocalStorage();
         }
 
         // Função para carregar um estado do histórico
@@ -1168,6 +1276,56 @@
         }
         
         // --- LÓGICA DO BLOCO DE CÓDIGO ---
+        const debouncedHighlight = debounce((element) => {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            const range = selection.getRangeAt(0);
+            const textContent = element.textContent;
+            
+            let charCount = 0;
+            const treeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            let found = false;
+            while (treeWalker.nextNode() && !found) {
+                if (treeWalker.currentNode === range.startContainer) {
+                    charCount += range.startOffset;
+                    found = true;
+                } else {
+                    charCount += treeWalker.currentNode.length;
+                }
+            }
+            if (!found && element.contains(range.startContainer)) {
+                 charCount = textContent.length;
+            }
+
+
+            const langElement = element.closest('.code-block-wrapper').querySelector('.code-block-lang');
+            const result = hljs.highlightAuto(textContent);
+            element.innerHTML = result.value;
+            langElement.textContent = result.language || 'auto';
+
+            let newCharCount = 0;
+            const newTreeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            let newRange = document.createRange();
+            let positionFound = false;
+            while (newTreeWalker.nextNode() && !positionFound) {
+                const nodeLength = newTreeWalker.currentNode.length;
+                if (newCharCount + nodeLength >= charCount) {
+                    newRange.setStart(newTreeWalker.currentNode, charCount - newCharCount);
+                    positionFound = true;
+                } else {
+                    newCharCount += nodeLength;
+                }
+            }
+            if (!positionFound) {
+                newRange.selectNodeContents(element);
+                newRange.collapse(false);
+            }
+            
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+
+        }, 300);
 
         function addCodeBlock() {
             const selection = window.getSelection();
@@ -1253,69 +1411,6 @@
                 }
             }
         }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        const debouncedHighlight = debounce((element) => {
-            const selection = window.getSelection();
-            if (!selection.rangeCount) return;
-            const range = selection.getRangeAt(0);
-            const textContent = element.textContent;
-            
-            let charCount = 0;
-            const treeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
-            let found = false;
-            while (treeWalker.nextNode() && !found) {
-                if (treeWalker.currentNode === range.startContainer) {
-                    charCount += range.startOffset;
-                    found = true;
-                } else {
-                    charCount += treeWalker.currentNode.length;
-                }
-            }
-            if (!found && element.contains(range.startContainer)) {
-                 charCount = textContent.length;
-            }
-
-
-            const langElement = element.closest('.code-block-wrapper').querySelector('.code-block-lang');
-            const result = hljs.highlightAuto(textContent);
-            element.innerHTML = result.value;
-            langElement.textContent = result.language || 'auto';
-
-            let newCharCount = 0;
-            const newTreeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
-            let newRange = document.createRange();
-            let positionFound = false;
-            while (newTreeWalker.nextNode() && !positionFound) {
-                const nodeLength = newTreeWalker.currentNode.length;
-                if (newCharCount + nodeLength >= charCount) {
-                    newRange.setStart(newTreeWalker.currentNode, charCount - newCharCount);
-                    positionFound = true;
-                } else {
-                    newCharCount += nodeLength;
-                }
-            }
-            if (!positionFound) {
-                newRange.selectNodeContents(element);
-                newRange.collapse(false);
-            }
-            
-            newRange.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-
-        }, 300);
 
         function handleNoteContentInput(e) {
             if (e.target.tagName === 'CODE' && e.target.closest('.code-block-wrapper')) {
@@ -1566,7 +1661,9 @@
             });
 
             resizeCanvas();
-            resetProject();
+            if (!loadStateFromLocalStorage()) {
+                resetProject();
+            }
         }
 
         function getNodeDepth(nodeId) {
