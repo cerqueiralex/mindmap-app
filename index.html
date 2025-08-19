@@ -2465,12 +2465,23 @@
             }
         }
 
+        // Listener para finalizar a edição quando o campo perde o foco (clique fora)
+        nodeEditorInput.addEventListener('blur', finishEditingNode);
+
         nodeEditorInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey && editingNode?.type === 'node') {
+            // Com a tecla 'Escape', finaliza a edição para nós e post-its.
+            if (e.key === 'Escape') {
                 e.preventDefault();
-                finishEditingNode();
-            } else if (e.key === 'Escape') {
-                finishEditingNode();
+                nodeEditorInput.blur(); // Aciona o 'blur' para um comportamento de saída consistente
+            }
+            // Com a tecla 'Enter' (sem a tecla Shift)
+            if (e.key === 'Enter' && !e.shiftKey) {
+                // Para itens do tipo 'node', finaliza a edição.
+                if (editingNode?.type === 'node') {
+                    e.preventDefault(); // Evita adicionar uma nova linha
+                    nodeEditorInput.blur(); // Aciona o 'blur' para finalizar a edição
+                }
+                // Para 'postit', a tecla 'Enter' deve criar uma nova linha (comportamento padrão), então não interferimos.
             }
         });
 
