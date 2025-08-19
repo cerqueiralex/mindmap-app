@@ -279,6 +279,17 @@
             color: #fff;
             font-size: 10px;
         }
+        /* Estilo para atalhos de teclado */
+        .kbd-style {
+            background-color: #e5e7eb;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #374151;
+            box-shadow: 1px 1px 1px #cbd5e1;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -526,13 +537,16 @@
             </div>
             <p class="mb-4 text-gray-700 text-center">Este é um aplicativo de produtividade versátil que combina um editor de mapas mentais com um poderoso sistema de anotações. Organize suas ideias visualmente, crie conexões e aprofunde seus tópicos com notas detalhadas, tudo em um só lugar. Ideal para brainstorming, planejamento de projetos e estudos.</p>
             <p class="mb-6 text-gray-700 text-center text-sm">Desenvolvido por Alexandre Polselli Cerqueira.</p>
-            <div class="flex justify-center space-x-4">
+            <div class="flex justify-center space-x-4 mb-6">
                 <a href="https://www.linkedin.com/in/alexandrepolselli/" target="_blank" class="text-gray-500 hover:text-blue-700" title="LinkedIn"><i class="fa-brands fa-linkedin fa-xl"></i></a>
                 <a href="http://datauniverse.com.br/" target="_blank" class="text-gray-500 hover:text-orange-500" title="Blog"><i class="fa-solid fa-blog fa-xl"></i></a>
                 <a href="https://conversionzone.com.br/" target="_blank" class="text-gray-500 hover:text-green-600" title="Consultoria"><i class="fa-solid fa-briefcase fa-xl"></i></a>
                 <a href="https://github.com/cerqueiralex" target="_blank" class="text-gray-500 hover:text-gray-800" title="Github"><i class="fa-brands fa-github fa-xl"></i></a>
                 <a href="https://www.youtube.com/@datauniverseblog/videos" target="_blank" class="text-gray-500 hover:text-red-600" title="Youtube"><i class="fa-brands fa-youtube fa-xl"></i></a>
             </div>
+            <a href="https://github.com/cerqueiralex/mindmap-app/" target="_blank" class="w-full text-center bg-gray-800 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center" style="font-size: small;">
+                <i class="fa-brands fa-github fa-lg mr-2"></i> Ver Projeto no GitHub
+            </a>
         </div>
     </div>
 
@@ -544,42 +558,51 @@
                 <button id="closeFeaturesModalBtn" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="text-gray-700 text-sm space-y-4 overflow-y-auto pr-4">
+                
                 <h4 class="font-bold text-lg">Gerenciamento de Projeto</h4>
                 <ul class="list-disc pl-5 space-y-1">
                     <li><b>Nome do Projeto:</b> Clique no nome do projeto na barra superior para editá-lo. O nome é salvo ao pressionar 'Enter' ou clicar fora.</li>
                     <li><b>Novo Projeto:</b> Cria um novo mapa mental em branco (Arquivo > Novo Projeto).</li>
                     <li><b>Salvar Projeto:</b> Salva o projeto atual como um arquivo .json com o nome definido (Arquivo > Salvar Projeto).</li>
                     <li><b>Carregar Projeto:</b> Carrega um mapa mental a partir de um arquivo .json (Arquivo > Carregar Projeto).</li>
+                    <li><b>Salvo Automático:</b> O progresso é salvo automaticamente no seu navegador.</li>
                 </ul>
 
                 <h4 class="font-bold text-lg">Manipulação de Nós</h4>
                 <ul class="list-disc pl-5 space-y-1">
-                    <li><b>Adicionar Nó Filho:</b> Adiciona um nó filho ao nó selecionado. Atalho: <code>Tab</code>.</li>
-                    <li><b>Adicionar Nó Irmão:</b> Adiciona um nó no mesmo nível do nó selecionado. Atalho: <code>Enter</code>.</li>
+                    <li><b>Adicionar Nó Filho:</b> Adiciona um nó filho ao nó selecionado.</li>
+                    <li><b>Adicionar Nó Irmão:</b> Adiciona um nó no mesmo nível do nó selecionado.</li>
                     <li><b>Adicionar Tópico Flutuante:</b> Cria um novo nó raiz independente no centro da tela.</li>
-                    <li><b>Remover Nó:</b> Remove o nó selecionado e todos os seus filhos. Atalho: <code>Delete</code> ou <code>Backspace</code>.</li>
+                    <li><b>Remover Nó:</b> Remove o nó selecionado e todos os seus filhos.</li>
                     <li><b>Editar Texto:</b> Dê um duplo clique em um nó para editar seu texto diretamente.</li>
                     <li><b>Recolher/Expandir Filhos:</b> Clique no círculo na borda de um nó para recolher ou expandir seus filhos.</li>
                     <li><b>Mover e Reanexar Nó:</b> Clique e arraste um nó para um novo nó pai para reorganizar a estrutura do mapa.</li>
                 </ul>
 
+                <h4 class="font-bold text-lg">Post-its (Notas Adesivas)</h4>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><b>Adicionar Post-it:</b> Clique no ícone de nota adesiva para adicionar um post-it ao canvas.</li>
+                    <li><b>Editar Texto:</b> Dê um duplo clique para editar o conteúdo do post-it.</li>
+                    <li><b>Mover:</b> Clique e arraste para posicionar o post-it onde desejar.</li>
+                    <li><b>Personalizar Cores:</b> Clique com o botão direito em um post-it para abrir o menu de contexto e alterar a cor de fundo e do texto.</li>
+                </ul>
+
                 <h4 class="font-bold text-lg">Navegação e Visualização</h4>
                  <ul class="list-disc pl-5 space-y-1">
                     <li><b>Mover Canvas (Pan):</b> Clique e arraste em uma área vazia do canvas.</li>
-                    <li><b>Mover Nó:</b> Clique e arraste um nó para reposicioná-lo.</li>
                     <li><b>Zoom:</b> Use os botões de +/- no canto, o gesto de pinça no trackpad/tela sensível ao toque, ou segure <code>Ctrl</code> e use a roda do mouse.</li>
-                    <li><b>Recentralizar:</b> Clica no botão de expandir para centralizar o mapa na tela.</li>
+                    <li><b>Recentralizar:</b> Clica no botão de expandir para centralizar e resetar o zoom do mapa na tela.</li>
                 </ul>
 
                 <h4 class="font-bold text-lg">Personalização e Estilo</h4>
                 <ul class="list-disc pl-5 space-y-1">
                     <li><b>Adicionar Emojis:</b> Com um nó selecionado, clique no ícone de emoji para abrir o painel. Adicione ou remova emojis que aparecerão ao lado do texto do nó.</li>
                     <li><b>Paleta de Cores:</b> Altere o tema de cores de todo o mapa mental.</li>
-                    <li><b>Formato dos Nós:</b> Altere a forma de todos os nós do mapa para círculo ou quadrado.</li>
+                    <li><b>Formato dos Nós:</b> Altere a forma de todos os nós do mapa para círculo, quadrado ou retângulo.</li>
                     <li><b>Tipo de Conexão:</b> Escolha entre linhas retas, anguladas ou curvadas para conectar os nós.</li>
                     <li><b>Arquitetura do Mapa:</b> Reorganize o layout do mapa para crescer para a direita, esquerda, para baixo ou para cima.</li>
-                    <li><b>Textura do Fundo:</b> Altere a aparência do fundo do canvas para liso, gradeado ou pontilhado para melhor alinhamento.</li>
-                    <li><b>Cor Individual do Nó:</b> No painel de notas, use o seletor de cores para alterar a cor apenas do nó selecionado.</li>
+                    <li><b>Textura do Fundo:</b> Altere a aparência do fundo do canvas para liso, gradeado ou pontilhado.</li>
+                    <li><b>Cor Individual do Nó:</b> No painel de notas, use o seletor de cores (<i class="fa-solid fa-fill-drip"></i>) para alterar a cor apenas do nó selecionado.</li>
                 </ul>
 
                 <h4 class="font-bold text-lg">Editor de Notas</h4>
@@ -588,7 +611,20 @@
                     <li>Estilos de texto (negrito, itálico, etc.), alinhamento, listas, e títulos (H1-H6).</li>
                     <li>Criação de links, cor de texto e destaque de texto.</li>
                     <li><b>Bloco de Código:</b> Insira blocos de código com destaque de sintaxe automático e botão para copiar.</li>
+                    <li><b>Colar Conteúdo:</b> Cole textos de fontes externas mantendo a formatação básica (negrito, parágrafos) sem importar estilos indesejados.</li>
                 </ul>
+
+                <h4 class="font-bold text-lg">Atalhos de Teclado</h4>
+                <div class="space-y-2">
+                    <p><b>Manipulação de Nós:</b></p>
+                    <div class="flex items-center justify-between"><span>Adicionar nó filho</span> <code class="kbd-style">Tab</code></div>
+                    <div class="flex items-center justify-between"><span>Adicionar nó irmão</span> <code class="kbd-style">Enter</code></div>
+                    <div class="flex items-center justify-between"><span>Excluir nó selecionado</span> <div><code class="kbd-style">Delete</code> ou <code class="kbd-style">Backspace</code></div></div>
+                    <p class="pt-2"><b>Geral:</b></p>
+                    <div class="flex items-center justify-between"><span>Desfazer</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Z</code></div></div>
+                    <div class="flex items-center justify-between"><span>Refazer</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Y</code></div></div>
+                    <div class="flex items-center justify-between"><span>Zoom no Canvas</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Roda do Mouse</code></div></div>
+                </div>
             </div>
         </div>
     </div>
