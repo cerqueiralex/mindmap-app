@@ -2469,13 +2469,22 @@
         nodeEditorInput.addEventListener('blur', finishEditingNode);
 
         nodeEditorInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                if (editingNode) {
+                    const parentId = editingNode.id; // Salva o ID do nó pai
+                    finishEditingNode(); // Finaliza a edição do nó atual
+                    selectedNodeId = parentId; // Define o nó atual como o pai para o novo nó
+                    addNode(); // Adiciona um novo nó filho
+                }
+            }
             // Com a tecla 'Escape', finaliza a edição para nós e post-its.
-            if (e.key === 'Escape') {
+            else if (e.key === 'Escape') {
                 e.preventDefault();
                 nodeEditorInput.blur(); // Aciona o 'blur' para um comportamento de saída consistente
             }
             // Com a tecla 'Enter' (sem a tecla Shift)
-            if (e.key === 'Enter' && !e.shiftKey) {
+            else if (e.key === 'Enter' && !e.shiftKey) {
                 // Para itens do tipo 'node', finaliza a edição.
                 if (editingNode?.type === 'node') {
                     e.preventDefault(); // Evita adicionar uma nova linha
