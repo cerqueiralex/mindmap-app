@@ -944,7 +944,7 @@
             appData.projectName = 'Meu Projeto';
             projectNameInput.value = appData.projectName;
             nodes = [initialNode];
-            postits = [];
+            postits = []; // CORREÇÃO: Limpa o array de post-its
             appData.notes = { 'root': '<h1>Bem-vindo!</h1><p>Esta é a nota principal.</p>' };
             
             history.length = 0;
@@ -1747,6 +1747,9 @@
 
         function setupCanvas() {
             canvas.addEventListener('mousedown', (e) => {
+                if (editingNode) {
+                    nodeEditorInput.blur();
+                }
                 initialClickX = e.clientX;
                 initialClickY = e.clientY;
                 const rect = canvas.getBoundingClientRect();
