@@ -274,7 +274,11 @@
         .color-swatch:hover {
             transform: scale(1.1);
         }
-
+        #saveStatusPanel {
+            background-color: rgb(0 0 0 / 49%);
+            color: #fff;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -398,7 +402,7 @@
                     </div>
                      <!-- Dropdown para alterar a textura do background -->
                     <div class="relative">
-                        <button id="textureBtn" class="toolbar-btn" title="Textura do Fundo"><i class="fa-solid fa-grip-lines"></i></button>
+                        <button id="textureBtn" class="toolbar-btn" title="Textura do Fundo"><i class="fa-solid fa-table-cells"></i></button>
                         <div id="texturePicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-52 z-20">
                             <div class="flex flex-col space-y-1 items-start">
                                 <button class="dropdown-btn" data-texture="lisa"><i class="fa-solid fa-square-full w-5 mr-2"></i> Textura Lisa</button>
@@ -416,7 +420,7 @@
             <textarea id="nodeEditorInput"></textarea>
             
             <!-- PAINEL DE STATUS DE SALVAMENTO -->
-            <div id="saveStatusPanel" class="absolute top-28 left-4 bg-white/80 backdrop-blur-sm rounded-lg p-2 px-3 shadow-md text-xs text-gray-700 font-medium z-10">
+            <div id="saveStatusPanel" class="absolute top-28 left-4 bg-white/80 backdrop-blur-sm rounded-lg px-3 shadow-md text-xs text-gray-700 font-medium z-10">
                 <span id="saveStatusText" class="font-bold">Não salvo</span>
             </div>
 
