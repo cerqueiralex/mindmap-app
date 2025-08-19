@@ -1437,6 +1437,44 @@
             }
         }
 
+        // --- FUNÇÃO PARA LIDAR COM A COLAGEM DE CONTEÚDO EXTERNO ---
+        function handlePaste(e) {
+            // 1. Impede o comportamento padrão de colagem do navegador.
+            e.preventDefault();
+
+            // 2. Obtém o conteúdo da área de transferência, priorizando o formato HTML.
+            let pastedHtml = (e.clipboardData || window.clipboardData).getData('text/html');
+
+            // Se não houver conteúdo HTML, usa o formato de texto simples.
+            if (!pastedHtml) {
+                const plainText = (e.clipboardData || window.clipboardData).getData('text/plain');
+                document.execCommand('insertText', false, plainText);
+                return;
+            }
+
+            // 3. Limpa o HTML de comentários indesejados.
+            pastedHtml = pastedHtml.replace(/<!--[\s\S]*?-->/g, '');
+
+            // 4. Usa DOMParser para criar um documento temporário e seguro para manipulação.
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(pastedHtml, 'text/html');
+
+            // 5. Seleciona todos os elementos no corpo do documento temporário.
+            const allElements = doc.body.querySelectorAll('*');
+
+            // 6. Remove os atributos de 'style' e 'class' de cada elemento para limpar a formatação.
+            allElements.forEach(el => {
+                el.removeAttribute('style');
+                el.removeAttribute('class');
+            });
+
+            // 7. Obtém a string de HTML limpa do corpo do documento temporário.
+            const cleanedHtml = doc.body.innerHTML;
+
+            // 8. Insere o HTML limpo no editor.
+            document.execCommand('insertHTML', false, cleanedHtml);
+        }
+
         function init() {
             setupCanvas();
             setupResizing();
@@ -1454,6 +1492,9 @@
             });
             noteContentDiv.addEventListener('click', handleNoteContentClick);
             noteContentDiv.addEventListener('keydown', handleCodeBlockKeyDown);
+            
+            // *** Listener para o evento de colar ***
+            noteContentDiv.addEventListener('paste', handlePaste);
             
             noteTitleInput.addEventListener('input', saveNodeTitle);
             
