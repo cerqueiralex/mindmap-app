@@ -4,6 +4,8 @@ Este é um aplicativo de produtividade versátil que combina um editor de mapas 
 
 Desenvolvido por Alexandre Polselli Cerqueira.
 
+O aplicativo está disponível na seguinte url: https://datauniverse.com.br/mindmap-app/
+
 # Funcionalidades e Atalhos
 
 ## Gerenciamento de Projeto
