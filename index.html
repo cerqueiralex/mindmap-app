@@ -213,7 +213,7 @@
             font-size: 0.8em;
             color: #4b5563;
         }
-        .copy-code-btn {
+        .copy-code-btn, .edit-code-btn {
             background-color: transparent;
             border: none;
             cursor: pointer;
@@ -221,7 +221,7 @@
             padding: 4px;
             border-radius: 4px;
         }
-        .copy-code-btn:hover {
+        .copy-code-btn:hover, .edit-code-btn:hover {
             background-color: #d1d5db;
         }
         .code-block-wrapper pre {
@@ -234,6 +234,12 @@
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.9em;
             outline: none;
+        }
+        /* Estilo para o modo de edição do bloco de código */
+        .code-block-wrapper.editing pre {
+            box-shadow: 0 0 0 2px #3b82f6; /* Anel azul para indicar edição */
+            border-radius: 0 0 7px 7px;
+            background-color: #fff;
         }
         /* Override para o fundo do highlight.js */
         .hljs {
@@ -1179,11 +1185,16 @@
                 <div class="code-block-wrapper" contenteditable="false">
                     <div class="code-block-header">
                         <span class="code-block-lang">auto</span>
-                        <button class="copy-code-btn" title="Copiar Código">
-                            <i class="fa-solid fa-copy"></i> Copiar
-                        </button>
+                        <div class="flex items-center">
+                            <button class="edit-code-btn" title="Editar Código">
+                                <i class="fa-solid fa-pencil"></i> Editar
+                            </button>
+                            <button class="copy-code-btn" title="Copiar Código">
+                                <i class="fa-solid fa-copy"></i> Copiar
+                            </button>
+                        </div>
                     </div>
-                    <pre><code contenteditable="true" spellcheck="false">\n</code></pre>
+                    <pre><code contenteditable="false" spellcheck="false">\n</code></pre>
                 </div>
                 <p><br></p>
             `;
@@ -1213,6 +1224,32 @@
                         console.error('Falha ao copiar texto: ', err);
                     }
                     document.body.removeChild(textArea);
+                }
+            }
+            
+            if (e.target.closest('.edit-code-btn')) {
+                const wrapper = e.target.closest('.code-block-wrapper');
+                const editButton = e.target.closest('.edit-code-btn');
+                if (wrapper) {
+                    const codeElement = wrapper.querySelector('code');
+                    const isEditing = codeElement.isContentEditable;
+
+                    if (isEditing) {
+                        // Para de editar
+                        codeElement.contentEditable = false;
+                        wrapper.classList.remove('editing');
+                        editButton.innerHTML = '<i class="fa-solid fa-pencil"></i> Editar';
+                        editButton.title = 'Editar Código';
+                        // Re-aplica o highlight no código
+                        debouncedHighlight(codeElement);
+                    } else {
+                        // Começa a editar
+                        codeElement.contentEditable = true;
+                        wrapper.classList.add('editing');
+                        editButton.innerHTML = '<i class="fa-solid fa-check"></i> Salvar';
+                        editButton.title = 'Salvar Alterações';
+                        codeElement.focus();
+                    }
                 }
             }
         }
