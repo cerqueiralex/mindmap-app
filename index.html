@@ -544,7 +544,7 @@
                 <a href="https://github.com/cerqueiralex" target="_blank" class="text-gray-500 hover:text-gray-800" title="Github"><i class="fa-brands fa-github fa-xl"></i></a>
                 <a href="https://www.youtube.com/@datauniverseblog/videos" target="_blank" class="text-gray-500 hover:text-red-600" title="Youtube"><i class="fa-brands fa-youtube fa-xl"></i></a>
             </div>
-            <a href="https://github.com/cerqueiralex/mindmap-app/" target="_blank" class="w-full text-center bg-gray-800 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center" style="font-size: small;">
+            <a href="https://github.com/cerqueiralex/mindmap-app/" target="_blank" class="w-full text-center bg-gray-800 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center">
                 <i class="fa-brands fa-github fa-lg mr-2"></i> Ver Projeto no GitHub
             </a>
         </div>
@@ -621,9 +621,9 @@
                     <div class="flex items-center justify-between"><span>Adicionar nó irmão</span> <code class="kbd-style">Enter</code></div>
                     <div class="flex items-center justify-between"><span>Excluir nó selecionado</span> <div><code class="kbd-style">Delete</code> ou <code class="kbd-style">Backspace</code></div></div>
                     <p class="pt-2"><b>Geral:</b></p>
-                    <div class="flex items-center justify-between"><span>Desfazer</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Z</code></div></div>
-                    <div class="flex items-center justify-between"><span>Refazer</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Y</code></div></div>
-                    <div class="flex items-center justify-between"><span>Zoom no Canvas</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Roda do Mouse</code></div></div>
+                    <div class="flex items-center justify-between"><span>Desfazer</span> <code class="kbd-style">Ctrl</code> + <code class="kbd-style">Z</code></div>
+                    <div class="flex items-center justify-between"><span>Refazer</span> <code class="kbd-style">Ctrl</code> + <code class="kbd-style">Y</code></div>
+                    <div class="flex items-center justify-between"><span>Zoom no Canvas</span> <code class="kbd-style">Ctrl</code> + <code class="kbd-style">Roda do Mouse</code></div>
                 </div>
             </div>
         </div>
@@ -1402,6 +1402,13 @@
         }
 
         function handleNoteContentClick(e) {
+            const link = e.target.closest('a');
+            if (link && link.href) {
+                e.preventDefault();
+                window.open(link.href, '_blank');
+                return;
+            }
+
             if (e.target.closest('.copy-code-btn')) {
                 const wrapper = e.target.closest('.code-block-wrapper');
                 if (wrapper) {
