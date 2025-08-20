@@ -10,6 +10,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inclui Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <!-- Inclui Highlight.js para Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -39,6 +42,7 @@
             border-left: 1px solid #cbd5e1;
             border-right: 1px solid #cbd5e1;
             transition: background-color: 0.2s;
+            z-index: 1;
         }
         #resizeHandle:hover {
             background-color: #cbd5e1;
@@ -50,6 +54,7 @@
             padding: 5px 10px;
             box-shadow: 1px 1px 2px #eee;
             border-radius: 6px;
+            background-color: #fff;
         }
         .toolbar-btn i {
             @apply text-gray-600;
@@ -57,6 +62,7 @@
         /* Estiliza o editor de notas */
         #notesEditor {
             @apply bg-white transition-all duration-300 ease-in-out;
+            z-index: 1;
         }
         #notesEditor.hidden {
             display: none;
@@ -86,6 +92,9 @@
         /* Estiliza os botões do editor de notas */
         .notes-toolbar-btn {
             @apply p-2 rounded-md transition-colors duration-200 hover:bg-gray-200;
+            padding: 0 10px 0 0;
+            border-right: 1px solid #eee;
+            margin: 0 0 10px 0;
         }
         .notes-toolbar-btn i {
             @apply text-gray-600;
@@ -137,104 +146,18 @@
             border: 1px solid rgba(0,0,0,0.1);
         }
 
-        /* Estilização do seletor de cores individual */
-        #colorPickerModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 60;
-        }
-
-        #colorPickerModal.active {
-            display: flex;
-        }
-
-        .color-picker-content {
-            @apply bg-white p-6 rounded-lg shadow-xl w-80;
-            background: #fff;
-            padding: 20px;
-            border-radius: 6px;
-        }
-
-        #colorPickerArea {
-            position: relative;
-            width: 100%;
-            padding-top: 100%; /* Proporção 1:1 */
-            background: hsl(0, 100%, 50%);
-        }
-
-        #colorPickerSelector {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border: 1px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;
-            cursor: pointer;
-            transform: translate(-50%, -50%);
-        }
-
-        .color-picker-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        #whiteOverlay {
-            background: linear-gradient(to right, white, rgba(255, 255, 255, 0));
-        }
-
-        #blackOverlay {
-            background: linear-gradient(to top, black, rgba(0, 0, 0, 0));
-        }
-
-        #hueSlider {
-            width: 100%;
-            height: 10px;
-            background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
-            border-radius: 5px;
-            -webkit-appearance: none;
-            appearance: none;
-            cursor: pointer;
-        }
-
-        #hueSlider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: white;
-            border: 1px solid black;
-        }
-
-        #selectedColorPreview {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 1px solid #ccc;
-        }
-
         /* Estilo para o campo de edição de nó */
         #nodeEditorInput {
             position: absolute;
             display: none;
             background-color: transparent;
             color: white;
-            text-align: center;
+            text-align: left;
             border: 1px dashed #fff;
             font-family: 'Inter', sans-serif;
             resize: none;
             overflow: hidden;
-            padding: 10px;
+            padding: 15px;
             box-sizing: border-box;
             z-index: 10;
         }
@@ -271,6 +194,78 @@
         }
         .current-emoji-item:hover .remove-emoji-btn {
             @apply opacity-100;
+        }
+        
+        /* Estilos para o Bloco de Código */
+        .code-block-wrapper {
+            background-color: #f3f4f6;
+            border-radius: 8px;
+            margin: 1em 0;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e5e7eb;
+            padding: 4px 12px;
+            font-size: 0.8em;
+            color: #4b5563;
+        }
+        .copy-code-btn {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            color: #4b5563;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        .copy-code-btn:hover {
+            background-color: #d1d5db;
+        }
+        .code-block-wrapper pre {
+            margin: 0;
+            padding: 1em;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .code-block-wrapper code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            outline: none;
+        }
+        /* Override para o fundo do highlight.js */
+        .hljs {
+            background: transparent !important;
+            padding: 0 !important;
+        }
+
+        /* Estilos para o menu de contexto do Post-it e paleta de cores genérica */
+        #postitContextMenu {
+            position: absolute;
+            display: none;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 8px;
+            z-index: 20;
+            width: 200px;
+        }
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .color-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .color-swatch:hover {
+            transform: scale(1.1);
         }
 
     </style>
@@ -319,8 +314,9 @@
                     <button id="undoMindMapBtn" class="toolbar-btn" title="Desfazer (Ctrl + Z)"><i class="fa-solid fa-rotate-left"></i></button>
                     <button id="redoMindMapBtn" class="toolbar-btn" title="Refazer (Ctrl + Y)"><i class="fa-solid fa-rotate-right"></i></button>
                     <button id="addNodeBtn" class="toolbar-btn" title="Adicionar Novo Nó (TAB)"><i class="fa-solid fa-plus"></i></button>
+                    <button id="removeNodeBtn" class="toolbar-btn" title="Remover Nó (Delete)"><i class="fa-solid fa-minus"></i></button>
                     <button id="addFloatingNodeBtn" class="toolbar-btn" title="Adicionar Tópico Flutuante"><i class="fa-solid fa-brain"></i></button>
-                    <button id="removeNodeBtn" class="toolbar-btn" title="Remover Nó (Delete)"><i class="fa-solid fa-trash-can"></i></button>
+                    <button id="addPostitBtn" class="toolbar-btn" title="Adicionar Nota Adesiva"><i class="fa-solid fa-note-sticky"></i></button>
                     
                     <!-- Botão e Painel de Emojis -->
                     <div class="relative">
@@ -348,7 +344,7 @@
                     <div class="relative">
                         <button id="colorPaletteBtn" class="toolbar-btn" title="Paleta de Cores"><i class="fa-solid fa-palette"></i></button>
                         <div id="colorPicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-40 z-20">
-                            <div class="flex flex-col space-y-1">
+                            <div class="flex flex-col space-y-1 items-start">
                                 <button class="dropdown-btn" data-theme="vermelho"><span class="color-circle mr-2 inline-block" style="background-color: #bb0e0e;"></span> Vermelho</button>
                                 <button class="dropdown-btn" data-theme="azul"><span class="color-circle mr-2 inline-block" style="background-color: #1e3a8a;"></span> Azul</button>
                                 <button class="dropdown-btn" data-theme="verde"><span class="color-circle mr-2 inline-block" style="background-color: #166534;"></span> Verde</button>
@@ -362,7 +358,7 @@
                     <div class="relative">
                         <button id="globalShapeBtn" class="toolbar-btn" title="Alterar Formato dos Nós"><i class="fa-solid fa-shapes"></i></button>
                         <div id="globalShapePicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-40 z-20">
-                            <div class="flex flex-col space-y-1">
+                            <div class="flex flex-col space-y-1 items-start">
                                 <button class="dropdown-btn" data-shape="circle"><i class="fa-regular fa-circle w-5 mr-2"></i> Círculo</button>
                                 <button class="dropdown-btn" data-shape="square"><i class="fa-regular fa-square w-5 mr-2"></i> Quadrado</button>
                                 <button class="dropdown-btn" data-shape="rectangle"><i class="fa-solid fa-square-full w-5 mr-2"></i> Retângulo</button>
@@ -374,7 +370,7 @@
                     <div class="relative">
                         <button id="lineTypeBtn" class="toolbar-btn" title="Tipo de Conexão"><i class="fa-solid fa-share-nodes"></i></button>
                         <div id="lineTypePicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-52 z-20">
-                            <div class="flex flex-col space-y-1">
+                            <div class="flex flex-col space-y-1 items-start">
                                 <button class="dropdown-btn" data-line-type="line"><i class="fa-solid fa-minus w-5 mr-2"></i> Linha</button>
                                 <button class="dropdown-btn" data-line-type="angled"><i class="fa-solid fa-turn-down w-5 -scale-y-100 mr-2"></i> Conector Angulado</button>
                                 <button class="dropdown-btn" data-line-type="curved"><i class="fa-solid fa-wave-square w-5 mr-2"></i> Conector Curvado</button>
@@ -385,11 +381,22 @@
                     <div class="relative">
                         <button id="layoutBtn" class="toolbar-btn" title="Arquitetura do Mapa"><i class="fa-solid fa-sitemap"></i></button>
                         <div id="layoutPicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-48 z-20">
-                            <div class="flex flex-col space-y-1">
+                            <div class="flex flex-col space-y-1 items-start">
                                 <button class="dropdown-btn" data-layout="right"><i class="fa-solid fa-arrow-right w-5 mr-2"></i> Direita</button>
                                 <button class="dropdown-btn" data-layout="left"><i class="fa-solid fa-arrow-left w-5 mr-2"></i> Esquerda</button>
                                 <button class="dropdown-btn" data-layout="top-down"><i class="fa-solid fa-arrow-down w-5 mr-2"></i> Top down</button>
                                 <button class="dropdown-btn" data-layout="bottom-up"><i class="fa-solid fa-arrow-up w-5 mr-2"></i> Bottom Up</button>
+                            </div>
+                        </div>
+                    </div>
+                     <!-- Dropdown para alterar a textura do background -->
+                    <div class="relative">
+                        <button id="textureBtn" class="toolbar-btn" title="Textura do Fundo"><i class="fa-solid fa-grip-lines"></i></button>
+                        <div id="texturePicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-52 z-20">
+                            <div class="flex flex-col space-y-1 items-start">
+                                <button class="dropdown-btn" data-texture="lisa"><i class="fa-solid fa-square-full w-5 mr-2"></i> Textura Lisa</button>
+                                <button class="dropdown-btn" data-texture="grid"><i class="fa-solid fa-table-cells w-5 mr-2"></i> Textura Grid</button>
+                                <button class="dropdown-btn" data-texture="dotted"><i class="fa-solid fa-border-all w-5 mr-2"></i> Textura Pontilhada</button>
                             </div>
                         </div>
                     </div>
@@ -400,6 +407,19 @@
             <canvas id="mindMapCanvas" class="flex-grow"></canvas>
             <!-- Campo de texto para edição de nós -->
             <textarea id="nodeEditorInput"></textarea>
+            
+            <!-- Menu de Contexto do Post-it -->
+            <div id="postitContextMenu">
+                <div class="mb-2">
+                    <h4 class="text-xs font-bold text-gray-500 mb-1">COR DA NOTA</h4>
+                    <div id="postitBgColorPalette" class="color-palette"></div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-gray-500 mb-1">COR DO TEXTO</h4>
+                    <div id="postitTextColorPalette" class="color-palette"></div>
+                </div>
+            </div>
+
 
             <!-- Controles de Navegação do Canvas (Canto Inferior Direito) -->
             <div class="absolute bottom-4 right-4 flex flex-col space-y-2">
@@ -427,7 +447,7 @@
                     <button id="closeNotesBtn" class="notes-toolbar-btn" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 p-4 border-b bg-gray-50 flex-wrap">
+            <div class="flex items-center space-x-2 p-4 border-b bg-gray-50 flex-wrap relative">
                 <button class="notes-toolbar-btn" onclick="formatDoc('bold')" title="Negrito"><i class="fa-solid fa-bold"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('italic')" title="Itálico"><i class="fa-solid fa-italic"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('underline')" title="Sublinhado"><i class="fa-solid fa-underline"></i></button>
@@ -436,6 +456,8 @@
                 <button class="notes-toolbar-btn" onclick="formatDoc('justifyLeft')" title="Alinhar à Esquerda"><i class="fa-solid fa-align-left"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('justifyCenter')" title="Alinhar ao Centro"><i class="fa-solid fa-align-center"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('justifyRight')" title="Alinhar à Direita"><i class="fa-solid fa-align-right"></i></button>
+                <button class="notes-toolbar-btn" onclick="formatDoc('justifyFull')" title="Justificar"><i class="fa-solid fa-align-justify"></i></button>
+                <button id="addCodeBlockBtn" class="notes-toolbar-btn" title="Inserir Bloco de Código"><i class="fa-solid fa-code"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('insertUnorderedList')" title="Lista com Marcadores"><i class="fa-solid fa-list-ul"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('insertOrderedList')" title="Lista Numerada"><i class="fa-solid fa-list-ol"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('removeFormat')" title="Remover Formatação"><i class="fa-solid fa-text-slash"></i></button>
@@ -540,6 +562,7 @@
                     <li><b>Formato dos Nós:</b> Altere a forma de todos os nós do mapa para círculo ou quadrado.</li>
                     <li><b>Tipo de Conexão:</b> Escolha entre linhas retas, anguladas ou curvadas para conectar os nós.</li>
                     <li><b>Arquitetura do Mapa:</b> Reorganize o layout do mapa para crescer para a direita, esquerda, para baixo ou para cima.</li>
+                    <li><b>Textura do Fundo:</b> Altere a aparência do fundo do canvas para liso, gradeado ou pontilhado para melhor alinhamento.</li>
                     <li><b>Cor Individual do Nó:</b> No painel de notas, use o seletor de cores para alterar a cor apenas do nó selecionado.</li>
                 </ul>
 
@@ -548,6 +571,7 @@
                 <ul class="list-disc pl-5 space-y-1">
                     <li>Estilos de texto (negrito, itálico, etc.), alinhamento, listas, e títulos (H1-H6).</li>
                     <li>Criação de links, cor de texto e destaque de texto.</li>
+                    <li><b>Bloco de Código:</b> Insira blocos de código com destaque de sintaxe automático e botão para copiar.</li>
                 </ul>
             </div>
         </div>
@@ -564,32 +588,18 @@
             </div>
         </div>
     </div>
-
-    <!-- Pop-up do seletor de cor individual -->
-    <div id="colorPickerModal">
-        <div class="color-picker-content">
+    
+    <!-- Modal da Paleta de Cores Genérica -->
+    <div id="genericColorPaletteModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-xs">
             <div class="flex justify-between items-center mb-4">
-                <h4 id="colorPickerTitle" class="text-lg font-semibold">Escolher Cor</h4>
-                <button id="closeColorPicker" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
+                <h3 id="genericColorPaletteTitle" class="text-lg font-bold">Selecionar Cor</h3>
+                <button id="closeGenericColorPalette" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="mb-4">
-                <h5 class="text-xs font-bold text-gray-500 mb-2">CORES PREDEFINIDAS</h5>
-                <div id="predefinedColors" class="flex flex-wrap gap-2 justify-center">
-                    <!-- Cores predefinidas serão inseridas aqui -->
-                </div>
-            </div>
-            <div id="colorPickerArea" class="relative mb-4 cursor-crosshair">
-                <div id="whiteOverlay" class="color-picker-overlay"></div>
-                <div id="blackOverlay" class="color-picker-overlay"></div>
-                <div id="colorPickerSelector"></div>
-            </div>
-            <input type="range" id="hueSlider" class="w-full mb-4" min="0" max="360" value="0">
-            <div class="flex items-center space-x-2">
-                <span id="selectedColorPreview" class="block w-6 h-6 rounded-full border border-gray-300"></span>
-                <input type="text" id="hexInput" class="w-full border rounded-md p-2 text-sm font-mono" placeholder="#000000">
-            </div>
+            <div id="genericColorPaletteContainer" class="color-palette"></div>
         </div>
     </div>
+
 
     <script>
         // Variáveis globais para o canvas e o contexto
@@ -613,6 +623,15 @@
         const helpMenuDropdown = document.getElementById('helpMenuDropdown');
         const layoutBtn = document.getElementById('layoutBtn');
         const layoutPicker = document.getElementById('layoutPicker');
+        const textureBtn = document.getElementById('textureBtn');
+        const texturePicker = document.getElementById('texturePicker');
+        const addCodeBlockBtn = document.getElementById('addCodeBlockBtn');
+        const addPostitBtn = document.getElementById('addPostitBtn');
+        const postitContextMenu = document.getElementById('postitContextMenu');
+        const genericColorPaletteModal = document.getElementById('genericColorPaletteModal');
+        const genericColorPaletteContainer = document.getElementById('genericColorPaletteContainer');
+        const genericColorPaletteTitle = document.getElementById('genericColorPaletteTitle');
+        const closeGenericColorPaletteBtn = document.getElementById('closeGenericColorPalette');
 
         // Variáveis para o seletor de emojis
         const emojiBtn = document.getElementById('emojiBtn');
@@ -627,20 +646,27 @@
 
         // Estado do aplicativo
         let nodes = [];
+        let postits = [];
         let selectedNodeId = null;
+        let selectedPostitId = null;
         let scale = 1.0;
         let originX = 0;
         let originY = 0;
         let isCanvasDragging = false; 
         let isNodeDragging = false;
+        let isPostitDragging = false;
         let draggedNode = null;
+        let draggedPostit = null;
         let lastMouseX = 0;
         let lastMouseY = 0;
+        let initialClickX = 0;
+        let initialClickY = 0;
         let savedSelection = null; // Para salvar a seleção de texto
         let editingNode = null; // Nó atualmente em edição
         let initialPinchDistance = 0; // Para o zoom com os dedos
         let globalLayoutDirection = 'right'; // Direção padrão do layout
         let potentialParentNodeId = null; // ID do nó que pode se tornar o novo pai
+        let canvasTexture = 'lisa'; // Textura padrão do canvas
 
         // Histórico para Desfazer/Refazer
         const history = [];
@@ -660,26 +686,34 @@
         
         // Função para quebrar o texto em linhas
         function getWrappedTextLines(text, maxWidth) {
-            const words = text.split(' ');
-            if (words.length === 0) return [''];
-            let lines = [];
-            let currentLine = words[0] || '';
+            const allLines = [];
+            const paragraphs = text.split('\n'); // Divide por quebras de linha manuais primeiro
 
-            for (let i = 1; i < words.length; i++) {
-                const word = words[i];
-                const testLine = currentLine + " " + word;
-                const metrics = ctx.measureText(testLine);
-                const testWidth = metrics.width;
-                if (testWidth < maxWidth && word.length > 0) {
-                    currentLine = testLine;
-                } else {
-                    lines.push(currentLine);
-                    currentLine = word;
+            paragraphs.forEach(paragraph => {
+                const words = paragraph.split(' ');
+                if (words.length === 1 && words[0] === '') {
+                    allLines.push(''); // Mantém linhas vazias
+                    return;
                 }
-            }
-            lines.push(currentLine);
-            return lines;
+                let currentLine = words[0] || '';
+
+                for (let i = 1; i < words.length; i++) {
+                    const word = words[i];
+                    const testLine = currentLine + " " + word;
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth < maxWidth && word.length > 0) {
+                        currentLine = testLine;
+                    } else {
+                        allLines.push(currentLine);
+                        currentLine = word;
+                    }
+                }
+                allLines.push(currentLine);
+            });
+            return allLines;
         }
+
 
         // Função para calcular as dimensões do nó com base no texto e emojis
         function calculateNodeDimensions(node) {
@@ -710,6 +744,7 @@
         // Objeto de dados simulado
         let appData = {
             nodes: [],
+            postits: [],
             notes: {},
             selectedNodeId: null,
             scale: 1.0,
@@ -718,7 +753,8 @@
             globalNodeShape: 'square',
             globalLineType: 'line',
             projectName: 'Meu Projeto',
-            globalLayoutDirection: 'right'
+            globalLayoutDirection: 'right',
+            canvasTexture: 'lisa'
         };
 
         // Função para salvar o estado atual
@@ -726,7 +762,16 @@
             if (historyIndex < history.length - 1) {
                 history.splice(historyIndex + 1);
             }
-            history.push(JSON.stringify({ nodes: nodes, notes: appData.notes, globalNodeShape: globalNodeShape, globalLineType: globalLineType, projectName: appData.projectName, globalLayoutDirection: globalLayoutDirection }));
+            history.push(JSON.stringify({ 
+                nodes: nodes, 
+                postits: postits,
+                notes: appData.notes, 
+                globalNodeShape: globalNodeShape, 
+                globalLineType: globalLineType, 
+                projectName: appData.projectName, 
+                globalLayoutDirection: globalLayoutDirection, 
+                canvasTexture: canvasTexture 
+            }));
             historyIndex++;
         }
 
@@ -735,11 +780,13 @@
             if (index >= 0 && index < history.length) {
                 const state = JSON.parse(history[index]);
                 nodes = state.nodes;
+                postits = state.postits || [];
                 appData.notes = state.notes;
                 globalNodeShape = state.globalNodeShape || 'square';
                 globalLineType = state.globalLineType || 'line';
                 appData.projectName = state.projectName || 'Meu Projeto';
                 globalLayoutDirection = state.globalLayoutDirection || 'right';
+                canvasTexture = state.canvasTexture || 'lisa';
                 projectNameInput.value = appData.projectName;
                 redrawCanvas();
             }
@@ -779,11 +826,13 @@
         function saveProject() {
             const projectData = {
                 nodes: nodes,
+                postits: postits,
                 notes: appData.notes,
                 globalNodeShape: globalNodeShape,
                 globalLineType: globalLineType,
                 projectName: appData.projectName,
-                globalLayoutDirection: globalLayoutDirection
+                globalLayoutDirection: globalLayoutDirection,
+                canvasTexture: canvasTexture
             };
             const dataStr = JSON.stringify(projectData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
@@ -808,10 +857,12 @@
                     const loadedData = JSON.parse(e.target.result);
                     if (loadedData.nodes && loadedData.notes) {
                         nodes = loadedData.nodes;
+                        postits = loadedData.postits || [];
                         globalNodeShape = loadedData.globalNodeShape || 'square';
                         globalLineType = loadedData.globalLineType || 'line';
                         appData.projectName = loadedData.projectName || 'Meu Projeto';
                         globalLayoutDirection = loadedData.globalLayoutDirection || 'right';
+                        canvasTexture = loadedData.canvasTexture || 'lisa';
                         projectNameInput.value = appData.projectName;
                         
                         // Recalcula as dimensões, mas mantém as posições x, y do JSON
@@ -889,9 +940,11 @@
             
             globalLineType = 'line';
             globalLayoutDirection = 'right';
+            canvasTexture = 'lisa';
             appData.projectName = 'Meu Projeto';
             projectNameInput.value = appData.projectName;
             nodes = [initialNode];
+            postits = []; // CORREÇÃO: Limpa o array de post-its
             appData.notes = { 'root': '<h1>Bem-vindo!</h1><p>Esta é a nota principal.</p>' };
             
             history.length = 0;
@@ -899,6 +952,7 @@
             saveState();
 
             selectedNodeId = null;
+            selectedPostitId = null;
             notesEditor.classList.add('hidden');
             
             originX = (canvas.width / 2);
@@ -910,167 +964,76 @@
         }
         confirmNewProjectBtn.addEventListener('click', resetProject);
 
-        // --- LÓGICA DO SELETOR DE COR ---
-        const colorPickerModal = document.getElementById('colorPickerModal');
-        const closeColorPickerBtn = document.getElementById('closeColorPicker');
-        const colorPickerArea = document.getElementById('colorPickerArea');
-        const colorPickerSelector = document.getElementById('colorPickerSelector');
-        const hueSlider = document.getElementById('hueSlider');
-        const selectedColorPreview = document.getElementById('selectedColorPreview');
-        const hexInput = document.getElementById('hexInput');
-        const colorPickerTitle = document.getElementById('colorPickerTitle');
-        const predefinedColorsContainer = document.getElementById('predefinedColors');
+        // --- LÓGICA DO SELETOR DE COR UNIFICADO ---
+        let colorPaletteCallback = null;
 
-        let isPickingColor = false;
-        let currentHue = 0;
-        let currentSaturation = 100;
-        let currentLightness = 50;
-        let colorCallback = null;
-
-        function openColorPicker(title, callback) {
-            colorPickerTitle.textContent = title;
-            colorCallback = callback;
-            colorPickerModal.classList.add('active');
+        function openGenericColorPalette(title, callback) {
+            genericColorPaletteTitle.textContent = title;
+            genericColorPaletteModal.classList.remove('hidden');
+            colorPaletteCallback = callback;
         }
 
-        function updateColorFromPicker(e) {
-            const rect = colorPickerArea.getBoundingClientRect();
-            let x = e.clientX - rect.left;
-            let y = e.clientY - rect.top;
-            x = Math.max(0, Math.min(x, rect.width));
-            y = Math.max(0, Math.min(y, rect.height));
-
-            currentSaturation = (x / rect.width) * 100;
-            currentLightness = 100 - (y / rect.height) * 100;
-            
-            updateColorSelectorPosition();
-            updateSelectedColor();
-        }
-
-        function updateSelectedColor() {
-            const hexColor = hslToHex(currentHue, currentSaturation, currentLightness);
-            selectedColorPreview.style.backgroundColor = hexColor;
-            hexInput.value = hexColor;
-            if (colorCallback) {
-                colorCallback(hexColor);
-            }
-        }
-        
-        function hslToHex(h, s, l) {
-            l /= 100;
-            const a = s * Math.min(l, 1 - l) / 100;
-            const f = n => {
-                const k = (n + h / 30) % 12;
-                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-                return Math.round(255 * color).toString(16).padStart(2, '0');
-            };
-            return `#${f(0)}${f(8)}${f(4)}`;
-        }
-        
-        function updateColorSelectorPosition() {
-            const rect = colorPickerArea.getBoundingClientRect();
-            const x = (currentSaturation / 100) * rect.width;
-            const y = (1 - currentLightness / 100) * rect.height;
-            colorPickerSelector.style.left = `${x}px`;
-            colorPickerSelector.style.top = `${y}px`;
-        }
-        
-        function initColorSwatches() {
+        function initGenericColorPalette() {
             const colors = [
-                // Primárias
-                '#FF0000', '#0000FF', '#FFFF00',
-                // Secundárias
-                '#FFA500', '#008000', '#800080',
-                // Terciárias
-                '#FF4500', '#FF8C00', '#ADFF2F', '#00FFFF', '#4B0082', '#C71585',
-                // Neutras
-                '#FFFFFF', '#808080', '#000000'
+                '#FFFBEB', '#FEF2F2', '#EFF6FF', '#F0FDF4', '#F5F3FF', '#FDF2F8', '#F3F4F6',
+                '#FEF3C7', '#FECACA', '#DBEAFE', '#D1FAE5', '#E0E7FF', '#FCE7F3', '#E5E7EB',
+                '#FDE68A', '#F87171', '#93C5FD', '#6EE7B7', '#C7D2FE', '#FBCFE8', '#9CA3AF',
+                '#FACC15', '#DC2626', '#3B82F6', '#10B981', '#818CF8', '#EC4899', '#4B5563',
+                '#CA8A04', '#7F1D1D', '#1E40AF', '#065F46', '#4338CA', '#86198F', '#1F2937'
             ];
             
-            predefinedColorsContainer.innerHTML = '';
+            genericColorPaletteContainer.innerHTML = '';
             colors.forEach(color => {
                 const swatch = document.createElement('div');
-                // Aplica estilos diretamente para garantir a visibilidade
-                Object.assign(swatch.style, {
-                    width: '1.5rem',
-                    height: '1.5rem',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    border: '2px solid #e5e7eb', // Corresponde a border-gray-200
-                    backgroundColor: color
-                });
-
-                swatch.addEventListener('mouseover', () => swatch.style.borderColor = '#9ca3af'); // Corresponde a hover:border-gray-400
-                swatch.addEventListener('mouseout', () => swatch.style.borderColor = '#e5e7eb');
-                
-                swatch.dataset.color = color;
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = color;
                 swatch.addEventListener('click', () => {
-                    if (colorCallback) {
-                        colorCallback(color);
-                        hexInput.value = color;
-                        selectedColorPreview.style.backgroundColor = color;
+                    if (colorPaletteCallback) {
+                        colorPaletteCallback(color);
                     }
+                    genericColorPaletteModal.classList.add('hidden');
                 });
-                predefinedColorsContainer.appendChild(swatch);
+                genericColorPaletteContainer.appendChild(swatch);
             });
         }
+        
+        closeGenericColorPaletteBtn.addEventListener('click', () => genericColorPaletteModal.classList.add('hidden'));
 
-        document.getElementById('individualColorBtn').addEventListener('click', () => {
+        document.getElementById('textColorBtn').addEventListener('click', (e) => {
+            savedSelection = window.getSelection().getRangeAt(0).cloneRange();
+            openGenericColorPalette('Cor do Texto', (color) => {
+                if (savedSelection) {
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(savedSelection);
+                    formatDoc('foreColor', color);
+                }
+            });
+        });
+
+        document.getElementById('highlightColorBtn').addEventListener('click', (e) => {
+            savedSelection = window.getSelection().getRangeAt(0).cloneRange();
+            openGenericColorPalette('Destacar Texto', (color) => {
+                if (savedSelection) {
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(savedSelection);
+                    formatDoc('hiliteColor', color);
+                }
+            });
+        });
+
+        document.getElementById('individualColorBtn').addEventListener('click', (e) => {
             if (selectedNodeId) {
-                openColorPicker('Alterar Cor do Nó', (color) => {
+                openGenericColorPalette('Cor do Nó', (color) => {
                     const node = nodes.find(n => n.id === selectedNodeId);
                     if (node) {
                         node.color = color;
                         redrawCanvas();
+                        saveState();
                     }
                 });
             }
         });
-        
-        document.getElementById('textColorBtn').addEventListener('click', () => {
-            openColorPicker('Cor do Texto', (color) => {
-                formatDoc('foreColor', color);
-            });
-        });
 
-        document.getElementById('highlightColorBtn').addEventListener('click', () => {
-            openColorPicker('Cor de Destaque', (color) => {
-                formatDoc('hiliteColor', color);
-            });
-        });
-
-        closeColorPickerBtn.addEventListener('click', () => {
-            colorPickerModal.classList.remove('active');
-            saveState();
-        });
-
-        colorPickerArea.addEventListener('mousedown', (e) => {
-            isPickingColor = true;
-            updateColorFromPicker(e);
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isPickingColor) {
-                updateColorFromPicker(e);
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            isPickingColor = false;
-        });
-
-        hueSlider.addEventListener('input', (e) => {
-            currentHue = e.target.value;
-            colorPickerArea.style.backgroundColor = `hsl(${currentHue}, 100%, 50%)`;
-            updateSelectedColor();
-        });
-
-        hexInput.addEventListener('change', (e) => {
-            const hex = e.target.value;
-            if (colorCallback) {
-                colorCallback(hex);
-            }
-        });
 
         // --- LÓGICA DO SELETOR DE EMOJIS ---
         async function initEmojiPicker() {
@@ -1198,25 +1161,168 @@
             });
         }
         
+        // --- LÓGICA DO BLOCO DE CÓDIGO ---
+
+        function addCodeBlock() {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            let range = selection.getRangeAt(0);
+
+            if (!noteContentDiv.contains(range.commonAncestorContainer)) {
+                noteContentDiv.focus();
+                const newSelection = window.getSelection();
+                if(!newSelection.rangeCount) return;
+                range = newSelection.getRangeAt(0);
+            }
+
+            const codeBlockHtml = `
+                <div class="code-block-wrapper" contenteditable="false">
+                    <div class="code-block-header">
+                        <span class="code-block-lang">auto</span>
+                        <button class="copy-code-btn" title="Copiar Código">
+                            <i class="fa-solid fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                    <pre><code contenteditable="true" spellcheck="false">\n</code></pre>
+                </div>
+                <p><br></p>
+            `;
+            
+            document.execCommand('insertHTML', false, codeBlockHtml);
+        }
+
+        function handleNoteContentClick(e) {
+            if (e.target.closest('.copy-code-btn')) {
+                const wrapper = e.target.closest('.code-block-wrapper');
+                if (wrapper) {
+                    const codeElement = wrapper.querySelector('code');
+                    const textToCopy = codeElement.textContent;
+                    const copyButton = e.target.closest('.copy-code-btn');
+
+                    const textArea = document.createElement('textarea');
+                    textArea.value = textToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        copyButton.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
+                        setTimeout(() => {
+                            copyButton.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                }
+            }
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        const debouncedHighlight = debounce((element) => {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            const range = selection.getRangeAt(0);
+            const textContent = element.textContent;
+            
+            let charCount = 0;
+            const treeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            let found = false;
+            while (treeWalker.nextNode() && !found) {
+                if (treeWalker.currentNode === range.startContainer) {
+                    charCount += range.startOffset;
+                    found = true;
+                } else {
+                    charCount += treeWalker.currentNode.length;
+                }
+            }
+            if (!found && element.contains(range.startContainer)) {
+                 charCount = textContent.length;
+            }
+
+
+            const langElement = element.closest('.code-block-wrapper').querySelector('.code-block-lang');
+            const result = hljs.highlightAuto(textContent);
+            element.innerHTML = result.value;
+            langElement.textContent = result.language || 'auto';
+
+            let newCharCount = 0;
+            const newTreeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            let newRange = document.createRange();
+            let positionFound = false;
+            while (newTreeWalker.nextNode() && !positionFound) {
+                const nodeLength = newTreeWalker.currentNode.length;
+                if (newCharCount + nodeLength >= charCount) {
+                    newRange.setStart(newTreeWalker.currentNode, charCount - newCharCount);
+                    positionFound = true;
+                } else {
+                    newCharCount += nodeLength;
+                }
+            }
+            if (!positionFound) {
+                newRange.selectNodeContents(element);
+                newRange.collapse(false);
+            }
+            
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+
+        }, 300);
+
+        function handleNoteContentInput(e) {
+            if (e.target.tagName === 'CODE' && e.target.closest('.code-block-wrapper')) {
+                debouncedHighlight(e.target);
+            }
+        }
+
+        function handleCodeBlockKeyDown(e) {
+            if (e.key === 'Tab') {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const container = selection.getRangeAt(0).commonAncestorContainer;
+                    const codeElement = container.nodeType === Node.ELEMENT_NODE ? container : container.parentElement;
+                    if (codeElement.closest('.code-block-wrapper code')) {
+                        e.preventDefault();
+                        document.execCommand('insertText', false, '  ');
+                    }
+                }
+            }
+        }
+
         function init() {
             setupCanvas();
             setupResizing();
             initEmojiPicker();
-            initColorSwatches();
+            initGenericColorPalette();
+            initPostitColorPalettes();
 
             window.addEventListener('resize', () => {
                 resizeCanvas();
                 redrawCanvas();
             });
-            noteContentDiv.addEventListener('input', saveNoteContent);
-            noteContentDiv.addEventListener('click', (e) => {
-                if(e.target.tagName === 'A') {
-                    e.preventDefault();
-                    window.open(e.target.href, '_blank');
-                }
+            noteContentDiv.addEventListener('input', (e) => {
+                saveNoteContent();
+                handleNoteContentInput(e);
             });
+            noteContentDiv.addEventListener('click', handleNoteContentClick);
+            noteContentDiv.addEventListener('keydown', handleCodeBlockKeyDown);
+            
             noteTitleInput.addEventListener('input', saveNodeTitle);
             
+            addCodeBlockBtn.addEventListener('click', addCodeBlock);
+            addPostitBtn.addEventListener('click', addPostit);
+
             projectNameInput.addEventListener('blur', () => {
                 appData.projectName = projectNameInput.value;
                 saveState();
@@ -1266,6 +1372,14 @@
                     globalLayoutDirection = e.currentTarget.dataset.layout;
                     applyTreeLayout();
                     saveState();
+                });
+            });
+
+            document.querySelectorAll('.dropdown-btn[data-texture]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    canvasTexture = e.currentTarget.dataset.texture;
+                    saveState();
+                    redrawCanvas();
                 });
             });
 
@@ -1343,19 +1457,23 @@
             });
 
             document.addEventListener('keydown', (e) => {
-                if (document.activeElement === noteContentDiv || document.activeElement === noteTitleInput || document.activeElement === emojiSearchInput) {
+                if (editingNode || document.activeElement === noteContentDiv || document.activeElement === noteTitleInput || document.activeElement === emojiSearchInput) {
                     return;
                 }
+                
                 if (e.key === 'Tab' || e.key === 'Enter' || (e.ctrlKey && (e.key === 'z' || e.key === 'y'))) {
                     e.preventDefault();
                 }
-                if (!selectedNodeId && e.key === 'Tab') { addNode(); return; }
-                if (!selectedNodeId) return;
+                if (!selectedNodeId && !selectedPostitId) return;
 
                 switch(e.key) {
-                    case 'Tab': addNode(); break;
-                    case 'Enter': addSiblingNode(); break;
-                    case 'Delete': case 'Backspace': deleteNode(); break;
+                    case 'Tab': if(selectedNodeId) addNode(); break;
+                    case 'Enter': if(selectedNodeId) addSiblingNode(); break;
+                    case 'Delete': 
+                    case 'Backspace': 
+                        if(selectedNodeId) deleteNode();
+                        if(selectedPostitId) deletePostit();
+                        break;
                     case 'z': if (e.ctrlKey) undoAction(); break;
                     case 'y': if (e.ctrlKey) redoAction(); break;
                 }
@@ -1370,7 +1488,8 @@
                     { btn: fileMenuBtn, panel: fileMenuDropdown },
                     { btn: helpMenuBtn, panel: helpMenuDropdown },
                     { btn: layoutBtn, panel: layoutPicker },
-                    { btn: emojiBtn, panel: emojiPickerPanel }
+                    { btn: emojiBtn, panel: emojiPickerPanel },
+                    { btn: textureBtn, panel: texturePicker }
                 ];
                 
                 dropdowns.forEach(d => {
@@ -1386,6 +1505,27 @@
                 if (helpMenuBtn.contains(target)) helpMenuDropdown.classList.toggle('hidden');
                 if (layoutBtn.contains(target)) layoutPicker.classList.toggle('hidden');
                 if (emojiBtn.contains(target)) toggleEmojiPanel();
+                if (textureBtn.contains(target)) texturePicker.classList.toggle('hidden');
+                
+                if (!postitContextMenu.contains(target) && !e.target.closest('.toolbar-btn')) {
+                   const rect = canvas.getBoundingClientRect();
+                   const mouseX = (e.clientX - rect.left - originX) / scale;
+                   const mouseY = (e.clientY - rect.top - originY) / scale;
+                   let clickedOnPostit = false;
+                   for(const p of postits) {
+                       if(isPointInShape(mouseX, mouseY, p)) {
+                           clickedOnPostit = true;
+                           break;
+                       }
+                   }
+                   if(!clickedOnPostit) {
+                       postitContextMenu.style.display = 'none';
+                   }
+                }
+                
+                if (!genericColorPaletteModal.contains(target) && !e.target.closest('.notes-toolbar-btn')) {
+                    genericColorPaletteModal.classList.add('hidden');
+                }
             });
 
             resizeCanvas();
@@ -1544,6 +1684,7 @@
 
             const newNode = {
                 id: `node-${Date.now()}`,
+                type: 'node',
                 parentId: selectedNode.parentId,
                 text: 'Novo Nó',
                 x: 0, y: 0,
@@ -1561,7 +1702,10 @@
             appData.notes[newNode.id] = '';
             
             applyTreeLayout();
+            selectedNodeId = newNode.id;
+            selectedPostitId = null;
             saveState();
+            editNode(newNode);
         }
 
         function deleteNode() {
@@ -1603,21 +1747,45 @@
 
         function setupCanvas() {
             canvas.addEventListener('mousedown', (e) => {
+                if (editingNode) {
+                    nodeEditorInput.blur();
+                }
+                initialClickX = e.clientX;
+                initialClickY = e.clientY;
                 const rect = canvas.getBoundingClientRect();
                 const mouseX = (e.clientX - rect.left - originX) / scale;
                 const mouseY = (e.clientY - rect.top - originY) / scale;
 
                 draggedNode = null;
-                for (let i = nodes.length - 1; i >= 0; i--) {
-                    const node = nodes[i];
-                    if (isPointInShape(mouseX, mouseY, node)) {
-                        isNodeDragging = true;
-                        draggedNode = node;
+                draggedPostit = null;
+                isNodeDragging = false;
+                isPostitDragging = false;
+                
+                let clickedOnSomething = false;
+
+                for (let i = postits.length - 1; i >= 0; i--) {
+                    const postit = postits[i];
+                    if (isPointInShape(mouseX, mouseY, postit)) {
+                        isPostitDragging = true;
+                        draggedPostit = postit;
+                        clickedOnSomething = true;
                         break;
                     }
                 }
 
-                if (!isNodeDragging) {
+                if (!isPostitDragging) {
+                    for (let i = nodes.length - 1; i >= 0; i--) {
+                        const node = nodes[i];
+                        if (isPointInShape(mouseX, mouseY, node)) {
+                            isNodeDragging = true;
+                            draggedNode = node;
+                            clickedOnSomething = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!clickedOnSomething) {
                     isCanvasDragging = true;
                     canvas.classList.add('grabbing');
                 }
@@ -1626,32 +1794,101 @@
                 lastMouseY = e.clientY;
             });
 
-            document.addEventListener('mouseup', (e) => {
-                // Lógica para reanexar o nó
+            canvas.addEventListener('mouseup', (e) => {
+                const dx = e.clientX - initialClickX;
+                const dy = e.clientY - initialClickY;
+                const isClick = Math.sqrt(dx*dx + dy*dy) < 5;
+
+                if (isClick) {
+                    const rect = canvas.getBoundingClientRect();
+                    const mouseX = (e.clientX - rect.left - originX) / scale;
+                    const mouseY = (e.clientY - rect.top - originY) / scale;
+                    
+                    let clickedNode = null;
+                    let clickedPostit = null;
+                    let clickedCollapseButton = false;
+
+                    for (let i = postits.length - 1; i >= 0; i--) {
+                        const postit = postits[i];
+                        if (isPointInShape(mouseX, mouseY, postit)) {
+                            clickedPostit = postit;
+                            break;
+                        }
+                    }
+
+                    if (clickedPostit) {
+                        selectedPostitId = clickedPostit.id;
+                        selectedNodeId = null;
+                        notesEditor.classList.add('hidden');
+                        showPostitContextMenu(clickedPostit);
+                    } else {
+                        postitContextMenu.style.display = 'none';
+                        for (let i = nodes.length - 1; i >= 0; i--) {
+                            const node = nodes[i];
+                            const children = nodes.filter(n => n.parentId === node.id);
+                            if (children.length > 0) {
+                                const buttonPos = getCollapseButtonPosition(node);
+                                const dist = Math.sqrt(Math.pow(mouseX - buttonPos.x, 2) + Math.pow(mouseY - buttonPos.y, 2));
+                                if (dist <= 8) {
+                                    toggleCollapse(node.id);
+                                    clickedCollapseButton = true;
+                                    break;
+                                }
+                            }
+                            if (isPointInShape(mouseX, mouseY, node)) { 
+                                clickedNode = node;
+                                break;
+                            }
+                        }
+
+                        if (!clickedCollapseButton) {
+                            if (clickedNode) {
+                                selectedNodeId = clickedNode.id;
+                                selectedPostitId = null;
+                                notesEditor.classList.remove('hidden');
+                                noteTitleInput.value = clickedNode.text;
+                                noteContentDiv.innerHTML = appData.notes[clickedNode.id] || '';
+                            } else {
+                                selectedNodeId = null;
+                                selectedPostitId = null;
+                                notesEditor.classList.add('hidden');
+                            }
+                        }
+                    }
+                }
+
                 if (isNodeDragging && potentialParentNodeId && draggedNode.id !== potentialParentNodeId) {
                     const nodeToReparent = nodes.find(n => n.id === draggedNode.id);
                     if (nodeToReparent) {
                         nodeToReparent.parentId = potentialParentNodeId;
-                        applyTreeLayout(); // Recalcula o layout após a mudança
+                        applyTreeLayout();
                     }
                 }
 
-                if(isNodeDragging || isCanvasDragging) {
+                if(isNodeDragging || isCanvasDragging || isPostitDragging) {
                     saveState();
                 }
                 isCanvasDragging = false;
                 isNodeDragging = false;
+                isPostitDragging = false;
                 draggedNode = null;
-                potentialParentNodeId = null; // Reseta o pai potencial
+                draggedPostit = null;
+                potentialParentNodeId = null;
                 canvas.classList.remove('grabbing');
-                redrawCanvas(); // Redesenha para remover os destaques
+                redrawCanvas();
             });
+
 
             document.addEventListener('mousemove', (e) => {
                 const dx = e.clientX - lastMouseX;
                 const dy = e.clientY - lastMouseY;
 
-                if (isNodeDragging && draggedNode) {
+                if (isPostitDragging && draggedPostit) {
+                    draggedPostit.x += dx / scale;
+                    draggedPostit.y += dy / scale;
+                    postitContextMenu.style.display = 'none';
+                    redrawCanvas();
+                } else if (isNodeDragging && draggedNode) {
                     const deltaX = dx / scale;
                     const deltaY = dy / scale;
 
@@ -1666,14 +1903,12 @@
                     }
                     moveSubtree(draggedNode.id, deltaX, deltaY);
 
-                    // Lógica para encontrar um novo pai potencial
                     potentialParentNodeId = null;
                     const rect = canvas.getBoundingClientRect();
                     const mouseX = (e.clientX - rect.left - originX) / scale;
                     const mouseY = (e.clientY - rect.top - originY) / scale;
 
                     for (const node of nodes) {
-                        // Não pode ser o próprio nó ou um de seus descendentes
                         if (node.id !== draggedNode.id && isPointInShape(mouseX, mouseY, node)) {
                             if (!isDescendant(draggedNode.id, node.id)) {
                                 potentialParentNodeId = node.id;
@@ -1681,12 +1916,11 @@
                             }
                         }
                     }
-
                     redrawCanvas();
-
                 } else if (isCanvasDragging) {
                     originX += dx;
                     originY += dy;
+                    postitContextMenu.style.display = 'none';
                     redrawCanvas();
                 }
 
@@ -1694,63 +1928,33 @@
                 lastMouseY = e.clientY;
             });
 
-            canvas.addEventListener('click', (e) => {
-                if (isNodeDragging) return;
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = (e.clientX - rect.left - originX) / scale;
-                const mouseY = (e.clientY - rect.top - originY) / scale;
-
-                let clickedNode = null;
-                let clickedCollapseButton = false;
-
-                for (let i = nodes.length - 1; i >= 0; i--) {
-                    const node = nodes[i];
-                    const children = nodes.filter(n => n.parentId === node.id);
-                    if (children.length > 0) {
-                        const buttonPos = getCollapseButtonPosition(node);
-                        const dist = Math.sqrt(Math.pow(mouseX - buttonPos.x, 2) + Math.pow(mouseY - buttonPos.y, 2));
-                        if (dist <= 8) {
-                            toggleCollapse(node.id);
-                            clickedCollapseButton = true;
-                            break;
-                        }
-                    }
-                    if (isPointInShape(mouseX, mouseY, node)) { 
-                        clickedNode = node;
-                        break;
-                    }
-                }
-
-                if (clickedCollapseButton) return;
-
-                if (clickedNode) {
-                    selectedNodeId = clickedNode.id;
-                    notesEditor.classList.remove('hidden');
-                    noteTitleInput.value = clickedNode.text;
-                    noteContentDiv.innerHTML = appData.notes[clickedNode.id] || '';
-                } else {
-                    selectedNodeId = null;
-                    notesEditor.classList.add('hidden');
-                }
-                redrawCanvas();
-            });
-
             canvas.addEventListener('dblclick', (e) => {
                 const rect = canvas.getBoundingClientRect();
                 const mouseX = (e.clientX - rect.left - originX) / scale;
                 const mouseY = (e.clientY - rect.top - originY) / scale;
 
-                let clickedNode = null;
-                for (let i = nodes.length - 1; i >= 0; i--) {
-                    const node = nodes[i];
-                    if (isPointInShape(mouseX, mouseY, node)) {
-                        clickedNode = node;
+                let clickedItem = null;
+                
+                for (let i = postits.length - 1; i >= 0; i--) {
+                    const postit = postits[i];
+                    if (isPointInShape(mouseX, mouseY, postit)) {
+                        clickedItem = postit;
                         break;
                     }
                 }
 
-                if (clickedNode) {
-                    editNode(clickedNode);
+                if (!clickedItem) {
+                    for (let i = nodes.length - 1; i >= 0; i--) {
+                        const node = nodes[i];
+                        if (isPointInShape(mouseX, mouseY, node)) {
+                            clickedItem = node;
+                            break;
+                        }
+                    }
+                }
+
+                if (clickedItem) {
+                    editNode(clickedItem);
                 }
             });
 
@@ -1793,8 +1997,8 @@
             });
         }
         
-        function isPointInShape(px, py, node) {
-            const { x, y, width, height } = node;
+        function isPointInShape(px, py, item) {
+            const { x, y, width, height } = item;
             return px >= x - width / 2 && px <= x + width / 2 && py >= y - height / 2 && py <= y + height / 2;
         }
         
@@ -1809,6 +2013,7 @@
 
             const newNode = {
                 id: `node-${Date.now()}`,
+                type: 'node',
                 parentId: parentId,
                 text: 'Novo Nó',
                 x: 0, y: 0,
@@ -1826,6 +2031,8 @@
             appData.notes[newNode.id] = '';
             
             applyTreeLayout();
+            selectedNodeId = newNode.id;
+            selectedPostitId = null;
             saveState();
             editNode(newNode);
         }
@@ -1833,6 +2040,7 @@
         function addFloatingNode() {
             const newNode = {
                 id: `node-${Date.now()}`,
+                type: 'node',
                 parentId: null,
                 text: 'Ideia Central',
                 x: (canvas.width / 2 - originX) / scale,
@@ -1872,12 +2080,83 @@
             }
         }
 
+        function drawBackgroundTexture() {
+            // Define a cor de fundo padrão
+            ctx.fillStyle = '#f8f9fa';
+            // Calcula a área visível nas coordenadas do "mundo" (considerando pan e zoom)
+            const viewX = -originX / scale;
+            const viewY = -originY / scale;
+            const viewWidth = canvas.width / scale;
+            const viewHeight = canvas.height / scale;
+            // Preenche toda a área visível para evitar espaços em branco nas bordas
+            ctx.fillRect(viewX, viewY, viewWidth, viewHeight);
+
+            // Se a textura for lisa, não faz mais nada
+            if (canvasTexture === 'lisa') {
+                return;
+            }
+
+            // Lógica de Nível de Detalhe (LOD) para o espaçamento
+            const baseSpacing = 20;
+            const minPixelSpacingOnScreen = 15; // Mínimo de pixels entre as linhas/pontos na tela
+            let adaptiveSpacing = baseSpacing;
+            // Aumenta o espaçamento no "mundo" conforme o zoom diminui, para evitar poluição visual
+            while (adaptiveSpacing * scale < minPixelSpacingOnScreen) {
+                adaptiveSpacing *= 2;
+            }
+
+            // Calcula o ponto de partida para desenhar a grade, alinhado com a grade adaptativa
+            const startWorldX = Math.floor(viewX / adaptiveSpacing) * adaptiveSpacing;
+            const startWorldY = Math.floor(viewY / adaptiveSpacing) * adaptiveSpacing;
+            // Calcula o ponto final para o desenho
+            const endWorldX = viewX + viewWidth;
+            const endWorldY = viewY + viewHeight;
+
+            if (canvasTexture === 'grid') {
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+                ctx.lineWidth = 1 / scale; // Mantém a espessura da linha consistente
+
+                // Desenha as linhas verticais que estão na área visível
+                for (let x = startWorldX; x < endWorldX; x += adaptiveSpacing) {
+                    ctx.moveTo(x, startWorldY);
+                    ctx.lineTo(x, endWorldY);
+                }
+                // Desenha as linhas horizontais que estão na área visível
+                for (let y = startWorldY; y < endWorldY; y += adaptiveSpacing) {
+                    ctx.moveTo(startWorldX, y);
+                    ctx.lineTo(endWorldX, y);
+                }
+                ctx.stroke();
+            } else if (canvasTexture === 'dotted') {
+                const dotSize = 1;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                
+                // Desenha os pontos que estão na área visível
+                for (let x = startWorldX; x < endWorldX; x += adaptiveSpacing) {
+                    for (let y = startWorldY; y < endWorldY; y += adaptiveSpacing) {
+                        ctx.beginPath();
+                        ctx.arc(x, y, dotSize / scale, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+
+
         function redrawCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
+            // Limpa o canvas inteiro (na coordenada da tela)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Aplica as transformações de pan e zoom
             ctx.translate(originX, originY);
             ctx.scale(scale, scale);
 
+            // Desenha a textura de fundo (que agora cobre toda a área visível)
+            drawBackgroundTexture();
+
+            // Desenha as linhas de conexão
             nodes.forEach(node => {
                 if (node.parentId && !isNodeHidden(node.id)) {
                     const parentNode = nodes.find(n => n.id === node.parentId);
@@ -1885,11 +2164,20 @@
                 }
             });
 
+            // Desenha os nós
             nodes.forEach(node => {
                 if (!isNodeHidden(node.id) && editingNode?.id !== node.id) {
                     drawNode(node);
                 }
             });
+
+            // Desenha os Post-its
+            postits.forEach(postit => {
+                if (editingNode?.id !== postit.id) {
+                    drawPostit(postit);
+                }
+            });
+
 
             ctx.restore();
             updateStats();
@@ -2139,24 +2427,25 @@
             });
         }
 
-        function editNode(node) {
-            editingNode = node;
+        function editNode(item) {
+            editingNode = item;
             const canvasRect = canvas.getBoundingClientRect();
-            const x = (node.x - node.width / 2) * scale + originX + canvasRect.left;
-            const y = (node.y - node.height / 2) * scale + originY + canvasRect.top;
+            const x = (item.x - item.width / 2) * scale + originX + canvasRect.left;
+            const y = (item.y - item.height / 2) * scale + originY + canvasRect.top;
             
-            // Define a cor de fundo do campo de edição para a cor do nó
-            nodeEditorInput.style.backgroundColor = node.color;
+            nodeEditorInput.style.backgroundColor = item.type === 'postit' ? item.backgroundColor : item.color;
+            nodeEditorInput.style.color = item.type === 'postit' ? item.textColor : 'white';
+            nodeEditorInput.style.textAlign = item.type === 'postit' ? 'left' : 'center';
 
             Object.assign(nodeEditorInput.style, {
                 display: 'block',
                 left: `${x}px`,
                 top: `${y}px`,
-                width: `${node.width * scale}px`,
-                height: `${node.height * scale}px`,
+                width: `${item.width * scale}px`,
+                height: `${item.height * scale}px`,
                 fontSize: `${16 * scale}px`
             });
-            nodeEditorInput.value = node.text;
+            nodeEditorInput.value = item.text;
             nodeEditorInput.focus();
             redrawCanvas();
         }
@@ -2164,18 +2453,165 @@
         function finishEditingNode() {
             if (editingNode) {
                 editingNode.text = nodeEditorInput.value;
-                updateNodeAndRedraw(editingNode);
+                if (editingNode.type === 'node') {
+                    updateNodeAndRedraw(editingNode);
+                } else if (editingNode.type === 'postit') {
+                    redrawCanvas(); // Recalcula altura no drawPostit
+                    saveState();
+                }
                 editingNode = null;
-                // Reseta o estilo do campo de edição
                 nodeEditorInput.style.display = 'none';
                 nodeEditorInput.style.backgroundColor = 'transparent';
             }
         }
 
-        nodeEditorInput.addEventListener('blur', finishEditingNode);
         nodeEditorInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') finishEditingNode();
+            if (e.key === 'Enter' && !e.shiftKey && editingNode?.type === 'node') {
+                e.preventDefault();
+                finishEditingNode();
+            } else if (e.key === 'Escape') {
+                finishEditingNode();
+            }
         });
+
+        // --- LÓGICA DO POST-IT ---
+
+        function addPostit() {
+            const newPostit = {
+                id: `postit-${Date.now()}`,
+                type: 'postit',
+                x: (canvas.width / 2 - originX) / scale,
+                y: (canvas.height / 2 - originY) / scale,
+                width: 200,
+                height: 200, // Altura inicial, será recalculada
+                text: 'Nova nota...',
+                backgroundColor: '#FFFBEB', // Amarelo claro
+                textColor: '#374151' // Cinza escuro
+            };
+            postits.push(newPostit);
+            saveState();
+            redrawCanvas();
+        }
+        
+        function deletePostit() {
+            if (!selectedPostitId) return;
+            postits = postits.filter(p => p.id !== selectedPostitId);
+            selectedPostitId = null;
+            postitContextMenu.style.display = 'none';
+            saveState();
+            redrawCanvas();
+        }
+
+        function drawPostit(postit) {
+            const maxWidth = 250;
+            const padding = 15;
+            const lineHeight = 20;
+            const dogEarSize = 20;
+            ctx.font = '16px Inter, sans-serif';
+
+            // Calcula dimensões com base no texto
+            const lines = getWrappedTextLines(postit.text, maxWidth - padding * 2);
+            const textHeight = lines.length * lineHeight;
+            postit.width = maxWidth;
+            postit.height = textHeight + padding * 2;
+
+            const { x, y, width, height, backgroundColor, textColor } = postit;
+            const postitX = x - width / 2;
+            const postitY = y - height / 2;
+
+            // Sombra
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetX = 4;
+            ctx.shadowOffsetY = 4;
+
+            // Corpo do Post-it
+            ctx.fillStyle = backgroundColor;
+            ctx.beginPath();
+            ctx.moveTo(postitX, postitY);
+            ctx.lineTo(postitX + width, postitY);
+            ctx.lineTo(postitX + width, postitY + height - dogEarSize);
+            ctx.lineTo(postitX + width - dogEarSize, postitY + height);
+            ctx.lineTo(postitX, postitY + height);
+            ctx.closePath();
+            ctx.fill();
+
+            // Efeito de dobra (dog-ear)
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.beginPath();
+            ctx.moveTo(postitX + width, postitY + height - dogEarSize);
+            ctx.lineTo(postitX + width - dogEarSize, postitY + height);
+            ctx.lineTo(postitX + width - dogEarSize, postitY + height - dogEarSize);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Borda de seleção
+            if (selectedPostitId === postit.id) {
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+
+            // Reset da sombra para o texto
+            ctx.shadowColor = 'transparent';
+
+            // Desenha o texto
+            ctx.fillStyle = textColor;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            lines.forEach((line, index) => {
+                ctx.fillText(line, postitX + padding, postitY + padding + (index * lineHeight));
+            });
+        }
+        
+        function showPostitContextMenu(postit) {
+            const canvasRect = canvas.getBoundingClientRect();
+            const menuWidth = 200;
+            // Posição na tela = (posição no mundo * zoom) + origem
+            const screenX = (postit.x - postit.width / 2) * scale + originX;
+            const screenY = (postit.y - postit.height / 2) * scale + originY;
+
+            postitContextMenu.style.display = 'block';
+            postitContextMenu.style.left = `${screenX + canvasRect.left}px`;
+            postitContextMenu.style.top = `${screenY + canvasRect.top - postitContextMenu.offsetHeight - 10}px`;
+        }
+
+        function initPostitColorPalettes() {
+            const bgColorPalette = document.getElementById('postitBgColorPalette');
+            const textColorPalette = document.getElementById('postitTextColorPalette');
+            
+            const colors = [
+                '#FFFBEB', '#FEF2F2', '#EFF6FF', '#F0FDF4', '#F5F3FF', '#FDF2F8', '#F3F4F6',
+                '#FEF3C7', '#FECACA', '#DBEAFE', '#D1FAE5', '#E0E7FF', '#FCE7F3', '#E5E7EB',
+                '#FDE68A', '#F87171', '#93C5FD', '#6EE7B7', '#C7D2FE', '#FBCFE8', '#9CA3AF',
+                '#FACC15', '#DC2626', '#3B82F6', '#10B981', '#818CF8', '#EC4899', '#4B5563',
+                '#CA8A04', '#7F1D1D', '#1E40AF', '#065F46', '#4338CA', '#86198F', '#1F2937'
+            ];
+
+            const createPalette = (container, property) => {
+                container.innerHTML = '';
+                colors.forEach(color => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.style.backgroundColor = color;
+                    swatch.addEventListener('click', () => {
+                        if (selectedPostitId) {
+                            const postit = postits.find(p => p.id === selectedPostitId);
+                            if (postit) {
+                                postit[property] = color;
+                                redrawCanvas();
+                                saveState();
+                            }
+                        }
+                    });
+                    container.appendChild(swatch);
+                });
+            };
+
+            createPalette(bgColorPalette, 'backgroundColor');
+            createPalette(textColorPalette, 'textColor');
+        }
+
 
         window.onload = init;
     </script>
