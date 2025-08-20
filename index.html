@@ -10,9 +10,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inclui Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-    <!-- Inclui Highlight.js para Syntax Highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -41,8 +38,7 @@
             background-color: #e2e8f0;
             border-left: 1px solid #cbd5e1;
             border-right: 1px solid #cbd5e1;
-            transition: background-color: 0.2s;
-            z-index: 1;
+            transition: background-color 0.2s;
         }
         #resizeHandle:hover {
             background-color: #cbd5e1;
@@ -50,19 +46,14 @@
 
         /* Estiliza os botões da barra de ferramentas */
         .toolbar-btn {
-            border: 1px solid #dddddd;
-            padding: 5px 10px;
-            box-shadow: 1px 1px 2px #eee;
-            border-radius: 6px;
-            background-color: #fff;
+            @apply p-2 rounded-md transition-colors duration-200 hover:bg-gray-200;
         }
         .toolbar-btn i {
             @apply text-gray-600;
         }
         /* Estiliza o editor de notas */
         #notesEditor {
-            @apply bg-white transition-all duration-300 ease-in-out;
-            z-index: 1;
+            @apply bg-white p-6 overflow-y-auto transition-all duration-300 ease-in-out;
         }
         #notesEditor.hidden {
             display: none;
@@ -70,32 +61,10 @@
         /* Estiliza a área de conteúdo do editor WYSIWYG */
         #noteContent {
             @apply w-full p-4 border rounded-lg resize-none min-h-[300px] outline-none focus:ring-2 focus:ring-blue-500;
-            cursor: text;
         }
-        /* Estilos para os cabeçalhos no editor de notas */
-        #noteContent h1 { font-size: 2em; font-weight: bold; }
-        #noteContent h2 { font-size: 1.75em; font-weight: bold; }
-        #noteContent h3 { font-size: 1.5em; font-weight: bold; }
-        #noteContent h4 { font-size: 1.25em; font-weight: bold; }
-        #noteContent h5 { font-size: 1.1em; font-weight: bold; }
-        #noteContent h6 { font-size: 1em; font-weight: bold; }
-        
-        /* Estilos para listas no editor de notas */
-        #noteContent ul {
-            list-style-type: disc;
-            padding-left: 1.5rem;
-        }
-        #noteContent ol {
-            list-style-type: decimal;
-            padding-left: 1.5rem;
-        }
-
         /* Estiliza os botões do editor de notas */
         .notes-toolbar-btn {
             @apply p-2 rounded-md transition-colors duration-200 hover:bg-gray-200;
-            padding: 0 10px 0 0;
-            border-right: 1px solid #eee;
-            margin: 0 0 10px 0;
         }
         .notes-toolbar-btn i {
             @apply text-gray-600;
@@ -135,8 +104,8 @@
             padding: 20px;
             border-radius: 6px;
         }
-        /* Estilização para os botões de tema e forma */
-        .dropdown-btn {
+        /* Estilização para os botões de tema */
+        .theme-btn {
             @apply w-full text-left py-2 px-4 rounded-md transition-colors duration-200 hover:bg-gray-100;
         }
         .color-circle {
@@ -147,192 +116,88 @@
             border: 1px solid rgba(0,0,0,0.1);
         }
 
-        /* Estilo para o campo de edição de nó */
-        #nodeEditorInput {
-            position: absolute;
+        /* Estilização do seletor de cores individual */
+        #individualColorPickerModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
             display: none;
-            background-color: transparent;
-            color: white;
-            text-align: left;
-            border: 1px dashed #fff;
-            font-family: 'Inter', sans-serif;
-            resize: none;
-            overflow: hidden;
-            padding: 15px;
-            box-sizing: border-box;
-            z-index: 10;
-        }
-        
-        #projectNameInput {
-            background-color: #fff;
-            border: 1px solid transparent;
-            border-radius: 5px;
-            padding: 2px 6px;
-            transition: border-color: 0.2s;
-        }
-        #projectNameInput:hover, #projectNameInput:focus {
-            border-color: #cbd5e1;
-        }
-
-        #contextMenu {
-            position: absolute;
-            display: none;
-            z-index: 100;
-        }
-        
-        /* Estilos para o seletor de Emojis */
-        .emoji-category h5 {
-            @apply text-sm font-bold text-gray-500 my-2 px-1;
-        }
-        .emoji-btn {
-            @apply text-2xl p-1 rounded-md transition-colors duration-150 hover:bg-gray-200 cursor-pointer;
-        }
-        .current-emoji-item {
-            @apply relative;
-        }
-        .current-emoji-item .remove-emoji-btn {
-            @apply absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 transition-opacity duration-200 cursor-pointer;
-        }
-        .current-emoji-item:hover .remove-emoji-btn {
-            @apply opacity-100;
-        }
-        
-        /* Estilos para o Bloco de Código */
-        .code-block-wrapper {
-            background-color: #f3f4f6;
-            border-radius: 8px;
-            margin: 1em 0;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-        }
-        .code-block-header {
-            display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            background-color: #e5e7eb;
-            padding: 4px 12px;
-            font-size: 0.8em;
-            color: #4b5563;
-        }
-        .copy-code-btn, .edit-code-btn {
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            color: #4b5563;
-            padding: 4px;
-            border-radius: 4px;
-        }
-        .copy-code-btn:hover, .edit-code-btn:hover {
-            background-color: #d1d5db;
-        }
-        .code-block-wrapper pre {
-            margin: 0;
-            padding: 1em;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        .code-block-wrapper code {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9em;
-            outline: none;
-        }
-        /* Estilo para o modo de edição do bloco de código */
-        .code-block-wrapper.editing pre {
-            box-shadow: 0 0 0 2px #3b82f6; /* Anel azul para indicar edição */
-            border-radius: 0 0 7px 7px;
-            background-color: #fff;
-        }
-        /* Override para o fundo do highlight.js */
-        .hljs {
-            background: transparent !important;
-            padding: 0 !important;
+            z-index: 60;
         }
 
-        /* Estilos para o menu de contexto do Post-it e paleta de cores genérica */
-        #postitContextMenu {
+        #individualColorPickerModal.active {
+            display: flex;
+        }
+
+        .color-picker-content {
+            @apply bg-white p-6 rounded-lg shadow-xl w-80;
+            background: #fff;
+    padding: 20px;
+    border-radius: 6px;
+        }
+
+        #colorPickerArea {
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* Proporção 1:1 */
+            background: hsl(0, 100%, 50%);
+        }
+
+        #colorPickerSelector {
             position: absolute;
-            display: none;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            padding: 8px;
-            z-index: 20;
-            width: 200px;
+            width: 10px;
+            height: 10px;
+            border: 1px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 1px black, inset 0 0 0 1px black;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
         }
-        .color-palette {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+
+        .color-picker-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
-        .color-swatch {
+
+        #whiteOverlay {
+            background: linear-gradient(to right, white, rgba(255, 255, 255, 0));
+        }
+
+        #blackOverlay {
+            background: linear-gradient(to top, black, rgba(0, 0, 0, 0));
+        }
+
+        #hueSlider {
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+            border-radius: 5px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        #hueSlider::-webkit-slider-thumb {
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid black;
+        }
+
+        #selectedColorPreview {
             width: 20px;
             height: 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-        .color-swatch:hover {
-            transform: scale(1.1);
-        }
-        #saveStatusPanel {
-            background-color: rgb(0 0 0 / 49%);
-            color: #fff;
-            font-size: 10px;
-        }
-        /* Estilo para atalhos de teclado */
-        .kbd-style {
-            background-color: #e5e7eb;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-family: monospace;
-            font-size: 0.9em;
-            color: #374151;
-            box-shadow: 1px 1px 1px #cbd5e1;
-        }
-        /* Estilos para o overlay de carregamento */
-        #loadingOverlay .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            border-top: 4px solid #fff;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #expandTextBtn {
-            padding: 10px;
-        }
-        #brainstormBtn, #expandTextBtn {
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-        #brainstormBtn:hover, #expandTextBtn:hover {
-            transform: scale(1.12); /* expande igualmente */
-            animation: gradientAnimation 3s ease infinite; /* acelera o gradiente */
-        }
-        #brainstormBtn:active, #expandTextBtn:active {
-            transform: scale(0.95);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        }
-
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            border: 1px solid #ccc;
         }
     </style>
 </head>
@@ -340,172 +205,44 @@
     <div class="flex-container">
         <!-- Editor de Mapas Mentais (Coluna Esquerda) -->
         <div id="mindMapContainer" class="relative flex flex-col h-full bg-white shadow-lg rounded-r-xl" style="width: 60%;">
-            <!-- Barra de Funções Principal 01 -->
-            <div id="main-menu-bar" class="p-1 flex items-center border-b bg-gray-100">
-                <div class="relative">
-                    <button id="fileMenuBtn" class="px-3 py-1 rounded-md hover:bg-gray-200 text-sm">Arquivo</button>
-                    <div id="fileMenuDropdown" class="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-xl border hidden w-56 z-20">
-                        <div class="flex flex-col space-y-1">
-                            <button id="newProjectBtn" class="dropdown-btn"><i class="fa-solid fa-file-circle-plus w-5 mr-2"></i> Novo Projeto</button>
-                            <button id="saveProjectBtn" class="dropdown-btn"><i class="fa-solid fa-download w-5 mr-2"></i> Salvar Projeto</button>
-                            <input type="file" id="loadFileInput" accept=".json" class="hidden">
-                            <button id="loadProjectBtn" class="dropdown-btn"><i class="fa-solid fa-upload w-5 mr-2"></i> Carregar Projeto</button>
-                            <div class="border-t my-1"></div>
-                            <button id="geminiApiKeyBtn" class="dropdown-btn"><i class="fa-solid fa-key w-5 mr-2"></i> Chave de API Gemini</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="relative">
-                    <button id="helpMenuBtn" class="px-3 py-1 rounded-md hover:bg-gray-200 text-sm">Ajuda</button>
-                    <div id="helpMenuDropdown" class="absolute top-full left-0 mt-1 p-2 bg-white rounded-lg shadow-xl border hidden w-56 z-20">
-                        <div class="flex flex-col space-y-1">
-                            <button id="featuresBtn" class="dropdown-btn"><i class="fa-solid fa-list-check w-5 mr-2"></i> Funcionalidades</button>
-                            <div class="border-t my-1"></div>
-                            <button id="aboutBtn" class="dropdown-btn"><i class="fa-solid fa-circle-info w-5 mr-2"></i> Sobre o Aplicativo</button>
-                        </div>
-                    </div>
-                </div>
-                <input type="text" id="projectNameInput" class="text-sm font-semibold text-gray-700 ml-2" value="Meu Projeto">
-                <!-- Ícones de Redes Sociais -->
-                <div class="ml-auto flex items-center space-x-2 pr-2">
-                    <a href="https://www.linkedin.com/in/alexandrepolselli/" target="_blank" class="text-gray-500 hover:text-blue-700" title="LinkedIn"><i class="fa-brands fa-linkedin fa-sm"></i></a>
-                    <a href="http://datauniverse.com.br/" target="_blank" class="text-gray-500 hover:text-orange-500" title="Blog"><i class="fa-solid fa-blog fa-sm"></i></a>
-                    <a href="https://conversionzone.com.br/" target="_blank" class="text-gray-500 hover:text-green-600" title="Consultoria"><i class="fa-solid fa-briefcase fa-sm"></i></a>
-                    <a href="https://github.com/cerqueiralex" target="_blank" class="text-gray-500 hover:text-gray-800" title="Github"><i class="fa-brands fa-github fa-sm"></i></a>
-                    <a href="https://www.youtube.com/@datauniverseblog/videos" target="_blank" class="text-gray-500 hover:text-red-600" title="Youtube"><i class="fa-brands fa-youtube fa-sm"></i></a>
-                </div>
-            </div>
-
             <!-- Barra de Ferramentas Superior -->
             <div class="p-4 flex items-center justify-between border-b bg-gray-50">
-                <div class="flex space-x-3">
+                <div class="flex space-x-2">
                     <button id="undoMindMapBtn" class="toolbar-btn" title="Desfazer (Ctrl + Z)"><i class="fa-solid fa-rotate-left"></i></button>
                     <button id="redoMindMapBtn" class="toolbar-btn" title="Refazer (Ctrl + Y)"><i class="fa-solid fa-rotate-right"></i></button>
                     <button id="addNodeBtn" class="toolbar-btn" title="Adicionar Novo Nó (TAB)"><i class="fa-solid fa-plus"></i></button>
-                    <button id="removeNodeBtn" class="toolbar-btn" title="Remover Nó (Delete)"><i class="fa-solid fa-minus"></i></button>
-                    <button id="addFloatingNodeBtn" class="toolbar-btn" title="Adicionar Tópico Flutuante"><i class="fa-solid fa-brain"></i></button>
-                    <button id="addPostitBtn" class="toolbar-btn" title="Adicionar Nota Adesiva"><i class="fa-solid fa-note-sticky"></i></button>
-                    <button id="brainstormBtn" class="toolbar-btn" title="Brainstorm de Ideias ✨"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-                    
-                    <!-- Botão e Painel de Emojis -->
-                    <div class="relative">
-                        <button id="emojiBtn" class="toolbar-btn" title="Adicionar Emoji"><i class="fa-solid fa-face-smile"></i></button>
-                        <div id="emojiPickerPanel" class="absolute top-12 left-0 p-3 bg-white rounded-lg shadow-xl border hidden w-80 z-30">
-                            <div class="flex justify-between items-center mb-2">
-                                <h4 class="font-semibold text-gray-700">Adicionar Emojis</h4>
-                                <button id="closeEmojiPanelBtn" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                            <div class="mb-2 p-2 bg-gray-100 rounded-md min-h-[40px]">
-                                <h5 class="text-xs font-bold text-gray-500 mb-1">NO NÓ</h5>
-                                <div id="currentEmojisContainer" class="flex flex-wrap gap-1 text-2xl">
-                                    <!-- Emojis atuais do nó serão inseridos aqui -->
-                                </div>
-                            </div>
-                            <input type="text" id="emojiSearchInput" placeholder="Buscar emoji..." class="w-full border rounded-md p-2 mb-2 text-sm">
-                            <div id="emojiListContainer" class="max-h-48 overflow-y-auto">
-                                <!-- Categorias e emojis serão inseridos aqui -->
-                            </div>
-                            <button id="removeAllEmojisBtn" class="w-full text-center mt-2 py-1 px-2 text-sm text-red-600 rounded-md hover:bg-red-100">Remover Todos</button>
-                        </div>
-                    </div>
-                    
+                    <button id="layoutBtn" class="toolbar-btn" title="Opções de Layout"><i class="fa-solid fa-diagram-project"></i></button>
                     <!-- Dropdown com temas de cores -->
                     <div class="relative">
                         <button id="colorPaletteBtn" class="toolbar-btn" title="Paleta de Cores"><i class="fa-solid fa-palette"></i></button>
-                        <div id="colorPicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-40 z-20">
-                            <div class="flex flex-col space-y-1 items-start">
-                                <button class="dropdown-btn" data-theme="vermelho"><span class="color-circle mr-2 inline-block" style="background-color: #bb0e0e;"></span> Vermelho</button>
-                                <button class="dropdown-btn" data-theme="azul"><span class="color-circle mr-2 inline-block" style="background-color: #1e3a8a;"></span> Azul</button>
-                                <button class="dropdown-btn" data-theme="verde"><span class="color-circle mr-2 inline-block" style="background-color: #166534;"></span> Verde</button>
-                                <button class="dropdown-btn" data-theme="roxo"><span class="color-circle mr-2 inline-block" style="background-color: #4c1d95;"></span> Roxo</button>
-                                <button class="dropdown-btn" data-theme="cinza"><span class="color-circle mr-2 inline-block" style="background-color: #3f3f46;"></span> Cinza</button>
+                        <div id="colorPicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden">
+                            <div class="flex flex-col space-y-2">
+                                <button class="theme-btn" data-theme="vermelho"><span class="color-circle" style="background-color: #bb0e0e;"></span></button>
+                                <button class="theme-btn" data-theme="azul"><span class="color-circle" style="background-color: #1e3a8a;"></span></button>
+                                <button class="theme-btn" data-theme="verde"><span class="color-circle" style="background-color: #166534;"></span></button>
+                                <button class="theme-btn" data-theme="roxo"><span class="color-circle" style="background-color: #4c1d95;"></span></button>
+                                <button class="theme-btn" data-theme="cinza"><span class="color-circle" style="background-color: #3f3f46;"></span></button>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Dropdown para alterar a forma de todos os nós -->
-                    <div class="relative">
-                        <button id="globalShapeBtn" class="toolbar-btn" title="Alterar Formato dos Nós"><i class="fa-solid fa-shapes"></i></button>
-                        <div id="globalShapePicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-40 z-20">
-                            <div class="flex flex-col space-y-1 items-start">
-                                <button class="dropdown-btn" data-shape="circle"><i class="fa-regular fa-circle w-5 mr-2"></i> Círculo</button>
-                                <button class="dropdown-btn" data-shape="square"><i class="fa-regular fa-square w-5 mr-2"></i> Quadrado</button>
-                                <button class="dropdown-btn" data-shape="rectangle"><i class="fa-solid fa-square-full w-5 mr-2"></i> Retângulo</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dropdown para alterar o tipo de linha de conexão -->
-                    <div class="relative">
-                        <button id="lineTypeBtn" class="toolbar-btn" title="Tipo de Conexão"><i class="fa-solid fa-share-nodes"></i></button>
-                        <div id="lineTypePicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-52 z-20">
-                            <div class="flex flex-col space-y-1 items-start">
-                                <button class="dropdown-btn" data-line-type="line"><i class="fa-solid fa-minus w-5 mr-2"></i> Linha</button>
-                                <button class="dropdown-btn" data-line-type="angled"><i class="fa-solid fa-turn-down w-5 -scale-y-100 mr-2"></i> Conector Angulado</button>
-                                <button class="dropdown-btn" data-line-type="curved"><i class="fa-solid fa-wave-square w-5 mr-2"></i> Conector Curvado</button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Dropdown para alterar a arquitetura do mapa -->
-                    <div class="relative">
-                        <button id="layoutBtn" class="toolbar-btn" title="Arquitetura do Mapa"><i class="fa-solid fa-sitemap"></i></button>
-                        <div id="layoutPicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-48 z-20">
-                            <div class="flex flex-col space-y-1 items-start">
-                                <button class="dropdown-btn" data-layout="right"><i class="fa-solid fa-arrow-right w-5 mr-2"></i> Direita</button>
-                                <button class="dropdown-btn" data-layout="left"><i class="fa-solid fa-arrow-left w-5 mr-2"></i> Esquerda</button>
-                                <button class="dropdown-btn" data-layout="top-down"><i class="fa-solid fa-arrow-down w-5 mr-2"></i> Top down</button>
-                                <button class="dropdown-btn" data-layout="bottom-up"><i class="fa-solid fa-arrow-up w-5 mr-2"></i> Bottom Up</button>
-                            </div>
-                        </div>
-                    </div>
-                     <!-- Dropdown para alterar a textura do background -->
-                    <div class="relative">
-                        <button id="textureBtn" class="toolbar-btn" title="Textura do Fundo"><i class="fa-solid fa-table-cells"></i></button>
-                        <div id="texturePicker" class="absolute top-12 left-0 p-2 bg-white rounded-lg shadow-xl border hidden w-52 z-20">
-                            <div class="flex flex-col space-y-1 items-start">
-                                <button class="dropdown-btn" data-texture="lisa"><i class="fa-solid fa-square-full w-5 mr-2"></i> Textura Lisa</button>
-                                <button class="dropdown-btn" data-texture="grid"><i class="fa-solid fa-table-cells w-5 mr-2"></i> Textura Grid</button>
-                                <button class="dropdown-btn" data-texture="dotted"><i class="fa-solid fa-border-all w-5 mr-2"></i> Textura Pontilhada</button>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="newProjectBtn" class="toolbar-btn" title="Novo Projeto"><i class="fa-solid fa-file-circle-plus"></i></button>
+                    <button id="saveProjectBtn" class="toolbar-btn" title="Salvar Projeto"><i class="fa-solid fa-download"></i></button>
+                    <!-- Input de arquivo oculto para carregar o projeto -->
+                    <input type="file" id="loadFileInput" accept=".json" class="hidden">
+                    <button id="loadProjectBtn" class="toolbar-btn" title="Carregar Projeto"><i class="fa-solid fa-upload"></i></button>
                 </div>
             </div>
 
             <!-- Canvas do Mapa Mental -->
             <canvas id="mindMapCanvas" class="flex-grow"></canvas>
-            <!-- Campo de texto para edição de nós -->
-            <textarea id="nodeEditorInput"></textarea>
-            
-            <!-- PAINEL DE STATUS DE SALVAMENTO -->
-            <div id="saveStatusPanel" class="absolute top-28 left-4 bg-white/80 backdrop-blur-sm rounded-lg px-3 shadow-md text-xs text-gray-700 font-medium z-10">
-                <span id="saveStatusText" class="font-bold">Não salvo</span>
-            </div>
-
-            <!-- Menu de Contexto do Post-it -->
-            <div id="postitContextMenu">
-                <div class="mb-2">
-                    <h4 class="text-xs font-bold text-gray-500 mb-1">COR DA NOTA</h4>
-                    <div id="postitBgColorPalette" class="color-palette"></div>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-gray-500 mb-1">COR DO TEXTO</h4>
-                    <div id="postitTextColorPalette" class="color-palette"></div>
-                </div>
-            </div>
-
 
             <!-- Controles de Navegação do Canvas (Canto Inferior Direito) -->
             <div class="absolute bottom-4 right-4 flex flex-col space-y-2">
                 <button id="zoomInBtn" class="toolbar-btn shadow-md"><i class="fa-solid fa-plus"></i></button>
                 <button id="zoomOutBtn" class="toolbar-btn shadow-md"><i class="fa-solid fa-minus"></i></button>
                 <button id="recenterBtn" class="toolbar-btn shadow-md"><i class="fa-solid fa-expand"></i></button>
-            </div>
-
-            <!-- Painel de Estatísticas (Canto Inferior Esquerdo) -->
-            <div id="statsPanel" class="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm rounded-lg p-2 px-3 shadow-md text-xs text-gray-700 font-medium space-y-1">
-                <div>Zoom: <span id="zoomLevel" class="font-bold tabular-nums">100%</span></div>
-                <div>Nós: <span id="nodeCount" class="font-bold tabular-nums">0</span></div>
             </div>
         </div>
 
@@ -521,53 +258,28 @@
                     <button id="closeNotesBtn" class="notes-toolbar-btn" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
-            <div class="flex items-center space-x-2 p-4 border-b bg-gray-50 flex-wrap relative">
+            <div class="flex items-center space-x-2 p-4 border-b bg-gray-50">
                 <button class="notes-toolbar-btn" onclick="formatDoc('bold')" title="Negrito"><i class="fa-solid fa-bold"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('italic')" title="Itálico"><i class="fa-solid fa-italic"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('underline')" title="Sublinhado"><i class="fa-solid fa-underline"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('strikeThrough')" title="Tachado"><i class="fa-solid fa-strikethrough"></i></button>
-                <button id="createLinkBtn" class="notes-toolbar-btn" title="Criar Link"><i class="fa-solid fa-link"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('justifyLeft')" title="Alinhar à Esquerda"><i class="fa-solid fa-align-left"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('justifyCenter')" title="Alinhar ao Centro"><i class="fa-solid fa-align-center"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('justifyRight')" title="Alinhar à Direita"><i class="fa-solid fa-align-right"></i></button>
-                <button class="notes-toolbar-btn" onclick="formatDoc('justifyFull')" title="Justificar"><i class="fa-solid fa-align-justify"></i></button>
-                <button class="notes-toolbar-btn" onclick="formatDoc('indent')" title="Aumentar Recuo"><i class="fa-solid fa-indent"></i></button>
-                <button class="notes-toolbar-btn" onclick="formatDoc('outdent')" title="Diminuir Recuo"><i class="fa-solid fa-outdent"></i></button>
-                <button id="addCodeBlockBtn" class="notes-toolbar-btn" title="Inserir Bloco de Código"><i class="fa-solid fa-code"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('insertUnorderedList')" title="Lista com Marcadores"><i class="fa-solid fa-list-ul"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('insertOrderedList')" title="Lista Numerada"><i class="fa-solid fa-list-ol"></i></button>
-                <button class="notes-toolbar-btn" onclick="formatDoc('removeFormat')" title="Remover Formatação"><i class="fa-solid fa-text-slash"></i></button>
-                <button class="notes-toolbar-btn" onclick="formatDoc('insertHorizontalRule')" title="Inserir Linha Horizontal"><i class="fa-solid fa-minus"></i></button>
-                <button id="expandTextBtn" class="notes-toolbar-btn" title="Expandir Texto ✨"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-                
-                <!-- Botão de Cor do Texto -->
-                <button id="textColorBtn" class="notes-toolbar-btn" title="Cor do Texto"><i class="fa-solid fa-paint-brush"></i></button>
-
-                <!-- Botão de Destacar Texto -->
-                <button id="highlightColorBtn" class="notes-toolbar-btn" title="Destacar Texto"><i class="fa-solid fa-highlighter"></i></button>
-
                 <select onchange="formatDoc('formatBlock', this.value)" class="p-1 rounded-md bg-white border">
                     <option value="p">Parágrafo</option>
                     <option value="h1">Título 1</option>
                     <option value="h2">Título 2</option>
-                    <option value="h3">Título 3</option>
-                    <option value="h4">Título 4</option>
-                    <option value="h5">Título 5</option>
-                    <option value="h6">Título 6</option>
                 </select>
-                <!-- Botão para abrir o seletor de cor individual -->
+                <!-- NOVO: Botão para abrir o seletor de cor individual -->
                 <button id="individualColorBtn" class="notes-toolbar-btn" title="Alterar Cor do Nó"><i class="fa-solid fa-fill-drip"></i></button>
             </div>
             
             <!-- Conteúdo do Editor de Notas (WYSIWYG) -->
-            <div id="noteContent" contenteditable="true" class="flex-grow p-6 outline-none focus:ring-0 overflow-y-auto"></div>
+            <div id="noteContent" contenteditable="true" class="flex-grow p-6 outline-none focus:ring-0"></div>
         </div>
-    </div>
-
-    <!-- Overlay de Carregamento -->
-    <div id="loadingOverlay" class="modal-overlay hidden flex-col">
-        <div class="spinner"></div>
-        <p class="text-white mt-4">Gerando ideias com IA...</p>
     </div>
 
     <!-- Pop-up de Novo Projeto (oculto por padrão) -->
@@ -585,173 +297,25 @@
         </div>
     </div>
 
-    <!-- Pop-up Sobre o Aplicativo (oculto por padrão) -->
-    <div id="aboutModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-lg">
+    <!-- NOVO: Pop-up do seletor de cor individual -->
+    <div id="individualColorPickerModal">
+        <div class="color-picker-content">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Sobre esse aplicativo</h3>
-                <button id="closeAboutModalBtn" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
+                <h4 class="text-lg font-semibold">Escolher Cor do Nó</h4>
+                <button id="closeIndividualColorPicker" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <p class="mb-4 text-gray-700 text-center">Este é um aplicativo de produtividade versátil que combina um editor de mapas mentais com um poderoso sistema de anotações. Organize suas ideias visualmente, crie conexões e aprofunde seus tópicos com notas detalhadas, tudo em um só lugar. Ideal para brainstorming, planejamento de projetos e estudos.</p>
-            <p class="mb-6 text-gray-700 text-center text-sm">Desenvolvido por Alexandre Polselli Cerqueira.</p>
-            <div class="flex justify-center space-x-4 mb-6">
-                <a href="https://www.linkedin.com/in/alexandrepolselli/" target="_blank" class="text-gray-500 hover:text-blue-700" title="LinkedIn"><i class="fa-brands fa-linkedin fa-xl"></i></a>
-                <a href="http://datauniverse.com.br/" target="_blank" class="text-gray-500 hover:text-orange-500" title="Blog"><i class="fa-solid fa-blog fa-xl"></i></a>
-                <a href="https://conversionzone.com.br/" target="_blank" class="text-gray-500 hover:text-green-600" title="Consultoria"><i class="fa-solid fa-briefcase fa-xl"></i></a>
-                <a href="https://github.com/cerqueiralex" target="_blank" class="text-gray-500 hover:text-gray-800" title="Github"><i class="fa-brands fa-github fa-xl"></i></a>
-                <a href="https://www.youtube.com/@datauniverseblog/videos" target="_blank" class="text-gray-500 hover:text-red-600" title="Youtube"><i class="fa-brands fa-youtube fa-xl"></i></a>
+            <div id="colorPickerArea" class="relative mb-4 cursor-crosshair">
+                <div id="whiteOverlay" class="color-picker-overlay"></div>
+                <div id="blackOverlay" class="color-picker-overlay"></div>
+                <div id="colorPickerSelector"></div>
             </div>
-            <a href="https://github.com/cerqueiralex/mindmap-app/" target="_blank" class="w-full text-center bg-gray-800 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center" style="font-size: 14px;>
-                <i class="fa-brands fa-github fa-sm mr-2"></i> Ver Projeto no GitHub
-            </a>
-        </div>
-    </div>
-
-    <!-- Pop-up de Funcionalidades (oculto por padrão) -->
-    <div id="featuresModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-2xl flex flex-col" style="max-height: 80vh;">
-            <div class="flex justify-between items-center mb-4 flex-shrink-0">
-                <h3 class="text-xl font-bold">Funcionalidades e Atalhos</h3>
-                <button id="closeFeaturesModalBtn" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="text-gray-700 text-sm space-y-4 overflow-y-auto pr-4">
-
-                <h4 class="font-bold text-lg">Funcionalidades de IA</h4>
-                <p>Observação sobre as funcionalidades de IA:</p>
-                <div class="text-sm text-gray-700 space-y-3">
-                    <p>Para usar as funcionalidades de IA, você precisa de uma chave de API do Google AI Studio.</p>
-                    <ol class="list-decimal pl-5 space-y-1">
-                        <li>Acesse o <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-600 hover:underline">Google AI Studio</a>.</li>
-                        <li>Clique em "Create API key" para gerar uma nova chave.</li>
-                        <li>Copie a chave gerada e cole no campo abaixo.</li>
-                    </ol>
-                    <p>Sua chave será salva apenas no seu navegador e não será compartilhada.</p>
-                    <p>Por favor, configure sua chave de API do Gemini no menu 'Arquivo > Chave de API Gemini' para usar as funcionalidades de IA.</p>
-                </div>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li><b>Brainstorm de Ideias ✨:</b> Selecione um nó qualquer que possua um texto associado ao nome e gere nós subjacentes com IA baseado no nome do nó principal</li>
-                    <li><b>Expandir Texto ✨:</b> Selecione um nó qualquer, escreva algum texto no editor de notas e gere um texto completo com IA a partir dele</li>
-                </ul>
-                
-                <h4 class="font-bold text-lg">Gerenciamento de Projeto</h4>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li><b>Nome do Projeto:</b> Clique no nome do projeto na barra superior para editá-lo. O nome é salvo ao pressionar 'Enter' ou clicar fora.</li>
-                    <li><b>Novo Projeto:</b> Cria um novo mapa mental em branco (Arquivo > Novo Projeto).</li>
-                    <li><b>Salvar Projeto:</b> Salva o projeto atual como um arquivo .json com o nome definido (Arquivo > Salvar Projeto).</li>
-                    <li><b>Carregar Projeto:</b> Carrega um mapa mental a partir de um arquivo .json (Arquivo > Carregar Projeto).</li>
-                    <li><b>Salvo Automático:</b> O progresso é salvo automaticamente no seu navegador.</li>
-                </ul>
-
-                <h4 class="font-bold text-lg">Manipulação de Nós</h4>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li><b>Adicionar Nó Filho:</b> Adiciona um nó filho ao nó selecionado.</li>
-                    <li><b>Adicionar Nó Irmão:</b> Adiciona um nó no mesmo nível do nó selecionado.</li>
-                    <li><b>Adicionar Tópico Flutuante:</b> Cria um novo nó raiz independente no centro da tela.</li>
-                    <li><b>Remover Nó:</b> Remove o nó selecionado e todos os seus filhos.</li>
-                    <li><b>Editar Texto:</b> Dê um duplo clique em um nó para editar seu texto diretamente.</li>
-                    <li><b>Recolher/Expandir Filhos:</b> Clique no círculo na borda de um nó para recolher ou expandir seus filhos.</li>
-                    <li><b>Mover e Reanexar Nó:</b> Clique e arraste um nó para um novo nó pai para reorganizar a estrutura do mapa.</li>
-                </ul>
-
-                <h4 class="font-bold text-lg">Post-its (Notas Adesivas)</h4>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li><b>Adicionar Post-it:</b> Clique no ícone de nota adesiva para adicionar um post-it ao canvas.</li>
-                    <li><b>Editar Texto:</b> Dê um duplo clique para editar o conteúdo do post-it.</li>
-                    <li><b>Mover:</b> Clique e arraste para posicionar o post-it onde desejar.</li>
-                    <li><b>Personalizar Cores:</b> Clique com o botão direito em um post-it para abrir o menu de contexto e alterar a cor de fundo e do texto.</li>
-                </ul>
-
-                <h4 class="font-bold text-lg">Navegação e Visualização</h4>
-                 <ul class="list-disc pl-5 space-y-1">
-                    <li><b>Mover Canvas (Pan):</b> Clique e arraste em uma área vazia do canvas.</li>
-                    <li><b>Zoom:</b> Use os botões de +/- no canto, o gesto de pinça no trackpad/tela sensível ao toque, ou segure <code>Ctrl</code> e use a roda do mouse.</li>
-                    <li><b>Recentralizar:</b> Clica no botão de expandir para centralizar e resetar o zoom do mapa na tela.</li>
-                </ul>
-
-                <h4 class="font-bold text-lg">Personalização e Estilo</h4>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li><b>Adicionar Emojis:</b> Com um nó selecionado, clique no ícone de emoji para abrir o painel. Adicione ou remova emojis que aparecerão ao lado do texto do nó.</li>
-                    <li><b>Paleta de Cores:</b> Altere o tema de cores de todo o mapa mental.</li>
-                    <li><b>Formato dos Nós:</b> Altere a forma de todos os nós do mapa para círculo, quadrado ou retângulo.</li>
-                    <li><b>Tipo de Conexão:</b> Escolha entre linhas retas, anguladas ou curvadas para conectar os nós.</li>
-                    <li><b>Arquitetura do Mapa:</b> Reorganize o layout do mapa para crescer para a direita, esquerda, para baixo ou para cima.</li>
-                    <li><b>Textura do Fundo:</b> Altere a aparência do fundo do canvas para liso, gradeado ou pontilhado.</li>
-                    <li><b>Cor Individual do Nó:</b> No painel de notas, use o seletor de cores (<i class="fa-solid fa-fill-drip"></i>) para alterar a cor apenas do nó selecionado.</li>
-                </ul>
-
-                <h4 class="font-bold text-lg">Editor de Notas</h4>
-                <p>Selecione um nó para abrir o editor de notas. As seguintes formatações estão disponíveis:</p>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li>Estilos de texto (negrito, itálico, etc.), alinhamento, listas, e títulos (H1-H6).</li>
-                    <li>Criação de links, cor de texto e destaque de texto.</li>
-                    <li><b>Bloco de Código:</b> Insira blocos de código com destaque de sintaxe automático e botão para copiar.</li>
-                    <li><b>Colar Conteúdo:</b> Cole textos de fontes externas mantendo a formatação básica (negrito, parágrafos) sem importar estilos indesejados.</li>
-                </ul>
-
-                <h4 class="font-bold text-lg">Atalhos de Teclado</h4>
-                <div class="space-y-2">
-                    <p><b>Manipulação de Nós:</b></p>
-                    <div class="flex items-center justify-between"><span>Adicionar nó filho</span> <code class="kbd-style">Tab</code></div>
-                    <div class="flex items-center justify-between"><span>Adicionar nó irmão</span> <code class="kbd-style">Enter</code></div>
-                    <div class="flex items-center justify-between"><span>Excluir nó selecionado</span> <div><code class="kbd-style">Delete</code> ou <code class="kbd-style">Backspace</code></div></div>
-                    <p class="pt-2"><b>Geral:</b></p>
-                    <div class="flex items-center justify-between"><span>Desfazer</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Z</code></div></div>
-                    <div class="flex items-center justify-between"><span>Refazer</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Y</code></div></div>
-                    <div class="flex items-center justify-between"><span>Zoom no Canvas</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Roda do Mouse</code></div></div>
-                </div>
+            <input type="range" id="hueSlider" class="w-full mb-4" min="0" max="360" value="0">
+            <div class="flex items-center space-x-2">
+                <span id="selectedColorPreview" class="block w-6 h-6 rounded-full border border-gray-300"></span>
+                <input type="text" id="hexInput" class="w-full border rounded-md p-2 text-sm font-mono" placeholder="#000000">
             </div>
         </div>
     </div>
-
-    <!-- Pop-up para Inserir Link (oculto por padrão) -->
-    <div id="linkModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h3 class="text-xl font-bold mb-4">Inserir Link</h3>
-            <input type="text" id="linkUrlInput" placeholder="https://exemplo.com" class="w-full border rounded-md p-2 mb-4">
-            <div class="flex justify-end space-x-4">
-                <button id="saveLinkBtn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-200">Salvar</button>
-                <button id="cancelLinkBtn" class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-md hover:bg-gray-300 transition-colors duration-200">Cancelar</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal da Chave de API Gemini -->
-    <div id="apiKeyModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-lg">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Configurar Chave de API do Gemini</h3>
-                <button id="closeApiKeyModalBtn" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="text-sm text-gray-700 space-y-3">
-                <p>Para usar as funcionalidades de IA, você precisa de uma chave de API do Google AI Studio.</p>
-                <ol class="list-decimal pl-5 space-y-1">
-                    <li>Acesse o <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-600 hover:underline">Google AI Studio</a>.</li>
-                    <li>Clique em "Create API key" para gerar uma nova chave.</li>
-                    <li>Copie a chave gerada e cole no campo abaixo.</li>
-                </ol>
-                <p>Sua chave será salva apenas no seu navegador e não será compartilhada.</p>
-            </div>
-            <div class="mt-4">
-                <label for="apiKeyInput" class="block text-sm font-medium text-gray-700 mb-1">Sua Chave de API</label>
-                <input type="password" id="apiKeyInput" placeholder="Cole sua chave de API aqui" class="w-full border rounded-md p-2">
-            </div>
-            <div class="flex justify-end mt-6">
-                <button id="saveApiKeyBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal da Paleta de Cores Genérica -->
-    <div id="genericColorPaletteModal" class="modal-overlay hidden">
-        <div class="modal-content max-w-xs">
-            <div class="flex justify-between items-center mb-4">
-                <h3 id="genericColorPaletteTitle" class="text-lg font-bold">Selecionar Cor</h3>
-                <button id="closeGenericColorPalette" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="genericColorPaletteContainer" class="color-palette"></div>
-        </div>
-    </div>
-
 
     <script>
         // Variáveis globais para o canvas e o contexto
@@ -763,401 +327,54 @@
         const noteContentDiv = document.getElementById('noteContent');
         const colorPaletteBtn = document.getElementById('colorPaletteBtn');
         const colorPicker = document.getElementById('colorPicker');
-        const globalShapeBtn = document.getElementById('globalShapeBtn');
-        const globalShapePicker = document.getElementById('globalShapePicker');
-        const lineTypeBtn = document.getElementById('lineTypeBtn');
-        const lineTypePicker = document.getElementById('lineTypePicker');
-        const nodeEditorInput = document.getElementById('nodeEditorInput');
-        const fileMenuBtn = document.getElementById('fileMenuBtn');
-        const fileMenuDropdown = document.getElementById('fileMenuDropdown');
-        const projectNameInput = document.getElementById('projectNameInput');
-        const helpMenuBtn = document.getElementById('helpMenuBtn');
-        const helpMenuDropdown = document.getElementById('helpMenuDropdown');
-        const layoutBtn = document.getElementById('layoutBtn');
-        const layoutPicker = document.getElementById('layoutPicker');
-        const textureBtn = document.getElementById('textureBtn');
-        const texturePicker = document.getElementById('texturePicker');
-        const addCodeBlockBtn = document.getElementById('addCodeBlockBtn');
-        const addPostitBtn = document.getElementById('addPostitBtn');
-        const postitContextMenu = document.getElementById('postitContextMenu');
-        const genericColorPaletteModal = document.getElementById('genericColorPaletteModal');
-        const genericColorPaletteContainer = document.getElementById('genericColorPaletteContainer');
-        const genericColorPaletteTitle = document.getElementById('genericColorPaletteTitle');
-        const closeGenericColorPaletteBtn = document.getElementById('closeGenericColorPalette');
-        const saveStatusText = document.getElementById('saveStatusText');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const brainstormBtn = document.getElementById('brainstormBtn');
-        const expandTextBtn = document.getElementById('expandTextBtn');
-
-        // Variáveis para o seletor de emojis
-        const emojiBtn = document.getElementById('emojiBtn');
-        const emojiPickerPanel = document.getElementById('emojiPickerPanel');
-        const closeEmojiPanelBtn = document.getElementById('closeEmojiPanelBtn');
-        const emojiListContainer = document.getElementById('emojiListContainer');
-        const currentEmojisContainer = document.getElementById('currentEmojisContainer');
-        const emojiSearchInput = document.getElementById('emojiSearchInput');
-        const removeAllEmojisBtn = document.getElementById('removeAllEmojisBtn');
-        const EMOJI_FONT_SIZE = 16;
-        let areEmojisLoaded = false;
-
-        // --- FUNÇÃO UTILITÁRIA DEBOUNCE ---
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
 
         // Estado do aplicativo
         let nodes = [];
-        let postits = [];
         let selectedNodeId = null;
-        let selectedPostitId = null;
         let scale = 1.0;
         let originX = 0;
         let originY = 0;
         let isCanvasDragging = false; 
         let isNodeDragging = false;
-        let isPostitDragging = false;
         let draggedNode = null;
-        let draggedPostit = null;
         let lastMouseX = 0;
         let lastMouseY = 0;
-        let initialClickX = 0;
-        let initialClickY = 0;
-        let savedSelection = null; // Para salvar a seleção de texto
-        let editingNode = null; // Nó atualmente em edição
-        let initialPinchDistance = 0; // Para o zoom com os dedos
-        let globalLayoutDirection = 'right'; // Direção padrão do layout
-        let potentialParentNodeId = null; // ID do nó que pode se tornar o novo pai
-        let canvasTexture = 'dotted'; // Textura padrão do canvas
 
         // Histórico para Desfazer/Refazer
         const history = [];
         let historyIndex = -1;
 
-        // Temas de cores para os nós
+        // NOVO: Temas de cores para os nós
         const colorThemes = {
             'vermelho': ['#bb0e0e', '#8d0000', '#733232', '#582424', '#451b1b'],
-            'azul': ['#1e3a8a', '#172554', '#3b82f6', '#3468a3', '#5f83af'],
+            'azul': ['#1e3a8a', '#172554', '#3b82f6', '#93c5fd', '#bfdbfe'],
             'verde': ['#166534', '#064e3b', '#047857', '#34d399', '#6ee7b7'],
             'roxo': ['#4c1d95', '#3b0764', '#5b21b6', '#a78bfa', '#c4b5fd'],
             'cinza': ['#3f3f46', '#27272a', '#52525b', '#a1a1aa', '#d4d4d8']
         };
         let currentTheme = 'azul';
-        let globalNodeShape = 'square'; // Forma padrão para todos os nós
-        let globalLineType = 'line'; // Tipo de linha padrão
-        
-        // --- LÓGICA DA API GEMINI ---
 
-        function showLoading(message) {
-            loadingOverlay.querySelector('p').textContent = message;
-            loadingOverlay.classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            loadingOverlay.classList.add('hidden');
-        }
-
-        async function callGeminiAPI(prompt, maxRetries = 3) {
-            const apiKey = localStorage.getItem('geminiApiKey');
-            
-            if (!apiKey) {
-                alert("Por favor, configure sua chave de API do Gemini no menu 'Arquivo > Chave de API Gemini' para usar as funcionalidades de IA.");
-                return null;
-            }
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                contents: [{ role: "user", parts: [{ text: prompt }] }]
-            };
-
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
-                        return result.candidates[0].content.parts[0].text;
-                    } else {
-                        throw new Error("Resposta da API inválida ou sem conteúdo.");
-                    }
-                } catch (error) {
-                    console.error(`Tentativa ${i + 1} falhou:`, error);
-                    if (i === maxRetries - 1) {
-                        alert("Não foi possível obter uma resposta da IA. Verifique se sua chave de API é válida e se não há restrições de acesso.");
-                        return null;
-                    }
-                    await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
-                }
-            }
-            return null;
-        }
-
-        async function brainstormChildNodes() {
-            if (!selectedNodeId) {
-                alert("Por favor, selecione um nó para o brainstorm.");
-                return;
-            }
-            const parentNode = nodes.find(n => n.id === selectedNodeId);
-            if (!parentNode) return;
-
-            showLoading("Gerando ideias com IA...");
-
-            const prompt = `Brainstorm a list of 5 to 7 sub-topics or related ideas for the following central topic: "${parentNode.text}". Please provide only a list of ideas, with each idea on a new line. Do not add numbers, bullets, or any other formatting.`;
-            
-            const resultText = await callGeminiAPI(prompt);
-            hideLoading();
-
-            if (resultText) {
-                const ideas = resultText.split('\n').filter(idea => idea.trim() !== '');
-                const depth = getNodeDepth(parentNode.id) + 1;
-                const themeColors = colorThemes[currentTheme];
-                
-                ideas.forEach(ideaText => {
-                    const colorIndex = Math.min(depth, themeColors.length - 1);
-                    const newNode = {
-                        id: `node-${Date.now()}-${Math.random()}`,
-                        type: 'node',
-                        parentId: parentNode.id,
-                        text: ideaText.trim(),
-                        x: 0, y: 0,
-                        color: themeColors[colorIndex],
-                        shape: globalNodeShape,
-                        note: '',
-                        emojis: [],
-                        isCollapsed: false
-                    };
-                    const newDimensions = calculateNodeDimensions(newNode);
-                    newNode.width = newDimensions.width;
-                    newNode.height = newDimensions.height;
-
-                    nodes.push(newNode);
-                    appData.notes[newNode.id] = '';
-                });
-
-                applyTreeLayout();
-                saveState();
-            }
-        }
-
-        async function expandNoteText() {
-            if (!selectedNodeId) return;
-            const currentHtml = noteContentDiv.innerHTML;
-            if (currentHtml.replace(/<[^>]*>/g, '').trim() === '') {
-                alert("Por favor, escreva algum texto antes de pedir para expandir.");
-                return;
-            }
-
-            showLoading("Expandindo texto com IA...");
-            const currentText = noteContentDiv.innerText;
-            const prompt = `Continue the following text, adding one or two more paragraphs. Here is the text:\n\n${currentText}`;
-
-            const resultText = await callGeminiAPI(prompt);
-            hideLoading();
-
-            if (resultText) {
-                // Adiciona o novo texto em um novo parágrafo para manter a formatação
-                noteContentDiv.innerHTML += `<p>${resultText.replace(/\n/g, '</p><p>')}</p>`;
-                saveNoteContent();
-            }
-        }
-
-        // Função para quebrar o texto em linhas
-        function getWrappedTextLines(text, maxWidth) {
-            const allLines = [];
-            const paragraphs = text.split('\n'); // Divide por quebras de linha manuais primeiro
-
-            paragraphs.forEach(paragraph => {
-                const words = paragraph.split(' ');
-                if (words.length === 1 && words[0] === '') {
-                    allLines.push(''); // Mantém linhas vazias
-                    return;
-                }
-                let currentLine = words[0] || '';
-
-                for (let i = 1; i < words.length; i++) {
-                    const word = words[i];
-                    const testLine = currentLine + " " + word;
-                    const metrics = ctx.measureText(testLine);
-                    const testWidth = metrics.width;
-                    if (testWidth < maxWidth && word.length > 0) {
-                        currentLine = testLine;
-                    } else {
-                        allLines.push(currentLine);
-                        currentLine = word;
-                    }
-                }
-                allLines.push(currentLine);
-            });
-            return allLines;
-        }
-
-
-        // Função para calcular as dimensões do nó com base no texto e emojis
-        function calculateNodeDimensions(node) {
-            const padding = 20;
-            const maxWidth = 350;
-            const lineHeight = 20;
-            ctx.font = '16px Inter, sans-serif';
-
-            const emojisText = (node.emojis || []).join('');
-            const emojisWidth = ctx.measureText(emojisText).width + (emojisText ? 5 : 0); 
-
-            const lines = getWrappedTextLines(node.text, maxWidth - (padding * 2));
-            const longestLine = lines.reduce((a, b) => (ctx.measureText(a).width > ctx.measureText(b).width ? a : b), '');
-            
-            let textWidth = ctx.measureText(longestLine).width;
-            if (lines.length === 1) { 
-                textWidth += emojisWidth;
-            }
-
-            const textHeight = lines.length * lineHeight;
-
-            return {
-                width: textWidth + (padding * 2),
-                height: Math.max(textHeight, EMOJI_FONT_SIZE) + (padding * 2)
-            };
-        }
-
-        // Objeto de dados simulado
+        // Objeto de dados simulado (seria armazenado em um banco de dados real)
         let appData = {
-            nodes: [],
-            postits: [],
-            notes: {},
+            nodes: [
+                { id: 'root', parentId: null, text: 'Ideia Central', x: 0, y: 0, color: colorThemes[currentTheme][0], note: 'Esta é a nota para o nó central.' },
+            ],
+            notes: {
+                'root': '<h1>Bem-vindo!</h1><p>Esta é a nota principal. Clique em um nó para editar seu conteúdo.</p>'
+            },
             selectedNodeId: null,
             scale: 1.0,
             originX: 0,
-            originY: 0,
-            globalNodeShape: 'square',
-            globalLineType: 'line',
-            projectName: 'Meu Projeto',
-            globalLayoutDirection: 'right',
-            canvasTexture: 'lisa'
+            originY: 0
         };
-
-        // --- LÓGICA DE SALVAMENTO LOCAL ---
-
-        function updateSaveStatus(status, timestamp = null) {
-            const panel = saveStatusText.parentElement;
-            if (status === 'saved') {
-                const timeString = new Date(timestamp).toLocaleTimeString('pt-BR');
-                saveStatusText.textContent = `Salvo às ${timeString}`;
-                panel.classList.remove('bg-red-200', 'text-red-800');
-                panel.classList.add('bg-white/80', 'text-gray-700');
-            } else if (status === 'error') {
-                saveStatusText.textContent = 'QuotaExceededError';
-                panel.classList.remove('bg-white/80');
-                panel.classList.add('bg-red-200', 'text-red-800');
-            } else { // 'unsaved'
-                saveStatusText.textContent = 'Não salvo';
-                panel.classList.remove('bg-red-200', 'text-red-800');
-                panel.classList.add('bg-white/80', 'text-gray-700');
-            }
-        }
-
-        const saveStateToLocalStorage = debounce(() => {
-            try {
-                const projectData = {
-                    nodes: nodes,
-                    postits: postits,
-                    notes: appData.notes,
-                    globalNodeShape: globalNodeShape,
-                    globalLineType: globalLineType,
-                    projectName: appData.projectName,
-                    globalLayoutDirection: globalLayoutDirection,
-                    canvasTexture: canvasTexture,
-                    originX: originX,
-                    originY: originY,
-                    scale: scale
-                };
-                const dataStr = JSON.stringify(projectData);
-                localStorage.setItem('mindMapProgress', dataStr);
-                updateSaveStatus('saved', Date.now());
-            } catch (e) {
-                if (e.name === 'QuotaExceededError') {
-                    console.error('Erro de localStorage: Quota excedida.');
-                    updateSaveStatus('error');
-                } else {
-                    console.error('Erro ao salvar no localStorage:', e);
-                }
-            }
-        }, 500);
-
-        function loadStateFromLocalStorage() {
-            const savedData = localStorage.getItem('mindMapProgress');
-            if (savedData) {
-                try {
-                    const loadedData = JSON.parse(savedData);
-                    nodes = loadedData.nodes || [];
-                    postits = loadedData.postits || [];
-                    appData.notes = loadedData.notes || {};
-                    globalNodeShape = loadedData.globalNodeShape || 'square';
-                    globalLineType = loadedData.globalLineType || 'line';
-                    appData.projectName = loadedData.projectName || 'Meu Projeto';
-                    globalLayoutDirection = loadedData.globalLayoutDirection || 'right';
-                    canvasTexture = loadedData.canvasTexture || 'lisa';
-                    projectNameInput.value = appData.projectName;
-                    originX = loadedData.originX || canvas.width / 2;
-                    originY = loadedData.originY || canvas.height / 2;
-                    scale = loadedData.scale || 1.0;
-
-                    nodes.forEach(node => {
-                        const dims = calculateNodeDimensions(node);
-                        node.width = dims.width;
-                        node.height = dims.height;
-                    });
-                    
-                    history.length = 0;
-                    historyIndex = -1;
-                    saveState(); 
-
-                    redrawCanvas();
-                    updateSaveStatus('saved', Date.now());
-                    return true;
-                } catch (error) {
-                    console.error('Erro ao carregar dados do localStorage:', error);
-                    localStorage.removeItem('mindMapProgress');
-                    return false;
-                }
-            }
-            return false;
-        }
 
         // Função para salvar o estado atual
         function saveState() {
             if (historyIndex < history.length - 1) {
                 history.splice(historyIndex + 1);
             }
-            history.push(JSON.stringify({ 
-                nodes: nodes, 
-                postits: postits,
-                notes: appData.notes, 
-                globalNodeShape: globalNodeShape, 
-                globalLineType: globalLineType, 
-                projectName: appData.projectName, 
-                globalLayoutDirection: globalLayoutDirection, 
-                canvasTexture: canvasTexture 
-            }));
+            history.push(JSON.stringify({ nodes: nodes, notes: appData.notes }));
             historyIndex++;
-            saveStateToLocalStorage();
         }
 
         // Função para carregar um estado do histórico
@@ -1165,14 +382,7 @@
             if (index >= 0 && index < history.length) {
                 const state = JSON.parse(history[index]);
                 nodes = state.nodes;
-                postits = state.postits || [];
                 appData.notes = state.notes;
-                globalNodeShape = state.globalNodeShape || 'square';
-                globalLineType = state.globalLineType || 'line';
-                appData.projectName = state.projectName || 'Meu Projeto';
-                globalLayoutDirection = state.globalLayoutDirection || 'right';
-                canvasTexture = state.canvasTexture || 'lisa';
-                projectNameInput.value = appData.projectName;
                 redrawCanvas();
             }
         }
@@ -1198,33 +408,18 @@
         
         // --- FUNÇÕES DE SALVAR E CARREGAR PROJETO ---
         
-        function slugify(text) {
-            return text.toString().toLowerCase()
-                .replace(/\s+/g, '-')
-                .replace(/[^\w\-]+/g, '')
-                .replace(/\-\-+/g, '-')
-                .replace(/^-+/, '')
-                .replace(/-+$/, '');
-        }
-
         // Salva o projeto como um arquivo .json
         function saveProject() {
             const projectData = {
                 nodes: nodes,
-                postits: postits,
-                notes: appData.notes,
-                globalNodeShape: globalNodeShape,
-                globalLineType: globalLineType,
-                projectName: appData.projectName,
-                globalLayoutDirection: globalLayoutDirection,
-                canvasTexture: canvasTexture
+                notes: appData.notes
             };
             const dataStr = JSON.stringify(projectData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${slugify(appData.projectName || 'projeto')}.json`;
+            a.download = 'projeto-mapa-mental.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1242,43 +437,27 @@
                     const loadedData = JSON.parse(e.target.result);
                     if (loadedData.nodes && loadedData.notes) {
                         nodes = loadedData.nodes;
-                        postits = loadedData.postits || [];
-                        globalNodeShape = loadedData.globalNodeShape || 'square';
-                        globalLineType = loadedData.globalLineType || 'line';
-                        appData.projectName = loadedData.projectName || 'Meu Projeto';
-                        globalLayoutDirection = loadedData.globalLayoutDirection || 'right';
-                        canvasTexture = loadedData.canvasTexture || 'lisa';
-                        projectNameInput.value = appData.projectName;
-                        
-                        // Recalcula as dimensões, mas mantém as posições x, y do JSON
-                        nodes.forEach(node => {
-                            node.shape = globalNodeShape;
-                            node.emojis = node.emojis || [];
-                            const dims = calculateNodeDimensions(node);
-                            node.width = dims.width;
-                            node.height = dims.height;
-                        });
-
                         appData.notes = loadedData.notes;
                         selectedNodeId = null;
                         notesEditor.classList.add('hidden');
                         
+                        // Limpa o histórico e salva o novo estado
                         history.length = 0;
                         historyIndex = -1;
                         saveState();
 
-                        // Centraliza a visualização no nó raiz, se existir
-                        const rootNode = nodes.find(n => n.parentId === null);
+                        // Posiciona a câmera para exibir o nó central após o carregamento
+                        const rootNode = nodes.find(n => n.id === 'root');
                         if (rootNode) {
                             originX = (canvas.width / 2) - rootNode.x;
                             originY = (canvas.height / 2) - rootNode.y;
                         } else {
+                            // Se não houver nó central, centraliza no ponto (0,0)
                             originX = 0;
                             originY = 0;
                         }
                         scale = 1.0;
                         
-                        // Apenas redesenha o canvas, não recalcula o layout
                         redrawCanvas();
                     } else {
                         console.error('Formato do arquivo JSON inválido.');
@@ -1288,8 +467,6 @@
                 }
             };
             reader.readAsText(file);
-             // Limpa o valor do input para permitir carregar o mesmo arquivo novamente
-            event.target.value = '';
         }
 
         // --- LÓGICA DO NOVO PROJETO (POP-UP) ---
@@ -1300,745 +477,266 @@
         const confirmNewProjectBtn = document.getElementById('confirmNewProjectBtn');
         const cancelNewProjectBtn = document.getElementById('cancelNewProjectBtn');
 
-        newProjectBtn.addEventListener('click', () => newProjectModal.classList.remove('hidden'));
-        function hideModal() { newProjectModal.classList.add('hidden'); }
+        // Mostra a pop-up
+        newProjectBtn.addEventListener('click', () => {
+            newProjectModal.classList.remove('hidden');
+        });
+
+        // Esconde a pop-up
+        function hideModal() {
+            newProjectModal.classList.add('hidden');
+        }
+
         closeModalBtn.addEventListener('click', hideModal);
         cancelNewProjectBtn.addEventListener('click', hideModal);
         
-        function resetProject() {
-            const initialText = 'Ideia Central';
-            globalNodeShape = 'square'; // Padrão alterado para quadrado
-            const initialNode = { 
-                id: 'root', 
-                parentId: null, 
-                text: initialText, 
-                x: 0, y: 0, 
-                color: colorThemes[currentTheme][0], 
-                shape: globalNodeShape, 
-                note: 'Esta é a nota para o nó central.',
-                emojis: [],
-                isCollapsed: false
+        // Reseta o projeto para o estado inicial
+        confirmNewProjectBtn.addEventListener('click', () => {
+            nodes = [
+                { id: 'root', parentId: null, text: 'Ideia Central', x: 0, y: 0, color: colorThemes[currentTheme][0], note: 'Esta é a nota para o nó central.' },
+            ];
+            appData.notes = {
+                'root': '<h1>Bem-vindo!</h1><p>Esta é a nota principal. Clique em um nó para editar seu conteúdo.</p>'
             };
-            const initialDimensions = calculateNodeDimensions(initialNode);
-            initialNode.width = initialDimensions.width;
-            initialNode.height = initialDimensions.height;
-            
-            globalLineType = 'line';
-            globalLayoutDirection = 'right';
-            canvasTexture = 'dotted';
-            appData.projectName = 'Meu Projeto';
-            projectNameInput.value = appData.projectName;
-            nodes = [initialNode];
-            postits = []; // CORREÇÃO: Limpa o array de post-its
-            appData.notes = { 'root': '<h1>Bem-vindo!</h1><p>Esta é a nota principal.</p>' };
             
             history.length = 0;
             historyIndex = -1;
             saveState();
 
             selectedNodeId = null;
-            selectedPostitId = null;
             notesEditor.classList.add('hidden');
             
-            originX = (canvas.width / 2);
-            originY = (canvas.height / 2);
+            originX = 0;
+            originY = 0;
             scale = 1.0;
 
-            applyTreeLayout(); // Aplica o layout para o novo projeto
+            redrawCanvas();
             hideModal();
+        });
+
+
+        // --- NOVO: LÓGICA DO SELETOR DE COR INDIVIDUAL ---
+        const individualColorBtn = document.getElementById('individualColorBtn');
+        const individualColorPickerModal = document.getElementById('individualColorPickerModal');
+        const closeIndividualColorPickerBtn = document.getElementById('closeIndividualColorPicker');
+        const colorPickerArea = document.getElementById('colorPickerArea');
+        const colorPickerSelector = document.getElementById('colorPickerSelector');
+        const hueSlider = document.getElementById('hueSlider');
+        const selectedColorPreview = document.getElementById('selectedColorPreview');
+        const hexInput = document.getElementById('hexInput');
+
+        let isPickingColor = false;
+        let currentHue = 0;
+        let currentSaturation = 100;
+        let currentLightness = 50;
+
+        function updateColorFromPicker(e) {
+            const rect = colorPickerArea.getBoundingClientRect();
+            const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+
+            currentSaturation = (x / rect.width) * 100;
+            currentLightness = 100 - (y / rect.height) * 100;
+
+            updateSelectedColor();
         }
-        confirmNewProjectBtn.addEventListener('click', resetProject);
 
-        // --- LÓGICA DO SELETOR DE COR UNIFICADO ---
-        let colorPaletteCallback = null;
-
-        function openGenericColorPalette(title, callback) {
-            genericColorPaletteTitle.textContent = title;
-            genericColorPaletteModal.classList.remove('hidden');
-            colorPaletteCallback = callback;
-        }
-
-        function initGenericColorPalette() {
-            const colors = [
-                '#FFFBEB', '#FEF2F2', '#EFF6FF', '#F0FDF4', '#F5F3FF', '#FDF2F8', '#F3F4F6',
-                '#FEF3C7', '#FECACA', '#DBEAFE', '#D1FAE5', '#E0E7FF', '#FCE7F3', '#E5E7EB',
-                '#FDE68A', '#F87171', '#93C5FD', '#6EE7B7', '#C7D2FE', '#FBCFE8', '#9CA3AF',
-                '#FACC15', '#DC2626', '#3B82F6', '#10B981', '#818CF8', '#EC4899', '#4B5563',
-                '#CA8A04', '#7F1D1D', '#1E40AF', '#065F46', '#4338CA', '#86198F', '#1F2937'
-            ];
+        function updateSelectedColor() {
+            const newColor = `hsl(${currentHue}, ${currentSaturation}%, ${currentLightness}%)`;
+            const hexColor = hslToHex(currentHue, currentSaturation, currentLightness);
             
-            genericColorPaletteContainer.innerHTML = '';
-            colors.forEach(color => {
-                const swatch = document.createElement('div');
-                swatch.className = 'color-swatch';
-                swatch.style.backgroundColor = color;
-                swatch.addEventListener('click', () => {
-                    if (colorPaletteCallback) {
-                        colorPaletteCallback(color);
-                    }
-                    genericColorPaletteModal.classList.add('hidden');
-                });
-                genericColorPaletteContainer.appendChild(swatch);
-            });
-        }
-        
-        closeGenericColorPaletteBtn.addEventListener('click', () => genericColorPaletteModal.classList.add('hidden'));
+            selectedColorPreview.style.backgroundColor = newColor;
+            hexInput.value = hexColor;
 
-        document.getElementById('textColorBtn').addEventListener('click', (e) => {
-            savedSelection = window.getSelection().getRangeAt(0).cloneRange();
-            openGenericColorPalette('Cor do Texto', (color) => {
-                if (savedSelection) {
-                    window.getSelection().removeAllRanges();
-                    window.getSelection().addRange(savedSelection);
-                    formatDoc('foreColor', color);
-                }
-            });
-        });
-
-        document.getElementById('highlightColorBtn').addEventListener('click', (e) => {
-            savedSelection = window.getSelection().getRangeAt(0).cloneRange();
-            openGenericColorPalette('Destacar Texto', (color) => {
-                if (savedSelection) {
-                    window.getSelection().removeAllRanges();
-                    window.getSelection().addRange(savedSelection);
-                    formatDoc('hiliteColor', color);
-                }
-            });
-        });
-
-        document.getElementById('individualColorBtn').addEventListener('click', (e) => {
             if (selectedNodeId) {
-                openGenericColorPalette('Cor do Nó', (color) => {
-                    const node = nodes.find(n => n.id === selectedNodeId);
-                    if (node) {
-                        node.color = color;
-                        redrawCanvas();
-                        saveState();
-                    }
-                });
-            }
-        });
-
-
-        // --- LÓGICA DO SELETOR DE EMOJIS ---
-        async function initEmojiPicker() {
-            emojiListContainer.innerHTML = '<p class="text-gray-500 text-sm">Carregando emojis...</p>';
-            try {
-                const response = await fetch('https://cdn.jsdelivr.net/npm/emojibase-data/en/data.json');
-                const emojiData = await response.json();
-                
-                const categoryMap = {
-                    0: 'Smileys & Emoção', 1: 'Pessoas & Corpo', 2: 'Animais & Natureza',
-                    3: 'Comida & Bebida', 4: 'Viagens & Lugares', 5: 'Atividades',
-                    6: 'Objetos', 7: 'Símbolos', 8: 'Bandeiras',
-                };
-                const categorizedEmojis = {};
-
-                emojiData.forEach(emoji => {
-                    if (emoji.group !== undefined) {
-                        const categoryName = categoryMap[emoji.group];
-                        if (!categorizedEmojis[categoryName]) {
-                            categorizedEmojis[categoryName] = [];
-                        }
-                        if (!emoji.skins) {
-                           categorizedEmojis[categoryName].push(emoji.emoji);
-                        }
-                    }
-                });
-                
-                emojiListContainer.innerHTML = '';
-                for (const category in categorizedEmojis) {
-                    const categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'emoji-category';
-                    const title = document.createElement('h5');
-                    title.textContent = category;
-                    categoryDiv.appendChild(title);
-                    const emojiGrid = document.createElement('div');
-                    emojiGrid.className = 'flex flex-wrap gap-1';
-                    categorizedEmojis[category].forEach(emoji => {
-                        const span = document.createElement('span');
-                        span.className = 'emoji-btn';
-                        span.textContent = emoji;
-                        span.onclick = () => addEmojiToNode(emoji);
-                        emojiGrid.appendChild(span);
-                    });
-                    categoryDiv.appendChild(emojiGrid);
-                    emojiListContainer.appendChild(categoryDiv);
-                }
-                areEmojisLoaded = true;
-            } catch (error) {
-                emojiListContainer.innerHTML = '<p class="text-red-500 text-sm">Falha ao carregar emojis.</p>';
-                console.error("Falha ao carregar emojis:", error);
-            }
-            
-            // Adiciona os event listeners do painel de emoji
-            closeEmojiPanelBtn.addEventListener('click', () => emojiPickerPanel.classList.add('hidden'));
-            removeAllEmojisBtn.addEventListener('click', () => {
                 const node = nodes.find(n => n.id === selectedNodeId);
                 if (node) {
-                    node.emojis = [];
-                    updateNodeAndRedraw(node);
-                    populateEmojiPicker();
-                }
-            });
-            emojiSearchInput.addEventListener('input', filterEmojis);
-        }
-
-        function toggleEmojiPanel() {
-            if (selectedNodeId) {
-                emojiPickerPanel.classList.toggle('hidden');
-                if (!emojiPickerPanel.classList.contains('hidden')) {
-                    populateEmojiPicker();
+                    node.color = hexColor;
+                    redrawCanvas();
                 }
             }
-        }
-
-        function populateEmojiPicker() {
-            if (!selectedNodeId) return;
-            const node = nodes.find(n => n.id === selectedNodeId);
-            if (!node) return;
-
-            currentEmojisContainer.innerHTML = '';
-            (node.emojis || []).forEach((emoji, index) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'current-emoji-item';
-                const emojiSpan = document.createElement('span');
-                emojiSpan.textContent = emoji;
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-emoji-btn';
-                removeBtn.innerHTML = '<i class="fa-solid fa-xmark fa-xs"></i>';
-                removeBtn.onclick = () => removeEmojiFromNode(index);
-                itemDiv.appendChild(emojiSpan);
-                itemDiv.appendChild(removeBtn);
-                currentEmojisContainer.appendChild(itemDiv);
-            });
-        }
-
-        function addEmojiToNode(emoji) {
-            if (!selectedNodeId) return;
-            const node = nodes.find(n => n.id === selectedNodeId);
-            if (node) {
-                if (!node.emojis) node.emojis = [];
-                node.emojis.push(emoji);
-                updateNodeAndRedraw(node);
-                populateEmojiPicker();
-            }
-        }
-
-        function removeEmojiFromNode(index) {
-            if (!selectedNodeId) return;
-            const node = nodes.find(n => n.id === selectedNodeId);
-            if (node && node.emojis) {
-                node.emojis.splice(index, 1);
-                updateNodeAndRedraw(node);
-                populateEmojiPicker();
-            }
-        }
-
-        function filterEmojis() {
-            const searchTerm = emojiSearchInput.value.toLowerCase();
-            document.querySelectorAll('.emoji-btn').forEach(btn => {
-                if (btn.textContent.includes(searchTerm)) {
-                    btn.style.display = 'inline-block';
-                } else {
-                    btn.style.display = 'none';
-                }
-            });
         }
         
-        // --- LÓGICA DO BLOCO DE CÓDIGO ---
-        const debouncedHighlight = debounce((element) => {
-            const selection = window.getSelection();
-            if (!selection.rangeCount) return;
-            const range = selection.getRangeAt(0);
-            const textContent = element.textContent;
-            
-            let charCount = 0;
-            const treeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
-            let found = false;
-            while (treeWalker.nextNode() && !found) {
-                if (treeWalker.currentNode === range.startContainer) {
-                    charCount += range.startOffset;
-                    found = true;
-                } else {
-                    charCount += treeWalker.currentNode.length;
-                }
-            }
-            if (!found && element.contains(range.startContainer)) {
-                 charCount = textContent.length;
-            }
-
-
-            const langElement = element.closest('.code-block-wrapper').querySelector('.code-block-lang');
-            const result = hljs.highlightAuto(textContent);
-            element.innerHTML = result.value;
-            langElement.textContent = result.language || 'auto';
-
-            let newCharCount = 0;
-            const newTreeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
-            let newRange = document.createRange();
-            let positionFound = false;
-            while (newTreeWalker.nextNode() && !positionFound) {
-                const nodeLength = newTreeWalker.currentNode.length;
-                if (newCharCount + nodeLength >= charCount) {
-                    newRange.setStart(newTreeWalker.currentNode, charCount - newCharCount);
-                    positionFound = true;
-                } else {
-                    newCharCount += nodeLength;
-                }
-            }
-            if (!positionFound) {
-                newRange.selectNodeContents(element);
-                newRange.collapse(false);
-            }
-            
-            newRange.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-
-        }, 300);
-
-        function addCodeBlock() {
-            const selection = window.getSelection();
-            if (!selection.rangeCount) return;
-            let range = selection.getRangeAt(0);
-
-            if (!noteContentDiv.contains(range.commonAncestorContainer)) {
-                noteContentDiv.focus();
-                const newSelection = window.getSelection();
-                if(!newSelection.rangeCount) return;
-                range = newSelection.getRangeAt(0);
-            }
-
-            const codeBlockHtml = `
-                <div class="code-block-wrapper" contenteditable="false">
-                    <div class="code-block-header">
-                        <span class="code-block-lang">auto</span>
-                        <div class="flex items-center">
-                            <button class="edit-code-btn" title="Editar Código">
-                                <i class="fa-solid fa-pencil"></i> Editar
-                            </button>
-                            <button class="copy-code-btn" title="Copiar Código">
-                                <i class="fa-solid fa-copy"></i> Copiar
-                            </button>
-                        </div>
-                    </div>
-                    <pre><code contenteditable="false" spellcheck="false">\n</code></pre>
-                </div>
-                <p><br></p>
-            `;
-            
-            document.execCommand('insertHTML', false, codeBlockHtml);
+        // Converte HSL para Hex (simplificado para o exemplo)
+        function hslToHex(h, s, l) {
+            l /= 100;
+            const a = s * Math.min(l, 1 - l) / 100;
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                return Math.round(255 * color).toString(16).padStart(2, '0');
+            };
+            return `#${f(0)}${f(8)}${f(4)}`;
+        }
+        
+        // Atualiza o seletor de cor no gradiente
+        function updateColorSelectorPosition() {
+            const rect = colorPickerArea.getBoundingClientRect();
+            const x = (currentSaturation / 100) * rect.width;
+            const y = (1 - currentLightness / 100) * rect.height;
+            colorPickerSelector.style.left = `${x}px`;
+            colorPickerSelector.style.top = `${y}px`;
         }
 
-        function handleNoteContentClick(e) {
-            const link = e.target.closest('a');
-            if (link && link.href) {
-                e.preventDefault();
-                window.open(link.href, '_blank');
-                return;
+        individualColorBtn.addEventListener('click', () => {
+            if (selectedNodeId) {
+                individualColorPickerModal.classList.add('active');
             }
+        });
 
-            if (e.target.closest('.copy-code-btn')) {
-                const wrapper = e.target.closest('.code-block-wrapper');
-                if (wrapper) {
-                    const codeElement = wrapper.querySelector('code');
-                    const textToCopy = codeElement.textContent;
-                    const copyButton = e.target.closest('.copy-code-btn');
+        closeIndividualColorPickerBtn.addEventListener('click', () => {
+            individualColorPickerModal.classList.remove('active');
+            saveState(); // Salva o estado ao fechar o seletor
+        });
 
-                    const textArea = document.createElement('textarea');
-                    textArea.value = textToCopy;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        copyButton.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
-                        setTimeout(() => {
-                            copyButton.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar';
-                        }, 2000);
-                    } catch (err) {
-                        console.error('Falha ao copiar texto: ', err);
-                    }
-                    document.body.removeChild(textArea);
+        colorPickerArea.addEventListener('mousedown', (e) => {
+            isPickingColor = true;
+            updateColorFromPicker(e);
+            updateColorSelectorPosition();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isPickingColor) {
+                updateColorFromPicker(e);
+                updateColorSelectorPosition();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isPickingColor = false;
+        });
+
+        hueSlider.addEventListener('input', (e) => {
+            currentHue = e.target.value;
+            colorPickerArea.style.backgroundColor = `hsl(${currentHue}, 100%, 50%)`;
+            updateSelectedColor();
+        });
+
+        hexInput.addEventListener('change', (e) => {
+            const hex = e.target.value;
+            // Converte hex para HSL e atualiza os seletores e o nó
+            // Implementação simplificada: apenas atualiza a cor do nó
+            if (selectedNodeId) {
+                const node = nodes.find(n => n.id === selectedNodeId);
+                if (node) {
+                    node.color = hex;
+                    redrawCanvas();
+                    saveState();
                 }
             }
-            
-            if (e.target.closest('.edit-code-btn')) {
-                const wrapper = e.target.closest('.code-block-wrapper');
-                const editButton = e.target.closest('.edit-code-btn');
-                if (wrapper) {
-                    const codeElement = wrapper.querySelector('code');
-                    const isEditing = codeElement.isContentEditable;
-
-                    if (isEditing) {
-                        // Para de editar
-                        codeElement.contentEditable = false;
-                        wrapper.classList.remove('editing');
-                        editButton.innerHTML = '<i class="fa-solid fa-pencil"></i> Editar';
-                        editButton.title = 'Editar Código';
-                        // Re-aplica o highlight no código
-                        debouncedHighlight(codeElement);
-                    } else {
-                        // Começa a editar
-                        codeElement.contentEditable = true;
-                        wrapper.classList.add('editing');
-                        editButton.innerHTML = '<i class="fa-solid fa-check"></i> Salvar';
-                        editButton.title = 'Salvar Alterações';
-                        codeElement.focus();
-                    }
-                }
-            }
-        }
-
-        function handleNoteContentInput(e) {
-            if (e.target.tagName === 'CODE' && e.target.closest('.code-block-wrapper')) {
-                debouncedHighlight(e.target);
-            }
-        }
-
-        function handleNoteContentKeyDown(e) {
-            // Lida com Tab para indentação em listas
-            if (e.key === 'Tab') {
-                // Verifica se o foco não está dentro de um bloco de código
-                const selection = window.getSelection();
-                if (selection.rangeCount > 0) {
-                    const container = selection.getRangeAt(0).commonAncestorContainer;
-                    const codeElement = container.nodeType === Node.ELEMENT_NODE ? container : container.parentElement;
-                    if (codeElement.closest('.code-block-wrapper code')) {
-                        // Se estiver em um bloco de código, permite o comportamento padrão do handleCodeBlockKeyDown
-                        return;
-                    }
-                }
-                
-                e.preventDefault(); // Previne a mudança de foco
-                if (e.shiftKey) {
-                    document.execCommand('outdent');
-                } else {
-                    document.execCommand('indent');
-                }
-            }
-        }
-
-        function handleCodeBlockKeyDown(e) {
-            if (e.key === 'Tab') {
-                const selection = window.getSelection();
-                if (selection.rangeCount > 0) {
-                    const container = selection.getRangeAt(0).commonAncestorContainer;
-                    const codeElement = container.nodeType === Node.ELEMENT_NODE ? container : container.parentElement;
-                    if (codeElement.closest('.code-block-wrapper code')) {
-                        e.preventDefault();
-                        document.execCommand('insertText', false, '  ');
-                    }
-                }
-            }
-        }
-
-        // --- FUNÇÃO PARA LIDAR COM A COLAGEM DE CONTEÚDO EXTERNO ---
-        function handlePaste(e) {
-            // 1. Impede o comportamento padrão de colagem do navegador.
-            e.preventDefault();
-
-            // 2. Obtém o conteúdo da área de transferência, priorizando o formato HTML.
-            let pastedHtml = (e.clipboardData || window.clipboardData).getData('text/html');
-
-            // Se não houver conteúdo HTML, usa o formato de texto simples.
-            if (!pastedHtml) {
-                const plainText = (e.clipboardData || window.clipboardData).getData('text/plain');
-                document.execCommand('insertText', false, plainText);
-                return;
-            }
-
-            // 3. Limpa o HTML de comentários indesejados.
-            pastedHtml = pastedHtml.replace(/<!--[\s\S]*?-->/g, '');
-
-            // 4. Usa DOMParser para criar um documento temporário e seguro para manipulação.
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(pastedHtml, 'text/html');
-
-            // 5. Seleciona todos os elementos no corpo do documento temporário.
-            const allElements = doc.body.querySelectorAll('*');
-
-            // 6. Remove os atributos de 'style' e 'class' de cada elemento para limpar a formatação.
-            allElements.forEach(el => {
-                el.removeAttribute('style');
-                el.removeAttribute('class');
-            });
-
-            // 7. Obtém a string de HTML limpa do corpo do documento temporário.
-            const cleanedHtml = doc.body.innerHTML;
-
-            // 8. Insere o HTML limpo no editor.
-            document.execCommand('insertHTML', false, cleanedHtml);
-        }
+        });
+        // FIM: LÓGICA DO SELETOR DE COR INDIVIDUAL
 
         function init() {
+            nodes = appData.nodes;
+            saveState();
             setupCanvas();
-            setupResizing();
-            initEmojiPicker();
-            initGenericColorPalette();
-            initPostitColorPalettes();
-
+            setupResizing(); // Configura o redimensionamento
             window.addEventListener('resize', () => {
                 resizeCanvas();
                 redrawCanvas();
             });
-            noteContentDiv.addEventListener('input', (e) => {
-                saveNoteContent();
-                handleNoteContentInput(e);
-            });
-            noteContentDiv.addEventListener('click', handleNoteContentClick);
-            noteContentDiv.addEventListener('keydown', (e) => {
-                handleCodeBlockKeyDown(e);
-                handleNoteContentKeyDown(e);
-            });
-            
-            // *** Listener para o evento de colar ***
-            noteContentDiv.addEventListener('paste', handlePaste);
-            
+            noteContentDiv.addEventListener('input', saveNoteContent);
             noteTitleInput.addEventListener('input', saveNodeTitle);
-            
-            addCodeBlockBtn.addEventListener('click', addCodeBlock);
-            addPostitBtn.addEventListener('click', addPostit);
-            brainstormBtn.addEventListener('click', brainstormChildNodes);
-            expandTextBtn.addEventListener('click', expandNoteText);
-
-            projectNameInput.addEventListener('blur', () => {
-                appData.projectName = projectNameInput.value;
-                saveState();
-            });
-            projectNameInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') projectNameInput.blur();
-            });
-
             document.getElementById('closeNotesBtn').addEventListener('click', () => {
                 notesEditor.classList.add('hidden');
                 selectedNodeId = null;
                 redrawCanvas();
             });
             document.getElementById('addNodeBtn').addEventListener('click', addNode);
-            document.getElementById('removeNodeBtn').addEventListener('click', deleteNode);
-            document.getElementById('addFloatingNodeBtn').addEventListener('click', addFloatingNode);
-            document.getElementById('zoomInBtn').addEventListener('click', () => { scale *= 1.1; redrawCanvas(); });
-            document.getElementById('zoomOutBtn').addEventListener('click', () => { scale /= 1.1; redrawCanvas(); });
+            document.getElementById('zoomInBtn').addEventListener('click', () => {
+                scale *= 1.1;
+                redrawCanvas();
+            });
+            document.getElementById('zoomOutBtn').addEventListener('click', () => {
+                scale /= 1.1;
+                redrawCanvas();
+            });
             document.getElementById('recenterBtn').addEventListener('click', () => {
-                originX = canvas.width / 2;
-                originY = canvas.height / 2;
+                originX = 0;
+                originY = 0;
                 scale = 1.0;
                 redrawCanvas();
             });
             
-            document.querySelectorAll('.dropdown-btn[data-theme]').forEach(btn => {
+            // Listener para aplicar temas
+            document.querySelectorAll('.theme-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    currentTheme = e.currentTarget.dataset.theme;
-                    applyThemeToNodes();
+                    const themeButton = e.target.closest('.theme-btn');
+                    if (themeButton) {
+                        const themeName = themeButton.dataset.theme;
+                        currentTheme = themeName;
+                        applyThemeToNodes();
+                    }
                 });
             });
 
-            document.querySelectorAll('.dropdown-btn[data-shape]').forEach(btn => {
-                btn.addEventListener('click', (e) => applyGlobalShape(e.currentTarget.dataset.shape));
-            });
-
-            document.querySelectorAll('.dropdown-btn[data-line-type]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    globalLineType = e.currentTarget.dataset.lineType;
-                    saveState();
-                    redrawCanvas();
-                });
-            });
-            
-            document.querySelectorAll('.dropdown-btn[data-layout]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    globalLayoutDirection = e.currentTarget.dataset.layout;
-                    applyTreeLayout();
-                    saveState();
-                });
-            });
-
-            document.querySelectorAll('.dropdown-btn[data-texture]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    canvasTexture = e.currentTarget.dataset.texture;
-                    saveState();
-                    redrawCanvas();
-                });
-            });
-
+            // Event listeners para os novos botões
             document.getElementById('saveProjectBtn').addEventListener('click', saveProject);
-            document.getElementById('loadProjectBtn').addEventListener('click', () => document.getElementById('loadFileInput').click());
+            document.getElementById('loadProjectBtn').addEventListener('click', () => {
+                document.getElementById('loadFileInput').click();
+            });
             document.getElementById('loadFileInput').addEventListener('change', loadProject);
             
-            const aboutBtn = document.getElementById('aboutBtn');
-            const aboutModal = document.getElementById('aboutModal');
-            const closeAboutModalBtn = document.getElementById('closeAboutModalBtn');
-            aboutBtn.addEventListener('click', () => aboutModal.classList.remove('hidden'));
-            closeAboutModalBtn.addEventListener('click', () => aboutModal.classList.add('hidden'));
-            aboutModal.addEventListener('click', (e) => { if (e.target === aboutModal) aboutModal.classList.add('hidden'); });
-
-            const featuresBtn = document.getElementById('featuresBtn');
-            const featuresModal = document.getElementById('featuresModal');
-            const closeFeaturesModalBtn = document.getElementById('closeFeaturesModalBtn');
-            featuresBtn.addEventListener('click', () => featuresModal.classList.remove('hidden'));
-            closeFeaturesModalBtn.addEventListener('click', () => featuresModal.classList.add('hidden'));
-            featuresModal.addEventListener('click', (e) => { if (e.target === featuresModal) featuresModal.classList.add('hidden'); });
-
-            const createLinkBtn = document.getElementById('createLinkBtn');
-            const linkModal = document.getElementById('linkModal');
-            const saveLinkBtn = document.getElementById('saveLinkBtn');
-            const cancelLinkBtn = document.getElementById('cancelLinkBtn');
-            const linkUrlInput = document.getElementById('linkUrlInput');
-
-            createLinkBtn.addEventListener('click', () => {
-                const selection = window.getSelection();
-                if (selection.rangeCount > 0 && !selection.getRangeAt(0).collapsed && noteContentDiv.contains(selection.anchorNode)) {
-                    savedSelection = selection.getRangeAt(0).cloneRange();
-                    linkModal.classList.remove('hidden');
-                    linkUrlInput.value = 'https://';
-                    linkUrlInput.focus();
-                }
-            });
-
-            function closeLinkModal() {
-                linkModal.classList.add('hidden');
-                linkUrlInput.value = '';
-                savedSelection = null;
-            }
-
-            cancelLinkBtn.addEventListener('click', closeLinkModal);
-            linkModal.addEventListener('click', (e) => { if (e.target === linkModal) closeLinkModal(); });
-
-            saveLinkBtn.addEventListener('click', () => {
-                if (savedSelection) {
-                    noteContentDiv.focus();
-                    const selection = window.getSelection();
-                    selection.removeAllRanges();
-                    selection.addRange(savedSelection);
-
-                    let url = linkUrlInput.value;
-                    if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-                        url = 'https://' + url;
-                    }
-
-                    if (url) {
-                        document.execCommand('createLink', false, url);
-                        const anchor = selection.anchorNode;
-                        if (anchor) {
-                            const linkElement = anchor.nodeType === 3 ? anchor.parentElement : anchor;
-                            if (linkElement && linkElement.tagName === 'A') {
-                                linkElement.target = '_blank';
-                                linkElement.style.color = 'blue';
-                                linkElement.style.textDecoration = 'underline';
-                            }
-                        }
-                    }
-                    
-                    closeLinkModal();
-                    saveNoteContent();
-                }
-            });
-
-            const apiKeyModal = document.getElementById('apiKeyModal');
-            const geminiApiKeyBtn = document.getElementById('geminiApiKeyBtn');
-            const closeApiKeyModalBtn = document.getElementById('closeApiKeyModalBtn');
-            const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
-            const apiKeyInput = document.getElementById('apiKeyInput');
-
-            geminiApiKeyBtn.addEventListener('click', () => {
-                apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
-                apiKeyModal.classList.remove('hidden');
-            });
-
-            closeApiKeyModalBtn.addEventListener('click', () => apiKeyModal.classList.add('hidden'));
-            apiKeyModal.addEventListener('click', (e) => { if(e.target === apiKeyModal) apiKeyModal.classList.add('hidden')});
-
-            saveApiKeyBtn.addEventListener('click', () => {
-                const key = apiKeyInput.value.trim();
-                if (key) {
-                    localStorage.setItem('geminiApiKey', key);
-                    apiKeyModal.classList.add('hidden');
-                    alert('Chave de API salva com sucesso!');
-                } else {
-                    alert('Por favor, insira uma chave de API válida.');
-                }
-            });
-
-
+            // Event listener para atalhos de teclado com verificação de foco
             document.addEventListener('keydown', (e) => {
-                if (editingNode || document.activeElement === noteContentDiv || document.activeElement === noteTitleInput || document.activeElement === emojiSearchInput || apiKeyModal.contains(document.activeElement)) {
-                    return;
+                // Checa se o elemento focado é o editor de notas
+                if (document.activeElement === noteContentDiv || document.activeElement === noteTitleInput) {
+                    return; // Sai da função se o foco estiver no editor de notas para não ativar os atalhos
                 }
-                
+
+                // Previne o comportamento padrão do navegador para evitar conflitos
                 if (e.key === 'Tab' || e.key === 'Enter' || (e.ctrlKey && (e.key === 'z' || e.key === 'y'))) {
                     e.preventDefault();
                 }
-                if (!selectedNodeId && !selectedPostitId) return;
+
+                // A maioria dos atalhos requer um nó selecionado
+                if (!selectedNodeId) {
+                    if (e.key === 'Tab') {
+                        addNode(); // Permite adicionar um nó sub-nó mesmo sem seleção
+                    }
+                    return;
+                }
 
                 switch(e.key) {
-                    case 'Tab': if(selectedNodeId) addNode(); break;
-                    case 'Enter': if(selectedNodeId) addSiblingNode(); break;
-                    case 'Delete': 
-                    case 'Backspace': 
-                        if(selectedNodeId) deleteNode();
-                        if(selectedPostitId) deletePostit();
+                    case 'Tab': // Adicionar sub-nó
+                        addNode();
                         break;
-                    case 'z': if (e.ctrlKey) undoAction(); break;
-                    case 'y': if (e.ctrlKey) redoAction(); break;
+                    case 'Enter': // Adicionar nó irmão
+                        addSiblingNode();
+                        break;
+                    case 'Delete':
+                    case 'Backspace': // Excluir nó
+                        deleteNode();
+                        break;
+                    case 'z': // Desfazer
+                        if (e.ctrlKey) {
+                            undoAction();
+                        }
+                        break;
+                    case 'y': // Refazer
+                        if (e.ctrlKey) {
+                            redoAction();
+                        }
+                        break;
                 }
             });
 
+            // Lógica de clique para mostrar/esconder o dropdown
             document.addEventListener('click', (e) => {
                 const target = e.target;
-                const dropdowns = [
-                    { btn: colorPaletteBtn, panel: colorPicker },
-                    { btn: globalShapeBtn, panel: globalShapePicker },
-                    { btn: lineTypeBtn, panel: lineTypePicker },
-                    { btn: fileMenuBtn, panel: fileMenuDropdown },
-                    { btn: helpMenuBtn, panel: helpMenuDropdown },
-                    { btn: layoutBtn, panel: layoutPicker },
-                    { btn: emojiBtn, panel: emojiPickerPanel },
-                    { btn: textureBtn, panel: texturePicker }
-                ];
-                
-                dropdowns.forEach(d => {
-                    if (!d.btn.contains(target) && !d.panel.contains(target)) {
-                        d.panel.classList.add('hidden');
-                    }
-                });
-                
-                if (colorPaletteBtn.contains(target)) colorPicker.classList.toggle('hidden');
-                if (globalShapeBtn.contains(target)) globalShapePicker.classList.toggle('hidden');
-                if (lineTypeBtn.contains(target)) lineTypePicker.classList.toggle('hidden');
-                if (fileMenuBtn.contains(target)) fileMenuDropdown.classList.toggle('hidden');
-                if (helpMenuBtn.contains(target)) helpMenuDropdown.classList.toggle('hidden');
-                if (layoutBtn.contains(target)) layoutPicker.classList.toggle('hidden');
-                if (emojiBtn.contains(target)) toggleEmojiPanel();
-                if (textureBtn.contains(target)) texturePicker.classList.toggle('hidden');
-                
-                if (!postitContextMenu.contains(target) && !e.target.closest('.toolbar-btn')) {
-                   const rect = canvas.getBoundingClientRect();
-                   const mouseX = (e.clientX - rect.left - originX) / scale;
-                   const mouseY = (e.clientY - rect.top - originY) / scale;
-                   let clickedOnPostit = false;
-                   for(const p of postits) {
-                       if(isPointInShape(mouseX, mouseY, p)) {
-                           clickedOnPostit = true;
-                           break;
-                       }
-                   }
-                   if(!clickedOnPostit) {
-                       postitContextMenu.style.display = 'none';
-                   }
-                }
-                
-                if (!genericColorPaletteModal.contains(target) && !e.target.closest('.notes-toolbar-btn')) {
-                    genericColorPaletteModal.classList.add('hidden');
+                if (target === colorPaletteBtn || colorPaletteBtn.contains(target)) {
+                    colorPicker.classList.toggle('hidden');
+                } else if (!colorPicker.contains(target)) {
+                    colorPicker.classList.add('hidden');
                 }
             });
 
             resizeCanvas();
-            if (!loadStateFromLocalStorage()) {
-                resetProject();
-            }
+            redrawCanvas();
         }
 
+        // Função para obter a profundidade de um nó
         function getNodeDepth(nodeId) {
             let depth = 0;
             let node = nodes.find(n => n.id === nodeId);
@@ -2054,245 +752,88 @@
             const themeColors = colorThemes[currentTheme];
             nodes.forEach(node => {
                 const depth = getNodeDepth(node.id);
-                // Garante que o índice não exceda o tamanho da array de cores
-                const colorIndex = Math.min(depth, themeColors.length - 1);
-                node.color = themeColors[colorIndex];
+                // Usa a cor correspondente à profundidade ou a última cor do tema como fallback
+                node.color = themeColors[depth] || themeColors[themeColors.length - 1];
             });
             saveState();
             redrawCanvas();
         }
 
-        function applyGlobalShape(shape) {
-            globalNodeShape = shape;
-            nodes.forEach(node => node.shape = globalNodeShape);
-            saveState();
-            redrawCanvas();
-        }
 
-        function applyTreeLayout() {
-            const roots = nodes.filter(n => n.parentId === null);
-            if (roots.length === 0) return;
-
-            roots.forEach(root => {
-                if (globalLayoutDirection === 'right' || globalLayoutDirection === 'left') {
-                    function calculateSubtreeHeight(nodeId) {
-                        const node = nodes.find(n => n.id === nodeId);
-                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id));
-
-                        if (children.length === 0 || node.isCollapsed) {
-                            node.subtreeHeight = node.height;
-                            return node.height;
-                        }
-
-                        const childrenTotalHeight = children.reduce((sum, child) => {
-                            return sum + calculateSubtreeHeight(child.id);
-                        }, 0) + (children.length - 1) * 20;
-
-                        node.subtreeHeight = Math.max(node.height, childrenTotalHeight);
-                        return node.subtreeHeight;
-                    }
-
-                    calculateSubtreeHeight(root.id);
-
-                    function positionNodes(nodeId, x, y) {
-                        const node = nodes.find(n => n.id === nodeId);
-                        node.x = x;
-                        node.y = y;
-
-                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id));
-                        if (children.length === 0 || node.isCollapsed) return;
-
-                        const childX = (globalLayoutDirection === 'right') 
-                            ? x + node.width / 2 + 50
-                            : x - node.width / 2 - 50;
-
-                        const totalChildrenHeight = children.reduce((sum, child) => sum + child.subtreeHeight, 0) + (children.length - 1) * 20;
-                        
-                        let currentY = y - totalChildrenHeight / 2;
-
-                        for (const child of children) {
-                            const childY = currentY + child.subtreeHeight / 2;
-                            const childPosX = (globalLayoutDirection === 'right') 
-                                ? childX + child.width / 2 
-                                : childX - child.width / 2;
-                            positionNodes(child.id, childPosX, childY);
-                            currentY += child.subtreeHeight + 20;
-                        }
-                    }
-                    positionNodes(root.id, root.x, root.y);
-                } else { // Top-down or Bottom-up
-                    function calculateSubtreeWidth(nodeId) {
-                        const node = nodes.find(n => n.id === nodeId);
-                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id));
-
-                        if (children.length === 0 || node.isCollapsed) {
-                            node.subtreeWidth = node.width;
-                            return node.width;
-                        }
-
-                        const childrenTotalWidth = children.reduce((sum, child) => {
-                            return sum + calculateSubtreeWidth(child.id);
-                        }, 0) + (children.length - 1) * 50;
-
-                        node.subtreeWidth = Math.max(node.width, childrenTotalWidth);
-                        return node.subtreeWidth;
-                    }
-
-                    calculateSubtreeWidth(root.id);
-
-                    function positionNodes(nodeId, x, y) {
-                        const node = nodes.find(n => n.id === nodeId);
-                        node.x = x;
-                        node.y = y;
-
-                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id));
-                        if (children.length === 0 || node.isCollapsed) return;
-
-                        const childY = (globalLayoutDirection === 'top-down') 
-                            ? y + node.height / 2 + 20
-                            : y - node.height / 2 - 20;
-
-                        const totalChildrenWidth = children.reduce((sum, child) => sum + child.subtreeWidth, 0) + (children.length - 1) * 50;
-                        
-                        let currentX = x - totalChildrenWidth / 2;
-
-                        for (const child of children) {
-                            const childX = currentX + child.subtreeWidth / 2;
-                            const childPosY = (globalLayoutDirection === 'top-down') 
-                                ? childY + child.height / 2 
-                                : childY - child.height / 2;
-                            positionNodes(child.id, childX, childPosY);
-                            currentX += child.subtreeWidth + 50;
-                        }
-                    }
-                    positionNodes(root.id, root.x, root.y);
-                }
-            });
-
-            redrawCanvas();
-        }
-
-        function updateNodeAndRedraw(node) {
-            const newDimensions = calculateNodeDimensions(node);
-            node.width = newDimensions.width;
-            node.height = newDimensions.height;
-            applyTreeLayout();
-            saveState();
-        }
-
+        // Função para adicionar nó irmão
         function addSiblingNode() {
             if (!selectedNodeId) return;
             const selectedNode = nodes.find(n => n.id === selectedNodeId);
             if (!selectedNode || !selectedNode.parentId) return;
 
+            const parentNode = nodes.find(n => n.id === selectedNode.parentId);
+            if (!parentNode) return;
+            
             const depth = getNodeDepth(selectedNode.id);
-            const themeColors = colorThemes[currentTheme];
-            const colorIndex = Math.min(depth, themeColors.length - 1);
 
+            const newNodeId = `node-${Date.now()}`;
             const newNode = {
-                id: `node-${Date.now()}`,
-                type: 'node',
+                id: newNodeId,
                 parentId: selectedNode.parentId,
                 text: 'Novo Nó',
-                x: 0, y: 0,
-                color: themeColors[colorIndex],
-                shape: globalNodeShape,
-                note: '',
-                emojis: [],
-                isCollapsed: false
+                x: selectedNode.x,
+                y: selectedNode.y + 150, // Posição abaixo do nó irmão
+                color: colorThemes[currentTheme][depth] || colorThemes[currentTheme][colorThemes.length - 1],
+                note: ''
             };
-            const newDimensions = calculateNodeDimensions(newNode);
-            newNode.width = newDimensions.width;
-            newNode.height = newDimensions.height;
-
             nodes.push(newNode);
-            appData.notes[newNode.id] = '';
+            appData.notes[newNodeId] = '';
             
-            applyTreeLayout();
-            selectedNodeId = newNode.id;
-            selectedPostitId = null;
             saveState();
-            editNode(newNode);
+            redrawCanvas();
         }
 
+        // Função para excluir nó
         function deleteNode() {
-            if (!selectedNodeId || selectedNodeId === 'root') return;
-            
-            let toDelete = [selectedNodeId];
-            let i = 0;
-            while (i < toDelete.length) {
-                const currentId = toDelete[i];
-                const children = nodes.filter(n => n.parentId === currentId).map(n => n.id);
-                toDelete.push(...children);
-                i++;
-            }
+            if (!selectedNodeId) return;
+            // Impede a exclusão do nó raiz
+            if (selectedNodeId === 'root') return;
 
-            nodes = nodes.filter(n => !toDelete.includes(n.id));
-            toDelete.forEach(id => delete appData.notes[id]);
+            const indexToDelete = nodes.findIndex(n => n.id === selectedNodeId);
+            if (indexToDelete === -1) return;
+
+            // Remove o nó e sua nota
+            nodes.splice(indexToDelete, 1);
+            delete appData.notes[selectedNodeId];
+            
+            // Também remove os nós filhos (para evitar nós "órfãos")
+            nodes = nodes.filter(n => n.parentId !== selectedNodeId);
+            for (const noteId in appData.notes) {
+                if (appData.notes[noteId].includes(`id="${selectedNodeId}"`)) {
+                    delete appData.notes[noteId];
+                }
+            }
 
             selectedNodeId = null;
             notesEditor.classList.add('hidden');
             
-            applyTreeLayout();
             saveState();
-        }
-
-        // Verifica se um nó é descendente de outro para evitar loops
-        function isDescendant(nodeId, potentialParentId) {
-            let currentNode = nodes.find(n => n.id === potentialParentId);
-            while (currentNode) {
-                if (currentNode.id === nodeId) {
-                    return true;
-                }
-                if (currentNode.parentId === null) {
-                    return false;
-                }
-                currentNode = nodes.find(n => n.id === currentNode.parentId);
-            }
-            return false;
+            redrawCanvas();
         }
 
         function setupCanvas() {
+            // Evento para início do arrasto (mouse pressionado)
             canvas.addEventListener('mousedown', (e) => {
-                if (editingNode) {
-                    nodeEditorInput.blur();
-                }
-                initialClickX = e.clientX;
-                initialClickY = e.clientY;
                 const rect = canvas.getBoundingClientRect();
                 const mouseX = (e.clientX - rect.left - originX) / scale;
                 const mouseY = (e.clientY - rect.top - originY) / scale;
 
                 draggedNode = null;
-                draggedPostit = null;
-                isNodeDragging = false;
-                isPostitDragging = false;
-                
-                let clickedOnSomething = false;
-
-                for (let i = postits.length - 1; i >= 0; i--) {
-                    const postit = postits[i];
-                    if (isPointInShape(mouseX, mouseY, postit)) {
-                        isPostitDragging = true;
-                        draggedPostit = postit;
-                        clickedOnSomething = true;
+                for (const node of nodes) {
+                    if (isPointInCircle(mouseX, mouseY, node.x, node.y, 50)) {
+                        isNodeDragging = true;
+                        draggedNode = node;
                         break;
                     }
                 }
 
-                if (!isPostitDragging) {
-                    for (let i = nodes.length - 1; i >= 0; i--) {
-                        const node = nodes[i];
-                        if (isPointInShape(mouseX, mouseY, node)) {
-                            isNodeDragging = true;
-                            draggedNode = node;
-                            clickedOnSomething = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!clickedOnSomething) {
+                // Se não clicou em um nó, ativa o arrasto do canvas
+                if (!isNodeDragging) {
                     isCanvasDragging = true;
                     canvas.classList.add('grabbing');
                 }
@@ -2301,133 +842,30 @@
                 lastMouseY = e.clientY;
             });
 
-            canvas.addEventListener('mouseup', (e) => {
-                const dx = e.clientX - initialClickX;
-                const dy = e.clientY - initialClickY;
-                const isClick = Math.sqrt(dx*dx + dy*dy) < 5;
-
-                if (isClick) {
-                    const rect = canvas.getBoundingClientRect();
-                    const mouseX = (e.clientX - rect.left - originX) / scale;
-                    const mouseY = (e.clientY - rect.top - originY) / scale;
-                    
-                    let clickedNode = null;
-                    let clickedPostit = null;
-                    let clickedCollapseButton = false;
-
-                    for (let i = postits.length - 1; i >= 0; i--) {
-                        const postit = postits[i];
-                        if (isPointInShape(mouseX, mouseY, postit)) {
-                            clickedPostit = postit;
-                            break;
-                        }
-                    }
-
-                    if (clickedPostit) {
-                        selectedPostitId = clickedPostit.id;
-                        selectedNodeId = null;
-                        notesEditor.classList.add('hidden');
-                        showPostitContextMenu(clickedPostit);
-                    } else {
-                        postitContextMenu.style.display = 'none';
-                        for (let i = nodes.length - 1; i >= 0; i--) {
-                            const node = nodes[i];
-                            const children = nodes.filter(n => n.parentId === node.id);
-                            if (children.length > 0) {
-                                const buttonPos = getCollapseButtonPosition(node);
-                                const dist = Math.sqrt(Math.pow(mouseX - buttonPos.x, 2) + Math.pow(mouseY - buttonPos.y, 2));
-                                if (dist <= 8) {
-                                    toggleCollapse(node.id);
-                                    clickedCollapseButton = true;
-                                    break;
-                                }
-                            }
-                            if (isPointInShape(mouseX, mouseY, node)) { 
-                                clickedNode = node;
-                                break;
-                            }
-                        }
-
-                        if (!clickedCollapseButton) {
-                            if (clickedNode) {
-                                selectedNodeId = clickedNode.id;
-                                selectedPostitId = null;
-                                notesEditor.classList.remove('hidden');
-                                noteTitleInput.value = clickedNode.text;
-                                noteContentDiv.innerHTML = appData.notes[clickedNode.id] || '';
-                            } else {
-                                selectedNodeId = null;
-                                selectedPostitId = null;
-                                notesEditor.classList.add('hidden');
-                            }
-                        }
-                    }
-                }
-
-                if (isNodeDragging && potentialParentNodeId && draggedNode.id !== potentialParentNodeId) {
-                    const nodeToReparent = nodes.find(n => n.id === draggedNode.id);
-                    if (nodeToReparent) {
-                        nodeToReparent.parentId = potentialParentNodeId;
-                        applyTreeLayout();
-                    }
-                }
-
-                if(isNodeDragging || isCanvasDragging || isPostitDragging) {
-                    saveState();
-                }
+            // Evento para o fim do arrasto (mouse solto)
+            canvas.addEventListener('mouseup', () => {
                 isCanvasDragging = false;
                 isNodeDragging = false;
-                isPostitDragging = false;
                 draggedNode = null;
-                draggedPostit = null;
-                potentialParentNodeId = null;
                 canvas.classList.remove('grabbing');
-                redrawCanvas();
+                // Salva o estado após soltar um nó ou o canvas para o histórico
+                saveState();
             });
 
-
-            document.addEventListener('mousemove', (e) => {
+            // Evento para o movimento do mouse
+            canvas.addEventListener('mousemove', (e) => {
                 const dx = e.clientX - lastMouseX;
                 const dy = e.clientY - lastMouseY;
 
-                if (isPostitDragging && draggedPostit) {
-                    draggedPostit.x += dx / scale;
-                    draggedPostit.y += dy / scale;
-                    postitContextMenu.style.display = 'none';
-                    redrawCanvas();
-                } else if (isNodeDragging && draggedNode) {
-                    const deltaX = dx / scale;
-                    const deltaY = dy / scale;
-
-                    function moveSubtree(nodeId, dX, dY) {
-                        const nodeToMove = nodes.find(n => n.id === nodeId);
-                        if(nodeToMove) {
-                            nodeToMove.x += dX;
-                            nodeToMove.y += dY;
-                            const children = nodes.filter(n => n.parentId === nodeId);
-                            children.forEach(child => moveSubtree(child.id, dX, dY));
-                        }
-                    }
-                    moveSubtree(draggedNode.id, deltaX, deltaY);
-
-                    potentialParentNodeId = null;
-                    const rect = canvas.getBoundingClientRect();
-                    const mouseX = (e.clientX - rect.left - originX) / scale;
-                    const mouseY = (e.clientY - rect.top - originY) / scale;
-
-                    for (const node of nodes) {
-                        if (node.id !== draggedNode.id && isPointInShape(mouseX, mouseY, node)) {
-                            if (!isDescendant(draggedNode.id, node.id)) {
-                                potentialParentNodeId = node.id;
-                                break;
-                            }
-                        }
-                    }
+                if (isNodeDragging && draggedNode) {
+                    // Se um nó está sendo arrastado, move o nó
+                    draggedNode.x += dx / scale;
+                    draggedNode.y += dy / scale;
                     redrawCanvas();
                 } else if (isCanvasDragging) {
+                    // Se o canvas está sendo arrastado, move o canvas
                     originX += dx;
                     originY += dy;
-                    postitContextMenu.style.display = 'none';
                     redrawCanvas();
                 }
 
@@ -2435,462 +873,195 @@
                 lastMouseY = e.clientY;
             });
 
+            // Evento de clique para seleção de nó
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left - originX) / scale;
+                const mouseY = (e.clientY - rect.top - originY) / scale;
+
+                let clickedNode = null;
+                for (const node of nodes) {
+                    if (isPointInCircle(mouseX, mouseY, node.x, node.y, 50)) { // 50 é o raio do nó
+                        clickedNode = node;
+                        break;
+                    }
+                }
+
+                if (clickedNode) {
+                    selectedNodeId = clickedNode.id;
+                    notesEditor.classList.remove('hidden');
+                    noteTitleInput.value = clickedNode.text;
+                    noteContentDiv.innerHTML = appData.notes[clickedNode.id] || '';
+                } else {
+                    selectedNodeId = null;
+                    notesEditor.classList.add('hidden');
+                }
+                redrawCanvas();
+            });
+
+            // Evento de duplo clique para edição de texto do nó
             canvas.addEventListener('dblclick', (e) => {
                 const rect = canvas.getBoundingClientRect();
                 const mouseX = (e.clientX - rect.left - originX) / scale;
                 const mouseY = (e.clientY - rect.top - originY) / scale;
 
-                let clickedItem = null;
-                
-                for (let i = postits.length - 1; i >= 0; i--) {
-                    const postit = postits[i];
-                    if (isPointInShape(mouseX, mouseY, postit)) {
-                        clickedItem = postit;
+                let clickedNode = null;
+                for (const node of nodes) {
+                    if (isPointInCircle(mouseX, mouseY, node.x, node.y, 50)) {
+                        clickedNode = node;
                         break;
                     }
                 }
 
-                if (!clickedItem) {
-                    for (let i = nodes.length - 1; i >= 0; i--) {
-                        const node = nodes[i];
-                        if (isPointInShape(mouseX, mouseY, node)) {
-                            clickedItem = node;
-                            break;
+                if (clickedNode) {
+                    const newText = prompt('Editar texto do nó:', clickedNode.text);
+                    if (newText !== null && newText.trim() !== '') {
+                        clickedNode.text = newText;
+                        saveState();
+                        redrawCanvas();
+                        if (selectedNodeId === clickedNode.id) {
+                            noteTitleInput.value = newText;
                         }
                     }
                 }
-
-                if (clickedItem) {
-                    editNode(clickedItem);
-                }
-            });
-
-            canvas.addEventListener('wheel', (e) => {
-                if (e.ctrlKey) {
-                    e.preventDefault();
-                    const zoomIntensity = 0.1;
-                    const wheel = e.deltaY < 0 ? 1 : -1;
-                    const zoom = Math.exp(wheel * zoomIntensity);
-                    scale *= zoom;
-                    redrawCanvas();
-                }
-            }, { passive: false });
-
-            canvas.addEventListener('touchstart', (e) => {
-                if (e.touches.length === 2) {
-                    initialPinchDistance = Math.hypot(
-                        e.touches[0].pageX - e.touches[1].pageX,
-                        e.touches[0].pageY - e.touches[1].pageY
-                    );
-                }
-            });
-
-            canvas.addEventListener('touchmove', (e) => {
-                if (e.touches.length === 2) {
-                    e.preventDefault();
-                    const currentPinchDistance = Math.hypot(
-                        e.touches[0].pageX - e.touches[1].pageX,
-                        e.touches[0].pageY - e.touches[1].pageY
-                    );
-                    const newScale = scale * (currentPinchDistance / initialPinchDistance);
-                    scale = Math.max(0.1, Math.min(newScale, 5));
-                    initialPinchDistance = currentPinchDistance;
-                    redrawCanvas();
-                }
-            }, { passive: false });
-
-            canvas.addEventListener('touchend', () => {
-                initialPinchDistance = 0;
             });
         }
-        
-        function isPointInShape(px, py, item) {
-            const { x, y, width, height } = item;
-            return px >= x - width / 2 && px <= x + width / 2 && py >= y - height / 2 && py <= y + height / 2;
-        }
-        
+
+        // Adiciona um novo nó filho ao nó selecionado
         function addNode() {
             const parentId = selectedNodeId || 'root';
             const parentNode = nodes.find(n => n.id === parentId);
             if (!parentNode) return;
 
-            const depth = getNodeDepth(parentId) + 1;
-            const themeColors = colorThemes[currentTheme];
-            const colorIndex = Math.min(depth, themeColors.length - 1);
-
+            const newNodeId = `node-${Date.now()}`;
+            const depth = getNodeDepth(parentNode.id) + 1;
             const newNode = {
-                id: `node-${Date.now()}`,
-                type: 'node',
+                id: newNodeId,
                 parentId: parentId,
                 text: 'Novo Nó',
-                x: 0, y: 0,
-                color: themeColors[colorIndex],
-                shape: globalNodeShape,
-                note: '',
-                emojis: [],
-                isCollapsed: false
+                x: parentNode.x + 200,
+                y: parentNode.y + Math.random() * 100 - 50,
+                color: colorThemes[currentTheme][depth] || colorThemes[currentTheme][colorThemes.length - 1],
+                note: ''
             };
-            const newDimensions = calculateNodeDimensions(newNode);
-            newNode.width = newDimensions.width;
-            newNode.height = newDimensions.height;
-
             nodes.push(newNode);
-            appData.notes[newNode.id] = '';
+            appData.notes[newNodeId] = '';
             
-            applyTreeLayout();
-            selectedNodeId = newNode.id;
-            selectedPostitId = null;
             saveState();
-            editNode(newNode);
-        }
-
-        function addFloatingNode() {
-            const newNode = {
-                id: `node-${Date.now()}`,
-                type: 'node',
-                parentId: null,
-                text: 'Ideia Central',
-                x: (canvas.width / 2 - originX) / scale,
-                y: (canvas.height / 2 - originY) / scale,
-                color: colorThemes[currentTheme][0],
-                shape: globalNodeShape,
-                note: '',
-                emojis: [],
-                isCollapsed: false
-            };
-            const newDimensions = calculateNodeDimensions(newNode);
-            newNode.width = newDimensions.width;
-            newNode.height = newDimensions.height;
-
-            nodes.push(newNode);
-            appData.notes[newNode.id] = '';
-            
             redrawCanvas();
-            saveState();
-            editNode(newNode);
         }
 
+        // Salva o conteúdo da nota associado ao nó selecionado
         function saveNoteContent() {
             if (selectedNodeId) {
                 appData.notes[selectedNodeId] = noteContentDiv.innerHTML;
-                saveState();
             }
         }
         
+        // Salva o título do nó quando editado no painel de notas
         function saveNodeTitle() {
             if (selectedNodeId) {
                 const node = nodes.find(n => n.id === selectedNodeId);
                 if (node) {
                     node.text = noteTitleInput.value;
-                    updateNodeAndRedraw(node);
+                    redrawCanvas();
                 }
             }
         }
 
-        function drawBackgroundTexture() {
-            // Define a cor de fundo padrão
-            ctx.fillStyle = '#f8f9fa';
-            // Calcula a área visível nas coordenadas do "mundo" (considerando pan e zoom)
-            const viewX = -originX / scale;
-            const viewY = -originY / scale;
-            const viewWidth = canvas.width / scale;
-            const viewHeight = canvas.height / scale;
-            // Preenche toda a área visível para evitar espaços em branco nas bordas
-            ctx.fillRect(viewX, viewY, viewWidth, viewHeight);
-
-            // Se a textura for lisa, não faz mais nada
-            if (canvasTexture === 'lisa') {
-                return;
-            }
-
-            // Lógica de Nível de Detalhe (LOD) para o espaçamento
-            const baseSpacing = 20;
-            const minPixelSpacingOnScreen = 15; // Mínimo de pixels entre as linhas/pontos na tela
-            let adaptiveSpacing = baseSpacing;
-            // Aumenta o espaçamento no "mundo" conforme o zoom diminui, para evitar poluição visual
-            while (adaptiveSpacing * scale < minPixelSpacingOnScreen) {
-                adaptiveSpacing *= 2;
-            }
-
-            // Calcula o ponto de partida para desenhar a grade, alinhado com a grade adaptativa
-            const startWorldX = Math.floor(viewX / adaptiveSpacing) * adaptiveSpacing;
-            const startWorldY = Math.floor(viewY / adaptiveSpacing) * adaptiveSpacing;
-            // Calcula o ponto final para o desenho
-            const endWorldX = viewX + viewWidth;
-            const endWorldY = viewY + viewHeight;
-
-            if (canvasTexture === 'grid') {
-                ctx.beginPath();
-                ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
-                ctx.lineWidth = 1 / scale; // Mantém a espessura da linha consistente
-
-                // Desenha as linhas verticais que estão na área visível
-                for (let x = startWorldX; x < endWorldX; x += adaptiveSpacing) {
-                    ctx.moveTo(x, startWorldY);
-                    ctx.lineTo(x, endWorldY);
-                }
-                // Desenha as linhas horizontais que estão na área visível
-                for (let y = startWorldY; y < endWorldY; y += adaptiveSpacing) {
-                    ctx.moveTo(startWorldX, y);
-                    ctx.lineTo(endWorldX, y);
-                }
-                ctx.stroke();
-            } else if (canvasTexture === 'dotted') {
-                const dotSize = 1;
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-                
-                // Desenha os pontos que estão na área visível
-                for (let x = startWorldX; x < endWorldX; x += adaptiveSpacing) {
-                    for (let y = startWorldY; y < endWorldY; y += adaptiveSpacing) {
-                        ctx.beginPath();
-                        ctx.arc(x, y, dotSize / scale, 0, 2 * Math.PI);
-                        ctx.fill();
-                    }
-                }
-            }
-        }
-
-
+        // Funções de desenho
         function redrawCanvas() {
-            ctx.save();
-            // Limpa o canvas inteiro (na coordenada da tela)
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Aplica as transformações de pan e zoom
+
+            ctx.save();
             ctx.translate(originX, originY);
             ctx.scale(scale, scale);
 
-            // Desenha a textura de fundo (que agora cobre toda a área visível)
-            drawBackgroundTexture();
-
-            // Desenha as linhas de conexão
-            nodes.forEach(node => {
-                if (node.parentId && !isNodeHidden(node.id)) {
+            // Desenha as linhas primeiro
+            for (const node of nodes) {
+                if (node.parentId) {
                     const parentNode = nodes.find(n => n.id === node.parentId);
-                    if (parentNode) drawLine(parentNode, node, '#9ca3af');
+                    if (parentNode) {
+                        drawLine(parentNode.x, parentNode.y, node.x, node.y, '#9ca3af');
+                    }
                 }
-            });
-
-            // Desenha os nós
-            nodes.forEach(node => {
-                if (!isNodeHidden(node.id) && editingNode?.id !== node.id) {
-                    drawNode(node);
-                }
-            });
-
-            // Desenha os Post-its
-            postits.forEach(postit => {
-                if (editingNode?.id !== postit.id) {
-                    drawPostit(postit);
-                }
-            });
-
-
-            ctx.restore();
-            updateStats();
-        }
-
-        function drawLine(fromNode, toNode, color) {
-            const x1 = fromNode.x;
-            const y1 = fromNode.y;
-            const x2 = toNode.x;
-            const y2 = toNode.y;
-
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            
-            switch (globalLineType) {
-                case 'angled':
-                    const midX = x1 + 40;
-                    ctx.lineTo(midX, y1);
-                    ctx.lineTo(midX, y2);
-                    ctx.lineTo(x2, y2);
-                    break;
-                case 'curved':
-                    const cp1x = x1 + (x2 - x1) / 2;
-                    const cp1y = y1;
-                    const cp2x = x1 + (x2 - x1) / 2;
-                    const cp2y = y2;
-                    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2);
-                    break;
-                case 'line':
-                default:
-                    ctx.lineTo(x2, y2);
-                    break;
             }
 
+            // Desenha os nós por cima das linhas
+            for (const node of nodes) {
+                drawNode(node);
+            }
+
+            ctx.restore();
+        }
+
+        function drawLine(x1, y1, x2, y2, color) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
             ctx.strokeStyle = color;
             ctx.lineWidth = 2;
             ctx.stroke();
         }
-        
+
         function drawNode(node) {
+            // Desenha a sombra
             ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
             ctx.shadowBlur = 10;
             ctx.shadowOffsetX = 3;
             ctx.shadowOffsetY = 3;
-            ctx.beginPath();
-            const { x, y, width, height } = node;
-            const nodeX = x - width / 2;
-            const nodeY = y - height / 2;
             
-            let rx = 0;
-            if (node.shape === 'square') {
-                rx = 15;
-            } else if (node.shape === 'circle') {
-                rx = Math.min(width, height) / 2;
-            } else if (node.shape === 'rectangle') {
-                rx = 0;
-            }
-
-            ctx.moveTo(nodeX + rx, nodeY);
-            ctx.lineTo(nodeX + width - rx, nodeY);
-            if (rx > 0) ctx.quadraticCurveTo(nodeX + width, nodeY, nodeX + width, nodeY + rx);
-            ctx.lineTo(nodeX + width, nodeY + height - rx);
-            if (rx > 0) ctx.quadraticCurveTo(nodeX + width, nodeY + height, nodeX + width - rx, nodeY + height);
-            ctx.lineTo(nodeX + rx, nodeY + height);
-            if (rx > 0) ctx.quadraticCurveTo(nodeX, nodeY + height, nodeX, nodeY + height - rx);
-            ctx.lineTo(nodeX, nodeY + rx);
-            if (rx > 0) ctx.quadraticCurveTo(nodeX, nodeY, nodeX + rx, nodeY);
-            ctx.closePath();
+            // Estiliza o nó
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 50, 0, 2 * Math.PI);
             ctx.fillStyle = node.color;
             ctx.fill();
 
-            ctx.shadowColor = 'transparent'; // Reset shadow for strokes
-            // Destaque para nó selecionado
+            // Desenha a borda do nó selecionado
             if (selectedNodeId === node.id) {
+                ctx.shadowColor = 'transparent'; // Remove a sombra para a borda
                 ctx.lineWidth = 4;
-                ctx.strokeStyle = '#3b82f6'; // Azul para selecionado
-                ctx.stroke();
-            }
-            // Destaque para alvo de soltar (novo pai)
-            if (potentialParentNodeId === node.id) {
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = '#22c55e'; // Verde para alvo
+                ctx.strokeStyle = '#3b82f6';
                 ctx.stroke();
             }
             
+            // Reinicia a sombra para o texto
             ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
             ctx.shadowBlur = 4;
             ctx.shadowOffsetX = 1;
             ctx.shadowOffsetY = 1;
+
+            // Desenha o texto do nó
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
-            const emojisText = (node.emojis || []).join('');
             ctx.font = '16px Inter, sans-serif';
-            const emojisWidth = ctx.measureText(emojisText).width;
+            ctx.fillText(node.text, node.x, node.y);
             
-            const lines = getWrappedTextLines(node.text, width - 20 - (emojisWidth > 0 ? emojisWidth + 5 : 0));
-            const startY = y - ((lines.length - 1) * 20) / 2;
-
-            lines.forEach((line, index) => {
-                const isLastLine = index === lines.length - 1;
-                const textWidth = ctx.measureText(line).width;
-                const totalWidth = isLastLine ? textWidth + (emojisWidth > 0 ? emojisWidth + 5 : 0) : textWidth;
-                let currentX = x - totalWidth / 2;
-                
-                ctx.font = '16px Inter, sans-serif';
-                ctx.fillText(line, currentX + textWidth / 2, startY + index * 20);
-                
-                if (isLastLine && emojisWidth > 0) {
-                    currentX += textWidth + 5;
-                    ctx.font = `${EMOJI_FONT_SIZE}px Inter, sans-serif`;
-                    ctx.fillText(emojisText, currentX + emojisWidth / 2, startY + index * 20);
-                }
-            });
-            
+            // Limpa a sombra para o próximo desenho
             ctx.shadowBlur = 0;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
-            if (nodes.some(n => n.parentId === node.id)) drawCollapseButton(node);
-            if (appData.notes[node.id] && appData.notes[node.id].replace(/<[^>]*>/g, '').trim() !== '') drawNoteIcon(node);
         }
         
-        function getCollapseButtonPosition(node) {
-            return { x: node.x + node.width / 2, y: node.y };
-        }
-
-        function drawCollapseButton(node) {
-            const pos = getCollapseButtonPosition(node);
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, 8, 0, 2 * Math.PI);
-            ctx.fillStyle = 'white';
-            ctx.fill();
-            ctx.strokeStyle = '#9ca3af';
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(pos.x - 4, pos.y);
-            ctx.lineTo(pos.x + 4, pos.y);
-            if (node.isCollapsed) {
-                ctx.moveTo(pos.x, pos.y - 4);
-                ctx.lineTo(pos.x, pos.y + 4);
-            }
-            ctx.strokeStyle = '#3f3f46';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-        }
-
-        function drawNoteIcon(node) {
-            const x = node.x + node.width / 2 - 15;
-            const y = node.y - node.height / 2 + 15;
-            
-            ctx.save();
-            ctx.shadowColor = 'transparent';
-            ctx.beginPath();
-            ctx.arc(x, y, 5, 0, 2 * Math.PI);
-            ctx.fillStyle = '#0f0';
-            ctx.fill();
-            ctx.strokeStyle = '#4f5051';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            ctx.restore();
-        }
-
-        function toggleCollapse(nodeId) {
-            const node = nodes.find(n => n.id === nodeId);
-            if (node) {
-                node.isCollapsed = !node.isCollapsed;
-                applyTreeLayout();
-                saveState();
-            }
-        }
-
-        function isNodeHidden(nodeId) {
-            let node = nodes.find(n => n.id === nodeId);
-            while (node && node.parentId) {
-                const parent = nodes.find(p => p.id === node.parentId);
-                if (parent && parent.isCollapsed) return true;
-                node = parent;
-            }
-            return false;
-        }
-
-        function updateStats() {
-            const zoomLevelEl = document.getElementById('zoomLevel');
-            const nodeCountEl = document.getElementById('nodeCount');
-
-            if (zoomLevelEl) {
-                zoomLevelEl.textContent = `${Math.round(scale * 100)}%`;
-            }
-            if (nodeCountEl) {
-                nodeCountEl.textContent = nodes.length;
-            }
+        // Verifica se um ponto está dentro de um círculo
+        function isPointInCircle(px, py, cx, cy, r) {
+            const distance = Math.sqrt(Math.pow(px - cx, 2) + Math.pow(py - cy, 2));
+            return distance <= r;
         }
 
         function resizeCanvas() {
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
-            redrawCanvas();
         }
 
+        // Função para formatar texto no editor de notas
         function formatDoc(command, value) {
             document.execCommand(command, false, value);
             noteContentDiv.focus();
         }
         
+        // --- Lógica de redimensionamento de coluna ---
         function setupResizing() {
             const resizeHandle = document.getElementById('resizeHandle');
             let isResizing = false;
@@ -2910,20 +1081,29 @@
                 const dx = initialX - e.clientX;
                 let newWidth = initialNotesWidth + dx;
                 
+                // Limites de 30% e 100% da largura da janela
                 const minWidth = window.innerWidth * 0.3;
                 const maxWidth = window.innerWidth;
 
-                if (newWidth < minWidth) newWidth = minWidth;
-                if (newWidth > maxWidth) newWidth = maxWidth;
-
-                notesEditor.style.width = `${newWidth}px`;
-                notesEditor.style.flexShrink = 0;
-                notesEditor.style.flexGrow = 0;
+                if (newWidth < minWidth) {
+                    newWidth = minWidth;
+                }
                 
+                if (newWidth > maxWidth) {
+                    newWidth = maxWidth;
+                }
+
+                // Ajusta a largura da coluna direita (notas)
+                notesEditor.style.width = `${newWidth}px`;
+                notesEditor.style.flexShrink = 0; // Impede que o flexbox encolha
+                notesEditor.style.flexGrow = 0; // Impede que o flexbox cresça
+                
+                // Ajusta a largura da coluna esquerda (mapa mental)
                 mindMapContainer.style.width = `${window.innerWidth - newWidth - resizeHandle.offsetWidth}px`;
                 mindMapContainer.style.flexShrink = 0;
                 mindMapContainer.style.flexGrow = 0;
 
+                // Redesenha o canvas para ajustar à nova largura
                 resizeCanvas();
                 redrawCanvas();
             });
@@ -2932,211 +1112,6 @@
                 isResizing = false;
                 document.body.style.cursor = 'default';
             });
-        }
-
-        function editNode(item) {
-            editingNode = item;
-            const canvasRect = canvas.getBoundingClientRect();
-            const x = (item.x - item.width / 2) * scale + originX + canvasRect.left;
-            const y = (item.y - item.height / 2) * scale + originY + canvasRect.top;
-            
-            nodeEditorInput.style.backgroundColor = item.type === 'postit' ? item.backgroundColor : item.color;
-            nodeEditorInput.style.color = item.type === 'postit' ? item.textColor : 'white';
-            nodeEditorInput.style.textAlign = item.type === 'postit' ? 'left' : 'center';
-
-            Object.assign(nodeEditorInput.style, {
-                display: 'block',
-                left: `${x}px`,
-                top: `${y}px`,
-                width: `${item.width * scale}px`,
-                height: `${item.height * scale}px`,
-                fontSize: `${16 * scale}px`
-            });
-            nodeEditorInput.value = item.text;
-            nodeEditorInput.focus();
-            redrawCanvas();
-        }
-
-        function finishEditingNode() {
-            if (editingNode) {
-                editingNode.text = nodeEditorInput.value;
-                if (editingNode.type === 'node') {
-                    updateNodeAndRedraw(editingNode);
-                } else if (editingNode.type === 'postit') {
-                    redrawCanvas(); // Recalcula altura no drawPostit
-                    saveState();
-                }
-                editingNode = null;
-                nodeEditorInput.style.display = 'none';
-                nodeEditorInput.style.backgroundColor = 'transparent';
-            }
-        }
-
-        // Listener para finalizar a edição quando o campo perde o foco (clique fora)
-        nodeEditorInput.addEventListener('blur', finishEditingNode);
-
-        nodeEditorInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                if (editingNode) {
-                    const parentId = editingNode.id; // Salva o ID do nó pai
-                    finishEditingNode(); // Finaliza a edição do nó atual
-                    selectedNodeId = parentId; // Define o nó atual como o pai para o novo nó
-                    addNode(); // Adiciona um novo nó filho
-                }
-            }
-            // Com a tecla 'Escape', finaliza a edição para nós e post-its.
-            else if (e.key === 'Escape') {
-                e.preventDefault();
-                nodeEditorInput.blur(); // Aciona o 'blur' para um comportamento de saída consistente
-            }
-            // Com a tecla 'Enter' (sem a tecla Shift)
-            else if (e.key === 'Enter' && !e.shiftKey) {
-                // Para itens do tipo 'node', finaliza a edição.
-                if (editingNode?.type === 'node') {
-                    e.preventDefault(); // Evita adicionar uma nova linha
-                    nodeEditorInput.blur(); // Aciona o 'blur' para finalizar a edição
-                }
-                // Para 'postit', a tecla 'Enter' deve criar uma nova linha (comportamento padrão), então não interferimos.
-            }
-        });
-
-        // --- LÓGICA DO POST-IT ---
-
-        function addPostit() {
-            const newPostit = {
-                id: `postit-${Date.now()}`,
-                type: 'postit',
-                x: (canvas.width / 2 - originX) / scale,
-                y: (canvas.height / 2 - originY) / scale,
-                width: 200,
-                height: 200, // Altura inicial, será recalculada
-                text: 'Nova nota...',
-                backgroundColor: '#FFFBEB', // Amarelo claro
-                textColor: '#374151' // Cinza escuro
-            };
-            postits.push(newPostit);
-            saveState();
-            redrawCanvas();
-        }
-        
-        function deletePostit() {
-            if (!selectedPostitId) return;
-            postits = postits.filter(p => p.id !== selectedPostitId);
-            selectedPostitId = null;
-            postitContextMenu.style.display = 'none';
-            saveState();
-            redrawCanvas();
-        }
-
-        function drawPostit(postit) {
-            const maxWidth = 250;
-            const padding = 15;
-            const lineHeight = 20;
-            const dogEarSize = 20;
-            ctx.font = '16px Inter, sans-serif';
-
-            // Calcula dimensões com base no texto
-            const lines = getWrappedTextLines(postit.text, maxWidth - padding * 2);
-            const textHeight = lines.length * lineHeight;
-            postit.width = maxWidth;
-            postit.height = textHeight + padding * 2;
-
-            const { x, y, width, height, backgroundColor, textColor } = postit;
-            const postitX = x - width / 2;
-            const postitY = y - height / 2;
-
-            // Sombra
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 12;
-            ctx.shadowOffsetX = 4;
-            ctx.shadowOffsetY = 4;
-
-            // Corpo do Post-it
-            ctx.fillStyle = backgroundColor;
-            ctx.beginPath();
-            ctx.moveTo(postitX, postitY);
-            ctx.lineTo(postitX + width, postitY);
-            ctx.lineTo(postitX + width, postitY + height - dogEarSize);
-            ctx.lineTo(postitX + width - dogEarSize, postitY + height);
-            ctx.lineTo(postitX, postitY + height);
-            ctx.closePath();
-            ctx.fill();
-
-            // Efeito de dobra (dog-ear)
-            ctx.fillStyle = 'rgba(0,0,0,0.15)';
-            ctx.beginPath();
-            ctx.moveTo(postitX + width, postitY + height - dogEarSize);
-            ctx.lineTo(postitX + width - dogEarSize, postitY + height);
-            ctx.lineTo(postitX + width - dogEarSize, postitY + height - dogEarSize);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Borda de seleção
-            if (selectedPostitId === postit.id) {
-                ctx.strokeStyle = '#3b82f6';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-            }
-
-            // Reset da sombra para o texto
-            ctx.shadowColor = 'transparent';
-
-            // Desenha o texto
-            ctx.fillStyle = textColor;
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            lines.forEach((line, index) => {
-                ctx.fillText(line, postitX + padding, postitY + padding + (index * lineHeight));
-            });
-        }
-        
-        function showPostitContextMenu(postit) {
-            const canvasRect = canvas.getBoundingClientRect();
-            const menuWidth = 200;
-            // Posição na tela = (posição no mundo * zoom) + origem
-            const screenX = (postit.x - postit.width / 2) * scale + originX;
-            const screenY = (postit.y - postit.height / 2) * scale + originY;
-
-            postitContextMenu.style.display = 'block';
-            postitContextMenu.style.left = `${screenX + canvasRect.left}px`;
-            postitContextMenu.style.top = `${screenY + canvasRect.top - postitContextMenu.offsetHeight - 10}px`;
-        }
-
-        function initPostitColorPalettes() {
-            const bgColorPalette = document.getElementById('postitBgColorPalette');
-            const textColorPalette = document.getElementById('postitTextColorPalette');
-            
-            const colors = [
-                '#FFFBEB', '#FEF2F2', '#EFF6FF', '#F0FDF4', '#F5F3FF', '#FDF2F8', '#F3F4F6',
-                '#FEF3C7', '#FECACA', '#DBEAFE', '#D1FAE5', '#E0E7FF', '#FCE7F3', '#E5E7EB',
-                '#FDE68A', '#F87171', '#93C5FD', '#6EE7B7', '#C7D2FE', '#FBCFE8', '#9CA3AF',
-                '#FACC15', '#DC2626', '#3B82F6', '#10B981', '#818CF8', '#EC4899', '#4B5563',
-                '#CA8A04', '#7F1D1D', '#1E40AF', '#065F46', '#4338CA', '#86198F', '#1F2937'
-            ];
-
-            const createPalette = (container, property) => {
-                container.innerHTML = '';
-                colors.forEach(color => {
-                    const swatch = document.createElement('div');
-                    swatch.className = 'color-swatch';
-                    swatch.style.backgroundColor = color;
-                    swatch.addEventListener('click', () => {
-                        if (selectedPostitId) {
-                            const postit = postits.find(p => p.id === selectedPostitId);
-                            if (postit) {
-                                postit[property] = color;
-                                redrawCanvas();
-                                saveState();
-                            }
-                        }
-                    });
-                    container.appendChild(swatch);
-                });
-            };
-
-            createPalette(bgColorPalette, 'backgroundColor');
-            createPalette(textColorPalette, 'textColor');
         }
 
 
