@@ -70,6 +70,7 @@
         /* Estiliza a área de conteúdo do editor WYSIWYG */
         #noteContent {
             @apply w-full p-4 border rounded-lg resize-none min-h-[300px] outline-none focus:ring-2 focus:ring-blue-500;
+            cursor: text;
         }
         /* Estilos para os cabeçalhos no editor de notas */
         #noteContent h1 { font-size: 2em; font-weight: bold; }
@@ -213,7 +214,7 @@
             font-size: 0.8em;
             color: #4b5563;
         }
-        .copy-code-btn {
+        .copy-code-btn, .edit-code-btn {
             background-color: transparent;
             border: none;
             cursor: pointer;
@@ -221,7 +222,7 @@
             padding: 4px;
             border-radius: 4px;
         }
-        .copy-code-btn:hover {
+        .copy-code-btn:hover, .edit-code-btn:hover {
             background-color: #d1d5db;
         }
         .code-block-wrapper pre {
@@ -234,6 +235,12 @@
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.9em;
             outline: none;
+        }
+        /* Estilo para o modo de edição do bloco de código */
+        .code-block-wrapper.editing pre {
+            box-shadow: 0 0 0 2px #3b82f6; /* Anel azul para indicar edição */
+            border-radius: 0 0 7px 7px;
+            background-color: #fff;
         }
         /* Override para o fundo do highlight.js */
         .hljs {
@@ -408,6 +415,11 @@
             <!-- Campo de texto para edição de nós -->
             <textarea id="nodeEditorInput"></textarea>
             
+            <!-- PAINEL DE STATUS DE SALVAMENTO -->
+            <div id="saveStatusPanel" class="absolute top-28 left-4 bg-white/80 backdrop-blur-sm rounded-lg p-2 px-3 shadow-md text-xs text-gray-700 font-medium z-10">
+                <span id="saveStatusText" class="font-bold">Não salvo</span>
+            </div>
+
             <!-- Menu de Contexto do Post-it -->
             <div id="postitContextMenu">
                 <div class="mb-2">
@@ -632,6 +644,7 @@
         const genericColorPaletteContainer = document.getElementById('genericColorPaletteContainer');
         const genericColorPaletteTitle = document.getElementById('genericColorPaletteTitle');
         const closeGenericColorPaletteBtn = document.getElementById('closeGenericColorPalette');
+        const saveStatusText = document.getElementById('saveStatusText');
 
         // Variáveis para o seletor de emojis
         const emojiBtn = document.getElementById('emojiBtn');
@@ -643,6 +656,19 @@
         const removeAllEmojisBtn = document.getElementById('removeAllEmojisBtn');
         const EMOJI_FONT_SIZE = 16;
         let areEmojisLoaded = false;
+
+        // --- FUNÇÃO UTILITÁRIA DEBOUNCE ---
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
 
         // Estado do aplicativo
         let nodes = [];
@@ -757,6 +783,94 @@
             canvasTexture: 'lisa'
         };
 
+        // --- LÓGICA DE SALVAMENTO LOCAL ---
+
+        function updateSaveStatus(status, timestamp = null) {
+            const panel = saveStatusText.parentElement;
+            if (status === 'saved') {
+                const timeString = new Date(timestamp).toLocaleTimeString('pt-BR');
+                saveStatusText.textContent = `Salvo às ${timeString}`;
+                panel.classList.remove('bg-red-200', 'text-red-800');
+                panel.classList.add('bg-white/80', 'text-gray-700');
+            } else if (status === 'error') {
+                saveStatusText.textContent = 'QuotaExceededError';
+                panel.classList.remove('bg-white/80');
+                panel.classList.add('bg-red-200', 'text-red-800');
+            } else { // 'unsaved'
+                saveStatusText.textContent = 'Não salvo';
+                panel.classList.remove('bg-red-200', 'text-red-800');
+                panel.classList.add('bg-white/80', 'text-gray-700');
+            }
+        }
+
+        const saveStateToLocalStorage = debounce(() => {
+            try {
+                const projectData = {
+                    nodes: nodes,
+                    postits: postits,
+                    notes: appData.notes,
+                    globalNodeShape: globalNodeShape,
+                    globalLineType: globalLineType,
+                    projectName: appData.projectName,
+                    globalLayoutDirection: globalLayoutDirection,
+                    canvasTexture: canvasTexture,
+                    originX: originX,
+                    originY: originY,
+                    scale: scale
+                };
+                const dataStr = JSON.stringify(projectData);
+                localStorage.setItem('mindMapProgress', dataStr);
+                updateSaveStatus('saved', Date.now());
+            } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                    console.error('Erro de localStorage: Quota excedida.');
+                    updateSaveStatus('error');
+                } else {
+                    console.error('Erro ao salvar no localStorage:', e);
+                }
+            }
+        }, 500);
+
+        function loadStateFromLocalStorage() {
+            const savedData = localStorage.getItem('mindMapProgress');
+            if (savedData) {
+                try {
+                    const loadedData = JSON.parse(savedData);
+                    nodes = loadedData.nodes || [];
+                    postits = loadedData.postits || [];
+                    appData.notes = loadedData.notes || {};
+                    globalNodeShape = loadedData.globalNodeShape || 'square';
+                    globalLineType = loadedData.globalLineType || 'line';
+                    appData.projectName = loadedData.projectName || 'Meu Projeto';
+                    globalLayoutDirection = loadedData.globalLayoutDirection || 'right';
+                    canvasTexture = loadedData.canvasTexture || 'lisa';
+                    projectNameInput.value = appData.projectName;
+                    originX = loadedData.originX || canvas.width / 2;
+                    originY = loadedData.originY || canvas.height / 2;
+                    scale = loadedData.scale || 1.0;
+
+                    nodes.forEach(node => {
+                        const dims = calculateNodeDimensions(node);
+                        node.width = dims.width;
+                        node.height = dims.height;
+                    });
+                    
+                    history.length = 0;
+                    historyIndex = -1;
+                    saveState(); 
+
+                    redrawCanvas();
+                    updateSaveStatus('saved', Date.now());
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao carregar dados do localStorage:', error);
+                    localStorage.removeItem('mindMapProgress');
+                    return false;
+                }
+            }
+            return false;
+        }
+
         // Função para salvar o estado atual
         function saveState() {
             if (historyIndex < history.length - 1) {
@@ -773,6 +887,7 @@
                 canvasTexture: canvasTexture 
             }));
             historyIndex++;
+            saveStateToLocalStorage();
         }
 
         // Função para carregar um estado do histórico
@@ -1162,73 +1277,6 @@
         }
         
         // --- LÓGICA DO BLOCO DE CÓDIGO ---
-
-        function addCodeBlock() {
-            const selection = window.getSelection();
-            if (!selection.rangeCount) return;
-            let range = selection.getRangeAt(0);
-
-            if (!noteContentDiv.contains(range.commonAncestorContainer)) {
-                noteContentDiv.focus();
-                const newSelection = window.getSelection();
-                if(!newSelection.rangeCount) return;
-                range = newSelection.getRangeAt(0);
-            }
-
-            const codeBlockHtml = `
-                <div class="code-block-wrapper" contenteditable="false">
-                    <div class="code-block-header">
-                        <span class="code-block-lang">auto</span>
-                        <button class="copy-code-btn" title="Copiar Código">
-                            <i class="fa-solid fa-copy"></i> Copiar
-                        </button>
-                    </div>
-                    <pre><code contenteditable="true" spellcheck="false">\n</code></pre>
-                </div>
-                <p><br></p>
-            `;
-            
-            document.execCommand('insertHTML', false, codeBlockHtml);
-        }
-
-        function handleNoteContentClick(e) {
-            if (e.target.closest('.copy-code-btn')) {
-                const wrapper = e.target.closest('.code-block-wrapper');
-                if (wrapper) {
-                    const codeElement = wrapper.querySelector('code');
-                    const textToCopy = codeElement.textContent;
-                    const copyButton = e.target.closest('.copy-code-btn');
-
-                    const textArea = document.createElement('textarea');
-                    textArea.value = textToCopy;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        copyButton.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
-                        setTimeout(() => {
-                            copyButton.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar';
-                        }, 2000);
-                    } catch (err) {
-                        console.error('Falha ao copiar texto: ', err);
-                    }
-                    document.body.removeChild(textArea);
-                }
-            }
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
         const debouncedHighlight = debounce((element) => {
             const selection = window.getSelection();
             if (!selection.rangeCount) return;
@@ -1279,6 +1327,91 @@
             selection.addRange(newRange);
 
         }, 300);
+
+        function addCodeBlock() {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            let range = selection.getRangeAt(0);
+
+            if (!noteContentDiv.contains(range.commonAncestorContainer)) {
+                noteContentDiv.focus();
+                const newSelection = window.getSelection();
+                if(!newSelection.rangeCount) return;
+                range = newSelection.getRangeAt(0);
+            }
+
+            const codeBlockHtml = `
+                <div class="code-block-wrapper" contenteditable="false">
+                    <div class="code-block-header">
+                        <span class="code-block-lang">auto</span>
+                        <div class="flex items-center">
+                            <button class="edit-code-btn" title="Editar Código">
+                                <i class="fa-solid fa-pencil"></i> Editar
+                            </button>
+                            <button class="copy-code-btn" title="Copiar Código">
+                                <i class="fa-solid fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                    </div>
+                    <pre><code contenteditable="false" spellcheck="false">\n</code></pre>
+                </div>
+                <p><br></p>
+            `;
+            
+            document.execCommand('insertHTML', false, codeBlockHtml);
+        }
+
+        function handleNoteContentClick(e) {
+            if (e.target.closest('.copy-code-btn')) {
+                const wrapper = e.target.closest('.code-block-wrapper');
+                if (wrapper) {
+                    const codeElement = wrapper.querySelector('code');
+                    const textToCopy = codeElement.textContent;
+                    const copyButton = e.target.closest('.copy-code-btn');
+
+                    const textArea = document.createElement('textarea');
+                    textArea.value = textToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        copyButton.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
+                        setTimeout(() => {
+                            copyButton.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                }
+            }
+            
+            if (e.target.closest('.edit-code-btn')) {
+                const wrapper = e.target.closest('.code-block-wrapper');
+                const editButton = e.target.closest('.edit-code-btn');
+                if (wrapper) {
+                    const codeElement = wrapper.querySelector('code');
+                    const isEditing = codeElement.isContentEditable;
+
+                    if (isEditing) {
+                        // Para de editar
+                        codeElement.contentEditable = false;
+                        wrapper.classList.remove('editing');
+                        editButton.innerHTML = '<i class="fa-solid fa-pencil"></i> Editar';
+                        editButton.title = 'Editar Código';
+                        // Re-aplica o highlight no código
+                        debouncedHighlight(codeElement);
+                    } else {
+                        // Começa a editar
+                        codeElement.contentEditable = true;
+                        wrapper.classList.add('editing');
+                        editButton.innerHTML = '<i class="fa-solid fa-check"></i> Salvar';
+                        editButton.title = 'Salvar Alterações';
+                        codeElement.focus();
+                    }
+                }
+            }
+        }
 
         function handleNoteContentInput(e) {
             if (e.target.tagName === 'CODE' && e.target.closest('.code-block-wrapper')) {
@@ -1529,7 +1662,9 @@
             });
 
             resizeCanvas();
-            resetProject();
+            if (!loadStateFromLocalStorage()) {
+                resetProject();
+            }
         }
 
         function getNodeDepth(nodeId) {
@@ -2465,12 +2600,32 @@
             }
         }
 
+        // Listener para finalizar a edição quando o campo perde o foco (clique fora)
+        nodeEditorInput.addEventListener('blur', finishEditingNode);
+
         nodeEditorInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey && editingNode?.type === 'node') {
+            if (e.key === 'Tab') {
                 e.preventDefault();
-                finishEditingNode();
-            } else if (e.key === 'Escape') {
-                finishEditingNode();
+                if (editingNode) {
+                    const parentId = editingNode.id; // Salva o ID do nó pai
+                    finishEditingNode(); // Finaliza a edição do nó atual
+                    selectedNodeId = parentId; // Define o nó atual como o pai para o novo nó
+                    addNode(); // Adiciona um novo nó filho
+                }
+            }
+            // Com a tecla 'Escape', finaliza a edição para nós e post-its.
+            else if (e.key === 'Escape') {
+                e.preventDefault();
+                nodeEditorInput.blur(); // Aciona o 'blur' para um comportamento de saída consistente
+            }
+            // Com a tecla 'Enter' (sem a tecla Shift)
+            else if (e.key === 'Enter' && !e.shiftKey) {
+                // Para itens do tipo 'node', finaliza a edição.
+                if (editingNode?.type === 'node') {
+                    e.preventDefault(); // Evita adicionar uma nova linha
+                    nodeEditorInput.blur(); // Aciona o 'blur' para finalizar a edição
+                }
+                // Para 'postit', a tecla 'Enter' deve criar uma nova linha (comportamento padrão), então não interferimos.
             }
         });
 
