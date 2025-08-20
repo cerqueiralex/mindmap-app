@@ -13,18 +13,19 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
         }
-        
+        /* Altera o layout principal para usar Flexbox e permitir redimensionamento */
         .flex-container {
             display: flex;
             height: 100vh;
+            overflow: hidden;
         }
 
         /* Estiliza o canvas do mapa mental */
         #mindMapCanvas {
             background-color: #f8f9fa;
             cursor: grab;
+            border-right: 1px solid #e2e8f0;
         }
         #mindMapCanvas.grabbing {
             cursor: grabbing;
@@ -37,7 +38,7 @@
             background-color: #e2e8f0;
             border-left: 1px solid #cbd5e1;
             border-right: 1px solid #cbd5e1;
-            transition: background-color 0.2s;
+            transition: background-color: 0.2s;
         }
         #resizeHandle:hover {
             background-color: #cbd5e1;
@@ -45,7 +46,10 @@
 
         /* Estiliza os botões da barra de ferramentas */
         .toolbar-btn {
-            @apply py-2 px-3 bg-white border border-gray-300 rounded-xl shadow transition-colors duration-200 hover:bg-gray-200;
+            border: 1px solid #dddddd;
+            padding: 5px 10px;
+            box-shadow: 1px 1px 2px #eee;
+            border-radius: 6px;
         }
         .toolbar-btn i {
             @apply text-gray-600;
@@ -268,17 +272,13 @@
         .current-emoji-item:hover .remove-emoji-btn {
             @apply opacity-100;
         }
-        
-        .color-swatch {
-            @apply w-6 h-6 rounded-full cursor-pointer border-2 border-transparent hover:border-gray-400;
-        }
 
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
     <div class="flex-container">
         <!-- Editor de Mapas Mentais (Coluna Esquerda) -->
-        <div id="mindMapContainer" class="relative flex flex-col h-full bg-white shadow-lg" style="width: 60%;">
+        <div id="mindMapContainer" class="relative flex flex-col h-full bg-white shadow-lg rounded-r-xl" style="width: 60%;">
             <!-- Barra de Funções Principal 01 -->
             <div id="main-menu-bar" class="p-1 flex items-center border-b bg-gray-100">
                 <div class="relative">
@@ -305,11 +305,11 @@
                 <input type="text" id="projectNameInput" class="text-sm font-semibold text-gray-700 ml-2" value="Meu Projeto">
                 <!-- Ícones de Redes Sociais -->
                 <div class="ml-auto flex items-center space-x-2 pr-2">
-                    <a href="https://www.linkedin.com/in/alexandrepolselli/" target="_blank" class="text-gray-500 hover:text-blue-700" title="LinkedIn"><i class="fa-brands fa-linkedin fa-lg"></i></a>
-                    <a href="http://datauniverse.com.br/" target="_blank" class="text-gray-500 hover:text-orange-500" title="Blog"><i class="fa-solid fa-blog fa-lg"></i></a>
-                    <a href="https://conversionzone.com.br/" target="_blank" class="text-gray-500 hover:text-green-600" title="Consultoria"><i class="fa-solid fa-briefcase fa-lg"></i></a>
-                    <a href="https://github.com/cerqueiralex" target="_blank" class="text-gray-500 hover:text-gray-800" title="Github"><i class="fa-brands fa-github fa-lg"></i></a>
-                    <a href="https://www.youtube.com/@datauniverseblog/videos" target="_blank" class="text-gray-500 hover:text-red-600" title="Youtube"><i class="fa-brands fa-youtube fa-lg"></i></a>
+                    <a href="https://www.linkedin.com/in/alexandrepolselli/" target="_blank" class="text-gray-500 hover:text-blue-700" title="LinkedIn"><i class="fa-brands fa-linkedin fa-sm"></i></a>
+                    <a href="http://datauniverse.com.br/" target="_blank" class="text-gray-500 hover:text-orange-500" title="Blog"><i class="fa-solid fa-blog fa-sm"></i></a>
+                    <a href="https://conversionzone.com.br/" target="_blank" class="text-gray-500 hover:text-green-600" title="Consultoria"><i class="fa-solid fa-briefcase fa-sm"></i></a>
+                    <a href="https://github.com/cerqueiralex" target="_blank" class="text-gray-500 hover:text-gray-800" title="Github"><i class="fa-brands fa-github fa-sm"></i></a>
+                    <a href="https://www.youtube.com/@datauniverseblog/videos" target="_blank" class="text-gray-500 hover:text-red-600" title="Youtube"><i class="fa-brands fa-youtube fa-sm"></i></a>
                 </div>
             </div>
 
@@ -401,17 +401,17 @@
             <!-- Campo de texto para edição de nós -->
             <textarea id="nodeEditorInput"></textarea>
 
-            <!-- Painel de Estatísticas -->
-            <div id="statsPanel" class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-xs rounded-lg px-3 py-1 flex space-x-4">
-                <div>Zoom: <span id="zoomLevel">100%</span></div>
-                <div>Nós: <span id="nodeCount">1</span></div>
-            </div>
-
             <!-- Controles de Navegação do Canvas (Canto Inferior Direito) -->
             <div class="absolute bottom-4 right-4 flex flex-col space-y-2">
                 <button id="zoomInBtn" class="toolbar-btn shadow-md"><i class="fa-solid fa-plus"></i></button>
                 <button id="zoomOutBtn" class="toolbar-btn shadow-md"><i class="fa-solid fa-minus"></i></button>
                 <button id="recenterBtn" class="toolbar-btn shadow-md"><i class="fa-solid fa-expand"></i></button>
+            </div>
+
+            <!-- Painel de Estatísticas (Canto Inferior Esquerdo) -->
+            <div id="statsPanel" class="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm rounded-lg p-2 px-3 shadow-md text-xs text-gray-700 font-medium space-y-1">
+                <div>Zoom: <span id="zoomLevel" class="font-bold tabular-nums">100%</span></div>
+                <div>Nós: <span id="nodeCount" class="font-bold tabular-nums">0</span></div>
             </div>
         </div>
 
@@ -522,12 +522,13 @@
                     <li><b>Remover Nó:</b> Remove o nó selecionado e todos os seus filhos. Atalho: <code>Delete</code> ou <code>Backspace</code>.</li>
                     <li><b>Editar Texto:</b> Dê um duplo clique em um nó para editar seu texto diretamente.</li>
                     <li><b>Recolher/Expandir Filhos:</b> Clique no círculo na borda de um nó para recolher ou expandir seus filhos.</li>
+                    <li><b>Mover e Reanexar Nó:</b> Clique e arraste um nó para um novo nó pai para reorganizar a estrutura do mapa.</li>
                 </ul>
 
                 <h4 class="font-bold text-lg">Navegação e Visualização</h4>
                  <ul class="list-disc pl-5 space-y-1">
                     <li><b>Mover Canvas (Pan):</b> Clique e arraste em uma área vazia do canvas.</li>
-                    <li><b>Mover Nó:</b> Clique e arraste um nó para reposicioná-lo (seus filhos se moverão junto).</li>
+                    <li><b>Mover Nó:</b> Clique e arraste um nó para reposicioná-lo.</li>
                     <li><b>Zoom:</b> Use os botões de +/- no canto, o gesto de pinça no trackpad/tela sensível ao toque, ou segure <code>Ctrl</code> e use a roda do mouse.</li>
                     <li><b>Recentralizar:</b> Clica no botão de expandir para centralizar o mapa na tela.</li>
                 </ul>
@@ -571,8 +572,11 @@
                 <h4 id="colorPickerTitle" class="text-lg font-semibold">Escolher Cor</h4>
                 <button id="closeColorPicker" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="predefinedColors" class="flex flex-wrap gap-2 mb-4 justify-center">
-                <!-- Cores predefinidas serão inseridas aqui -->
+            <div class="mb-4">
+                <h5 class="text-xs font-bold text-gray-500 mb-2">CORES PREDEFINIDAS</h5>
+                <div id="predefinedColors" class="flex flex-wrap gap-2 justify-center">
+                    <!-- Cores predefinidas serão inseridas aqui -->
+                </div>
             </div>
             <div id="colorPickerArea" class="relative mb-4 cursor-crosshair">
                 <div id="whiteOverlay" class="color-picker-overlay"></div>
@@ -636,6 +640,7 @@
         let editingNode = null; // Nó atualmente em edição
         let initialPinchDistance = 0; // Para o zoom com os dedos
         let globalLayoutDirection = 'right'; // Direção padrão do layout
+        let potentialParentNodeId = null; // ID do nó que pode se tornar o novo pai
 
         // Histórico para Desfazer/Refazer
         const history = [];
@@ -809,6 +814,7 @@
                         globalLayoutDirection = loadedData.globalLayoutDirection || 'right';
                         projectNameInput.value = appData.projectName;
                         
+                        // Recalcula as dimensões, mas mantém as posições x, y do JSON
                         nodes.forEach(node => {
                             node.shape = globalNodeShape;
                             node.emojis = node.emojis || [];
@@ -825,7 +831,8 @@
                         historyIndex = -1;
                         saveState();
 
-                        const rootNode = nodes.find(n => n.id === 'root');
+                        // Centraliza a visualização no nó raiz, se existir
+                        const rootNode = nodes.find(n => n.parentId === null);
                         if (rootNode) {
                             originX = (canvas.width / 2) - rootNode.x;
                             originY = (canvas.height / 2) - rootNode.y;
@@ -835,7 +842,8 @@
                         }
                         scale = 1.0;
                         
-                        applyTreeLayout();
+                        // Apenas redesenha o canvas, não recalcula o layout
+                        redrawCanvas();
                     } else {
                         console.error('Formato do arquivo JSON inválido.');
                     }
@@ -844,6 +852,8 @@
                 }
             };
             reader.readAsText(file);
+             // Limpa o valor do input para permitir carregar o mesmo arquivo novamente
+            event.target.value = '';
         }
 
         // --- LÓGICA DO NOVO PROJETO (POP-UP) ---
@@ -895,7 +905,7 @@
             originY = (canvas.height / 2);
             scale = 1.0;
 
-            redrawCanvas();
+            applyTreeLayout(); // Aplica o layout para o novo projeto
             hideModal();
         }
         confirmNewProjectBtn.addEventListener('click', resetProject);
@@ -967,16 +977,32 @@
         
         function initColorSwatches() {
             const colors = [
-                '#FF0000', '#FFA500', '#FFFF00', '#008000', '#0000FF', '#4B0082', '#EE82EE', // Primary/Secondary
-                '#FF4500', '#FFD700', '#ADFF2F', '#00FFFF', '#8A2BE2', '#C71585', // Tertiary
-                '#FFFFFF', '#808080', '#000000' // White, Gray, Black
+                // Primárias
+                '#FF0000', '#0000FF', '#FFFF00',
+                // Secundárias
+                '#FFA500', '#008000', '#800080',
+                // Terciárias
+                '#FF4500', '#FF8C00', '#ADFF2F', '#00FFFF', '#4B0082', '#C71585',
+                // Neutras
+                '#FFFFFF', '#808080', '#000000'
             ];
             
             predefinedColorsContainer.innerHTML = '';
             colors.forEach(color => {
                 const swatch = document.createElement('div');
-                swatch.className = 'color-swatch';
-                swatch.style.backgroundColor = color;
+                // Aplica estilos diretamente para garantir a visibilidade
+                Object.assign(swatch.style, {
+                    width: '1.5rem',
+                    height: '1.5rem',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    border: '2px solid #e5e7eb', // Corresponde a border-gray-200
+                    backgroundColor: color
+                });
+
+                swatch.addEventListener('mouseover', () => swatch.style.borderColor = '#9ca3af'); // Corresponde a hover:border-gray-400
+                swatch.addEventListener('mouseout', () => swatch.style.borderColor = '#e5e7eb');
+                
                 swatch.dataset.color = color;
                 swatch.addEventListener('click', () => {
                     if (colorCallback) {
@@ -1560,6 +1586,21 @@
             saveState();
         }
 
+        // Verifica se um nó é descendente de outro para evitar loops
+        function isDescendant(nodeId, potentialParentId) {
+            let currentNode = nodes.find(n => n.id === potentialParentId);
+            while (currentNode) {
+                if (currentNode.id === nodeId) {
+                    return true;
+                }
+                if (currentNode.parentId === null) {
+                    return false;
+                }
+                currentNode = nodes.find(n => n.id === currentNode.parentId);
+            }
+            return false;
+        }
+
         function setupCanvas() {
             canvas.addEventListener('mousedown', (e) => {
                 const rect = canvas.getBoundingClientRect();
@@ -1585,14 +1626,25 @@
                 lastMouseY = e.clientY;
             });
 
-            document.addEventListener('mouseup', () => {
+            document.addEventListener('mouseup', (e) => {
+                // Lógica para reanexar o nó
+                if (isNodeDragging && potentialParentNodeId && draggedNode.id !== potentialParentNodeId) {
+                    const nodeToReparent = nodes.find(n => n.id === draggedNode.id);
+                    if (nodeToReparent) {
+                        nodeToReparent.parentId = potentialParentNodeId;
+                        applyTreeLayout(); // Recalcula o layout após a mudança
+                    }
+                }
+
                 if(isNodeDragging || isCanvasDragging) {
                     saveState();
                 }
                 isCanvasDragging = false;
                 isNodeDragging = false;
                 draggedNode = null;
+                potentialParentNodeId = null; // Reseta o pai potencial
                 canvas.classList.remove('grabbing');
+                redrawCanvas(); // Redesenha para remover os destaques
             });
 
             document.addEventListener('mousemove', (e) => {
@@ -1613,6 +1665,23 @@
                         }
                     }
                     moveSubtree(draggedNode.id, deltaX, deltaY);
+
+                    // Lógica para encontrar um novo pai potencial
+                    potentialParentNodeId = null;
+                    const rect = canvas.getBoundingClientRect();
+                    const mouseX = (e.clientX - rect.left - originX) / scale;
+                    const mouseY = (e.clientY - rect.top - originY) / scale;
+
+                    for (const node of nodes) {
+                        // Não pode ser o próprio nó ou um de seus descendentes
+                        if (node.id !== draggedNode.id && isPointInShape(mouseX, mouseY, node)) {
+                            if (!isDescendant(draggedNode.id, node.id)) {
+                                potentialParentNodeId = node.id;
+                                break;
+                            }
+                        }
+                    }
+
                     redrawCanvas();
 
                 } else if (isCanvasDragging) {
@@ -1803,11 +1872,6 @@
             }
         }
 
-        function updateStats() {
-            document.getElementById('zoomLevel').textContent = `${Math.round(scale * 100)}%`;
-            document.getElementById('nodeCount').textContent = nodes.length;
-        }
-
         function redrawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
@@ -1897,10 +1961,17 @@
             ctx.fillStyle = node.color;
             ctx.fill();
 
+            ctx.shadowColor = 'transparent'; // Reset shadow for strokes
+            // Destaque para nó selecionado
             if (selectedNodeId === node.id) {
-                ctx.shadowColor = 'transparent';
                 ctx.lineWidth = 4;
-                ctx.strokeStyle = '#3b82f6';
+                ctx.strokeStyle = '#3b82f6'; // Azul para selecionado
+                ctx.stroke();
+            }
+            // Destaque para alvo de soltar (novo pai)
+            if (potentialParentNodeId === node.id) {
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#22c55e'; // Verde para alvo
                 ctx.stroke();
             }
             
@@ -2002,6 +2073,18 @@
             return false;
         }
 
+        function updateStats() {
+            const zoomLevelEl = document.getElementById('zoomLevel');
+            const nodeCountEl = document.getElementById('nodeCount');
+
+            if (zoomLevelEl) {
+                zoomLevelEl.textContent = `${Math.round(scale * 100)}%`;
+            }
+            if (nodeCountEl) {
+                nodeCountEl.textContent = nodes.length;
+            }
+        }
+
         function resizeCanvas() {
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
@@ -2016,32 +2099,43 @@
         function setupResizing() {
             const resizeHandle = document.getElementById('resizeHandle');
             let isResizing = false;
+            let initialX = 0;
+            let initialNotesWidth = 0;
 
             resizeHandle.addEventListener('mousedown', (e) => {
                 isResizing = true;
+                initialX = e.clientX;
+                initialNotesWidth = notesEditor.offsetWidth;
                 document.body.style.cursor = 'col-resize';
-                document.body.style.userSelect = 'none';
             });
 
             document.addEventListener('mousemove', (e) => {
                 if (!isResizing) return;
                 
-                let newWidth = window.innerWidth - e.clientX;
+                const dx = initialX - e.clientX;
+                let newWidth = initialNotesWidth + dx;
                 
-                const minWidth = window.innerWidth * 0.2;
-                const maxWidth = window.innerWidth * 0.8;
+                const minWidth = window.innerWidth * 0.3;
+                const maxWidth = window.innerWidth;
 
                 if (newWidth < minWidth) newWidth = minWidth;
                 if (newWidth > maxWidth) newWidth = maxWidth;
 
                 notesEditor.style.width = `${newWidth}px`;
-                resizeHandle.style.right = `${newWidth}px`;
+                notesEditor.style.flexShrink = 0;
+                notesEditor.style.flexGrow = 0;
+                
+                mindMapContainer.style.width = `${window.innerWidth - newWidth - resizeHandle.offsetWidth}px`;
+                mindMapContainer.style.flexShrink = 0;
+                mindMapContainer.style.flexGrow = 0;
+
+                resizeCanvas();
+                redrawCanvas();
             });
 
             document.addEventListener('mouseup', () => {
                 isResizing = false;
                 document.body.style.cursor = 'default';
-                document.body.style.userSelect = 'auto';
             });
         }
 
