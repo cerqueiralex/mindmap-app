@@ -498,6 +498,8 @@
                 <button class="notes-toolbar-btn" onclick="formatDoc('justifyCenter')" title="Alinhar ao Centro"><i class="fa-solid fa-align-center"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('justifyRight')" title="Alinhar à Direita"><i class="fa-solid fa-align-right"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('justifyFull')" title="Justificar"><i class="fa-solid fa-align-justify"></i></button>
+                <button class="notes-toolbar-btn" onclick="formatDoc('indent')" title="Aumentar Recuo"><i class="fa-solid fa-indent"></i></button>
+                <button class="notes-toolbar-btn" onclick="formatDoc('outdent')" title="Diminuir Recuo"><i class="fa-solid fa-outdent"></i></button>
                 <button id="addCodeBlockBtn" class="notes-toolbar-btn" title="Inserir Bloco de Código"><i class="fa-solid fa-code"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('insertUnorderedList')" title="Lista com Marcadores"><i class="fa-solid fa-list-ul"></i></button>
                 <button class="notes-toolbar-btn" onclick="formatDoc('insertOrderedList')" title="Lista Numerada"><i class="fa-solid fa-list-ol"></i></button>
@@ -1613,6 +1615,29 @@
             }
         }
 
+        function handleNoteContentKeyDown(e) {
+            // Lida com Tab para indentação em listas
+            if (e.key === 'Tab') {
+                // Verifica se o foco não está dentro de um bloco de código
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const container = selection.getRangeAt(0).commonAncestorContainer;
+                    const codeElement = container.nodeType === Node.ELEMENT_NODE ? container : container.parentElement;
+                    if (codeElement.closest('.code-block-wrapper code')) {
+                        // Se estiver em um bloco de código, permite o comportamento padrão do handleCodeBlockKeyDown
+                        return;
+                    }
+                }
+                
+                e.preventDefault(); // Previne a mudança de foco
+                if (e.shiftKey) {
+                    document.execCommand('outdent');
+                } else {
+                    document.execCommand('indent');
+                }
+            }
+        }
+
         function handleCodeBlockKeyDown(e) {
             if (e.key === 'Tab') {
                 const selection = window.getSelection();
@@ -1681,7 +1706,10 @@
                 handleNoteContentInput(e);
             });
             noteContentDiv.addEventListener('click', handleNoteContentClick);
-            noteContentDiv.addEventListener('keydown', handleCodeBlockKeyDown);
+            noteContentDiv.addEventListener('keydown', (e) => {
+                handleCodeBlockKeyDown(e);
+                handleNoteContentKeyDown(e);
+            });
             
             // *** Listener para o evento de colar ***
             noteContentDiv.addEventListener('paste', handlePaste);
