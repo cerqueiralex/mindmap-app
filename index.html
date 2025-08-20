@@ -303,6 +303,37 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        #expandTextBtn {
+            padding: 10px;
+        }
+        #brainstormBtn, #expandTextBtn {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        #brainstormBtn:hover, #expandTextBtn:hover {
+            transform: scale(1.12); /* expande igualmente */
+            animation: gradientAnimation 3s ease infinite; /* acelera o gradiente */
+        }
+        #brainstormBtn:active, #expandTextBtn:active {
+            transform: scale(0.95);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
