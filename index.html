@@ -319,6 +319,8 @@
                             <button id="saveProjectBtn" class="dropdown-btn"><i class="fa-solid fa-download w-5 mr-2"></i> Salvar Projeto</button>
                             <input type="file" id="loadFileInput" accept=".json" class="hidden">
                             <button id="loadProjectBtn" class="dropdown-btn"><i class="fa-solid fa-upload w-5 mr-2"></i> Carregar Projeto</button>
+                            <div class="border-t my-1"></div>
+                            <button id="geminiApiKeyBtn" class="dropdown-btn"><i class="fa-solid fa-key w-5 mr-2"></i> Chave de API Gemini</button>
                         </div>
                     </div>
                 </div>
@@ -568,8 +570,8 @@
                 <a href="https://github.com/cerqueiralex" target="_blank" class="text-gray-500 hover:text-gray-800" title="Github"><i class="fa-brands fa-github fa-xl"></i></a>
                 <a href="https://www.youtube.com/@datauniverseblog/videos" target="_blank" class="text-gray-500 hover:text-red-600" title="Youtube"><i class="fa-brands fa-youtube fa-xl"></i></a>
             </div>
-            <a href="https://github.com/cerqueiralex/mindmap-app/" target="_blank" class="w-full text-center bg-gray-800 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center">
-                <i class="fa-brands fa-github fa-lg mr-2"></i> Ver Projeto no GitHub
+            <a href="https://github.com/cerqueiralex/mindmap-app/" target="_blank" class="w-full text-center bg-gray-800 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-900 transition-colors duration-200 flex items-center justify-center" style="font-size: 14px;>
+                <i class="fa-brands fa-github fa-sm mr-2"></i> Ver Projeto no GitHub
             </a>
         </div>
     </div>
@@ -582,6 +584,23 @@
                 <button id="closeFeaturesModalBtn" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="text-gray-700 text-sm space-y-4 overflow-y-auto pr-4">
+
+                <h4 class="font-bold text-lg">Funcionalidades de IA</h4>
+                <p>Observação sobre as funcionalidades de IA:</p>
+                <div class="text-sm text-gray-700 space-y-3">
+                    <p>Para usar as funcionalidades de IA, você precisa de uma chave de API do Google AI Studio.</p>
+                    <ol class="list-decimal pl-5 space-y-1">
+                        <li>Acesse o <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-600 hover:underline">Google AI Studio</a>.</li>
+                        <li>Clique em "Create API key" para gerar uma nova chave.</li>
+                        <li>Copie a chave gerada e cole no campo abaixo.</li>
+                    </ol>
+                    <p>Sua chave será salva apenas no seu navegador e não será compartilhada.</p>
+                    <p>Por favor, configure sua chave de API do Gemini no menu 'Arquivo > Chave de API Gemini' para usar as funcionalidades de IA.</p>
+                </div>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><b>Brainstorm de Ideias ✨:</b> Selecione um nó qualquer que possua um texto associado ao nome e gere nós subjacentes com IA baseado no nome do nó principal</li>
+                    <li><b>Expandir Texto ✨:</b> Selecione um nó qualquer, escreva algum texto no editor de notas e gere um texto completo com IA a partir dele</li>
+                </ul>
                 
                 <h4 class="font-bold text-lg">Gerenciamento de Projeto</h4>
                 <ul class="list-disc pl-5 space-y-1">
@@ -645,9 +664,9 @@
                     <div class="flex items-center justify-between"><span>Adicionar nó irmão</span> <code class="kbd-style">Enter</code></div>
                     <div class="flex items-center justify-between"><span>Excluir nó selecionado</span> <div><code class="kbd-style">Delete</code> ou <code class="kbd-style">Backspace</code></div></div>
                     <p class="pt-2"><b>Geral:</b></p>
-                    <div class="flex items-center justify-between"><span>Desfazer</span> <code class="kbd-style">Ctrl</code> + <code class="kbd-style">Z</code></div>
-                    <div class="flex items-center justify-between"><span>Refazer</span> <code class="kbd-style">Ctrl</code> + <code class="kbd-style">Y</code></div>
-                    <div class="flex items-center justify-between"><span>Zoom no Canvas</span> <code class="kbd-style">Ctrl</code> + <code class="kbd-style">Roda do Mouse</code></div>
+                    <div class="flex items-center justify-between"><span>Desfazer</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Z</code></div></div>
+                    <div class="flex items-center justify-between"><span>Refazer</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Y</code></div></div>
+                    <div class="flex items-center justify-between"><span>Zoom no Canvas</span> <div><code class="kbd-style">Ctrl</code> + <code class="kbd-style">Roda do Mouse</code></div></div>
                 </div>
             </div>
         </div>
@@ -665,6 +684,32 @@
         </div>
     </div>
     
+    <!-- Modal da Chave de API Gemini -->
+    <div id="apiKeyModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Configurar Chave de API do Gemini</h3>
+                <button id="closeApiKeyModalBtn" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="text-sm text-gray-700 space-y-3">
+                <p>Para usar as funcionalidades de IA, você precisa de uma chave de API do Google AI Studio.</p>
+                <ol class="list-decimal pl-5 space-y-1">
+                    <li>Acesse o <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-600 hover:underline">Google AI Studio</a>.</li>
+                    <li>Clique em "Create API key" para gerar uma nova chave.</li>
+                    <li>Copie a chave gerada e cole no campo abaixo.</li>
+                </ol>
+                <p>Sua chave será salva apenas no seu navegador e não será compartilhada.</p>
+            </div>
+            <div class="mt-4">
+                <label for="apiKeyInput" class="block text-sm font-medium text-gray-700 mb-1">Sua Chave de API</label>
+                <input type="password" id="apiKeyInput" placeholder="Cole sua chave de API aqui" class="w-full border rounded-md p-2">
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="saveApiKeyBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200">Salvar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal da Paleta de Cores Genérica -->
     <div id="genericColorPaletteModal" class="modal-overlay hidden">
         <div class="modal-content max-w-xs">
@@ -759,7 +804,7 @@
         let initialPinchDistance = 0; // Para o zoom com os dedos
         let globalLayoutDirection = 'right'; // Direção padrão do layout
         let potentialParentNodeId = null; // ID do nó que pode se tornar o novo pai
-        let canvasTexture = 'lisa'; // Textura padrão do canvas
+        let canvasTexture = 'dotted'; // Textura padrão do canvas
 
         // Histórico para Desfazer/Refazer
         const history = [];
@@ -789,7 +834,13 @@
         }
 
         async function callGeminiAPI(prompt, maxRetries = 3) {
-            const apiKey = ""; // Será fornecido pelo ambiente
+            const apiKey = localStorage.getItem('geminiApiKey');
+            
+            if (!apiKey) {
+                alert("Por favor, configure sua chave de API do Gemini no menu 'Arquivo > Chave de API Gemini' para usar as funcionalidades de IA.");
+                return null;
+            }
+
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             
             const payload = {
@@ -820,10 +871,9 @@
                 } catch (error) {
                     console.error(`Tentativa ${i + 1} falhou:`, error);
                     if (i === maxRetries - 1) {
-                        alert("Não foi possível obter uma resposta da IA. Verifique o console para mais detalhes.");
+                        alert("Não foi possível obter uma resposta da IA. Verifique se sua chave de API é válida e se não há restrições de acesso.");
                         return null;
                     }
-                    // Espera exponencial
                     await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
                 }
             }
@@ -1244,7 +1294,7 @@
             
             globalLineType = 'line';
             globalLayoutDirection = 'right';
-            canvasTexture = 'lisa';
+            canvasTexture = 'dotted';
             appData.projectName = 'Meu Projeto';
             projectNameInput.value = appData.projectName;
             nodes = [initialNode];
@@ -1854,8 +1904,34 @@
                 }
             });
 
+            const apiKeyModal = document.getElementById('apiKeyModal');
+            const geminiApiKeyBtn = document.getElementById('geminiApiKeyBtn');
+            const closeApiKeyModalBtn = document.getElementById('closeApiKeyModalBtn');
+            const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+            const apiKeyInput = document.getElementById('apiKeyInput');
+
+            geminiApiKeyBtn.addEventListener('click', () => {
+                apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
+                apiKeyModal.classList.remove('hidden');
+            });
+
+            closeApiKeyModalBtn.addEventListener('click', () => apiKeyModal.classList.add('hidden'));
+            apiKeyModal.addEventListener('click', (e) => { if(e.target === apiKeyModal) apiKeyModal.classList.add('hidden')});
+
+            saveApiKeyBtn.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    localStorage.setItem('geminiApiKey', key);
+                    apiKeyModal.classList.add('hidden');
+                    alert('Chave de API salva com sucesso!');
+                } else {
+                    alert('Por favor, insira uma chave de API válida.');
+                }
+            });
+
+
             document.addEventListener('keydown', (e) => {
-                if (editingNode || document.activeElement === noteContentDiv || document.activeElement === noteTitleInput || document.activeElement === emojiSearchInput) {
+                if (editingNode || document.activeElement === noteContentDiv || document.activeElement === noteTitleInput || document.activeElement === emojiSearchInput || apiKeyModal.contains(document.activeElement)) {
                     return;
                 }
                 
