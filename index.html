@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicativo de Produtividade e Colaboração</title>
+    <title>Mindmap Data Universe: Aplicativo de Brainstorming e Produtividade | Data Universe</title>
     <!-- Inclui a fonte Inter -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <!-- Inclui Tailwind CSS para estilização rápida -->
@@ -13,6 +13,13 @@
     <!-- Inclui Highlight.js para Syntax Highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-KWZHLTT8');</script>
+    <!-- End Google Tag Manager -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -337,6 +344,10 @@
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KWZHLTT8"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <div class="flex-container">
         <!-- Editor de Mapas Mentais (Coluna Esquerda) -->
         <div id="mindMapContainer" class="relative flex flex-col h-full bg-white shadow-lg rounded-r-xl" style="width: 60%;">
@@ -589,7 +600,7 @@
     <div id="aboutModal" class="modal-overlay hidden">
         <div class="modal-content max-w-lg">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Sobre esse aplicativo</h3>
+                <h3 class="text-xl font-bold">Sobre o Mindmap Data Universe</h3>
                 <button id="closeAboutModalBtn" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <p class="mb-4 text-gray-700 text-center">Este é um aplicativo de produtividade versátil que combina um editor de mapas mentais com um poderoso sistema de anotações. Organize suas ideias visualmente, crie conexões e aprofunde seus tópicos com notas detalhadas, tudo em um só lugar. Ideal para brainstorming, planejamento de projetos e estudos.</p>
@@ -1208,7 +1219,7 @@
         }
 
         // Salva o projeto como um arquivo .json
-        function saveProject() {
+        async function saveProject() {
             const projectData = {
                 nodes: nodes,
                 postits: postits,
@@ -1221,15 +1232,42 @@
             };
             const dataStr = JSON.stringify(projectData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${slugify(appData.projectName || 'projeto')}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            
+            // Verifica se a API File System Access é suportada
+            if ('showSaveFilePicker' in window) {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: `${slugify(appData.projectName || 'projeto')}.json`,
+                        types: [{
+                            description: 'JSON Files',
+                            accept: {
+                                'application/json': ['.json'],
+                            },
+                        }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                } catch (err) {
+                    // O erro "AbortError" é comum se o usuário cancelar a caixa de diálogo.
+                    // Não precisamos registrar isso como um erro real no console.
+                    if (err.name !== 'AbortError') {
+                        console.error('Erro ao salvar o arquivo:', err);
+                    }
+                }
+            } else {
+                // Fallback para navegadores mais antigos
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${slugify(appData.projectName || 'projeto')}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
         }
+
 
         // Carrega um projeto de um arquivo .json
         function loadProject(event) {
