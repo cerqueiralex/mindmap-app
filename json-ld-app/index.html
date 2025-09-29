@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Schema e HTML para FAQ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Estilos personalizados para a aplicação */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Fundo cinza claro */
+        }
+        /* Efeito de transição suave */
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+        /* Estilo para o feedback "Copiado!" */
+        .copy-feedback {
+            transition: opacity 0.5s ease-in-out;
+        }
+        /* Estilos para o container da pré-visualização */
+        #html-preview .wp-block-heading {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .footer {
+            border-top: 1px solid;
+            padding: 20px;
+            width: 100%;
+        }
+        #secao-explicativa {
+            text-align: justify;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+
+        <!-- Cabeçalho da Aplicação -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Gerador de Schema e HTML de FAQ</h1>
+            <p class="mt-2 text-lg text-gray-600">Crie dados estruturados e o HTML para seu blog de forma integrada.</p>
+        </header>
+
+        <main class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+            
+            <!-- Formulário de FAQ -->
+            <div id="form-container">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4">1. Preencha os Detalhes do FAQ</h2>
+
+                <!-- Formulário para FAQ -->
+                <div id="faq-form" class="space-y-4">
+                    <div id="faq-items-container" class="space-y-6">
+                        <!-- Template para um item de FAQ (será clonado) -->
+                        <div class="faq-item p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <div class="mb-2">
+                                <label class="block text-sm font-medium text-gray-600">Pergunta</label>
+                                <input type="text" class="question-input mt-1 w-full p-2 border border-gray-300 rounded-md" placeholder="Qual é a sua pergunta?">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600">Resposta</label>
+                                <textarea class="answer-input mt-1 w-full p-2 border border-gray-300 rounded-md" rows="3" placeholder="Digite a resposta aqui..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="add-faq-btn" class="mt-4 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+                        + Adicionar Pergunta
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botão de Geração -->
+            <div class="mt-8 text-center">
+                <button id="generate-btn" class="w-full md:w-auto px-8 py-3 bg-green-600 text-white font-bold text-lg rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all transform hover:scale-105">
+                    Gerar Códigos
+                </button>
+            </div>
+
+            <!-- Seção de Resultado -->
+            <div id="result-container" class="mt-8 pt-6 border-t border-gray-200 space-y-8" style="display: none;">
+                
+                <!-- Resultado JSON-LD -->
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">2. Seu Código JSON-LD (para SEO)</h2>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="format" value="pretty" checked class="form-radio h-4 w-4 text-indigo-600">
+                                <span class="ml-2 text-gray-700">Formatado</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="format" value="minify" class="form-radio h-4 w-4 text-indigo-600">
+                                <span class="ml-2 text-gray-700">Minificado</span>
+                            </label>
+                        </div>
+                        <div>
+                            <span id="copy-json-feedback" class="copy-feedback text-green-600 font-semibold mr-4 opacity-0">Copiado!</span>
+                            <button id="copy-json-btn" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-800 transition-all">
+                                Copiar JSON-LD
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="output-json" class="w-full p-4 border border-gray-300 rounded-lg bg-gray-900 text-green-400 font-mono text-sm" rows="15" readonly></textarea>
+                    <div class="mt-4 text-center">
+                        <a href="https://search.google.com/test/rich-results" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 font-semibold">
+                            Testar o código no Google Rich Results Test &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Resultado HTML -->
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">3. Seu Código HTML (para o Blog)</h2>
+                     <div class="flex items-center justify-end mb-4">
+                         <div>
+                            <span id="copy-html-feedback" class="copy-feedback text-green-600 font-semibold mr-4 opacity-0">Copiado!</span>
+                            <button id="copy-html-btn" class="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-800 transition-all">
+                                Copiar HTML
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="output-html" class="w-full p-4 border border-gray-300 rounded-lg bg-gray-900 text-yellow-300 font-mono text-sm" rows="15" readonly></textarea>
+                
+                    <!-- SEÇÃO DE PRÉ-VISUALIZAÇÃO -->
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Pré-visualização do HTML</h3>
+                        <div id="html-preview" class="p-6 border border-gray-300 rounded-lg bg-white min-h-[150px] prose max-w-none">
+                            <!-- O HTML gerado será renderizado aqui -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- NOVA SEÇÃO EXPLICATIVA -->
+        <section id="secao-explicativa" class="mt-12 prose max-w-none">
+            <h2 class="text-2xl font-bold">Entendendo a Ferramenta: JSON-LD, Schema de FAQ e HTML</h2>
+            <p>Esta ferramenta foi projetada para resolver dois problemas comuns na publicação de conteúdo web: otimização para motores de busca (SEO) e a apresentação visual do conteúdo para o leitor. Abaixo, explicamos os conceitos por trás de cada código gerado.</p>
+            
+            <h3 class="text-xl font-semibold mt-6">O que é JSON-LD?</h3>
+            <p><strong>JSON-LD (JavaScript Object Notation for Linked Data)</strong> é um formato de dados estruturados recomendado pelo Google. Ele permite que você "traduza" o conteúdo da sua página para uma linguagem que os motores de busca entendem perfeitamente. Ao fazer isso, você fornece um contexto claro sobre suas informações. O código JSON-LD gerado por esta ferramenta é inserido no <code>&lt;head&gt;</code> do seu site e não é visível para os usuários, servindo apenas para comunicar-se com os robôs de busca.</p>
+
+            <h3 class="text-xl font-semibold mt-6">O que é o Schema de FAQ (FAQPage)?</h3>
+            <p>O <strong>Schema de FAQ (<code>FAQPage</code>)</strong> é um tipo específico de marcação de dados estruturados que informa ao Google que sua página contém uma lista de perguntas e respostas. Quando o Google identifica essa marcação, ele pode exibir suas perguntas e respostas diretamente nos resultados da pesquisa, como um <em>rich result</em> (resultado rico). Isso aumenta a visibilidade do seu site, ocupa mais espaço na página de resultados e pode melhorar significativamente sua taxa de cliques (CTR), pois os usuários encontram respostas diretamente no Google.</p>
+
+            <h3 class="text-xl font-semibold mt-6">Como o Código HTML Facilita a Implementação?</h3>
+            <p>A regra de ouro do Google para dados estruturados é que <strong>o conteúdo marcado com schema deve estar visível para o usuário na página</strong>. Simplesmente adicionar o código JSON-LD sem exibir as perguntas e respostas no seu artigo pode ser considerado uma violação das diretrizes do Google.</p>
+            <p>É aqui que o segundo código gerado entra: o <strong>HTML estilizado</strong>. Esta ferramenta não só cria o código para os robôs (JSON-LD), mas também o código para os seus leitores (HTML). Ao copiar e colar este bloco HTML diretamente no corpo do seu artigo, você garante que as mesmas perguntas e respostas do seu schema estão visíveis para todos, cumprindo as diretrizes do Google e enriquecendo o conteúdo para o seu público. Isso economiza tempo e garante que sua implementação de SEO técnico esteja correta e completa.</p>
+        </section>
+        
+    </div>
+    <!-- RODAPÉ ATUALIZADO -->
+    <footer class="footer text-center mt-12 text-gray-500">
+        <!-- NOVO HEADER SOCIAL -->
+        <div class="container flex justify-end mb-4">
+            <div class="ml-auto flex items-center space-x-4 pr-2">
+                <a href="https://www.linkedin.com/in/alexandrepolselli/" target="_blank" class="text-gray-500 hover:text-blue-700" title="LinkedIn"><i class="fa-brands fa-linkedin fa-lg"></i></a>
+                <a href="https://datauniverse.com.br/" target="_blank" class="text-gray-500 hover:text-orange-500" title="Blog"><i class="fa-solid fa-blog fa-lg"></i></a>
+                <a href="https://conversionzone.com.br/" target="_blank" class="text-gray-500 hover:text-green-600" title="Consultoria"><i class="fa-solid fa-briefcase fa-lg"></i></a>
+                <a href="https://github.com/cerqueiralex" target="_blank" class="text-gray-500 hover:text-gray-800" title="Github"><i class="fa-brands fa-github fa-lg"></i></a>
+                <a href="https://www.youtube.com/@datauniverseblog/videos" target="_blank" class="text-gray-500 hover:text-red-600" title="Youtube"><i class="fa-brands fa-youtube fa-lg"></i></a>
+            </div>
+        </div>
+        <p>Copyright © 2025 -  Data Universe - Todos os direitos reservados</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- SELEÇÃO DE ELEMENTOS DO DOM ---
+            const generateBtn = document.getElementById('generate-btn');
+            const resultContainer = document.getElementById('result-container');
+            const addFaqBtn = document.getElementById('add-faq-btn');
+            const faqItemsContainer = document.getElementById('faq-items-container');
+            
+            // Elementos para JSON-LD
+            const outputJsonTextarea = document.getElementById('output-json');
+            const copyJsonBtn = document.getElementById('copy-json-btn');
+            const copyJsonFeedback = document.getElementById('copy-json-feedback');
+            const formatRadios = document.querySelectorAll('input[name="format"]');
+
+            // Elementos para HTML
+            const outputHtmlTextarea = document.getElementById('output-html');
+            const copyHtmlBtn = document.getElementById('copy-html-btn');
+            const copyHtmlFeedback = document.getElementById('copy-html-feedback');
+            const htmlPreview = document.getElementById('html-preview');
+
+            let lastGeneratedSchema = null;
+
+            // --- FUNÇÕES ---
+            
+            const addFaqItem = () => {
+                const newItem = faqItemsContainer.children[0].cloneNode(true);
+                newItem.querySelector('.question-input').value = '';
+                newItem.querySelector('.answer-input').value = '';
+                
+                if (faqItemsContainer.children.length > 0) {
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Remover';
+                    removeBtn.className = 'mt-2 px-3 py-1 bg-red-500 text-white text-sm font-semibold rounded-md hover:bg-red-600';
+                    removeBtn.onclick = () => newItem.remove();
+                    newItem.appendChild(removeBtn);
+                }
+                faqItemsContainer.appendChild(newItem);
+            };
+
+            const generateFaqSchema = () => {
+                const mainEntity = [];
+                const faqItems = faqItemsContainer.querySelectorAll('.faq-item');
+                
+                faqItems.forEach(item => {
+                    const question = item.querySelector('.question-input').value.trim();
+                    const answer = item.querySelector('.answer-input').value.trim();
+                    if (question && answer) {
+                        mainEntity.push({
+                            "@type": "Question",
+                            "name": question,
+                            "acceptedAnswer": {
+                                "@type": "Answer",
+                                "text": answer
+                            }
+                        });
+                    }
+                });
+
+                if (mainEntity.length === 0) {
+                    return null;
+                }
+
+                return {
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    "mainEntity": mainEntity
+                };
+            };
+
+            const generateFaqHtml = () => {
+                const faqItems = faqItemsContainer.querySelectorAll('.faq-item');
+                let htmlSnippets = '';
+
+                faqItems.forEach((item, index) => {
+                    const question = item.querySelector('.question-input').value.trim();
+                    const answer = item.querySelector('.answer-input').value.trim();
+
+                    if (question && answer) {
+                        const uniqueId = `faq-question-${Date.now() + index}`;
+                        htmlSnippets += `
+<div class="schema-faq-section" id="${uniqueId}" style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; box-shadow: 2px 2px 5px #eee; margin: 0 0 5px 0;">
+    <strong class="schema-faq-question"><strong>${question}</strong></strong>
+    <p class="schema-faq-answer">${answer}</p>
+</div>`;
+                    }
+                });
+
+                if (htmlSnippets.trim() === '') {
+                    return null;
+                }
+
+                return `<h2 class="wp-block-heading">FAQ – Perguntas Frequentes</h2>
+<div class="schema-faq wp-block-yoast-faq-block">${htmlSnippets.trim()}
+</div>`;
+            };
+            
+            const displaySchema = () => {
+                if (!lastGeneratedSchema) return;
+
+                const format = document.querySelector('input[name="format"]:checked').value;
+                const space = format === 'pretty' ? 2 : 0;
+                const jsonString = JSON.stringify(lastGeneratedSchema, null, space);
+                
+                outputJsonTextarea.value = `<script type="application/ld+json">\n${jsonString}\n<\/script>`;
+            };
+
+            const handleGenerate = () => {
+                const schemaObject = generateFaqSchema();
+                const htmlString = generateFaqHtml();
+
+                if (!schemaObject) {
+                    alert('Por favor, preencha pelo menos um par de Pergunta e Resposta.');
+                    resultContainer.style.display = 'none';
+                    htmlPreview.innerHTML = '';
+                    return;
+                }
+                
+                lastGeneratedSchema = schemaObject;
+                displaySchema();
+
+                outputHtmlTextarea.value = htmlString;
+                htmlPreview.innerHTML = htmlString;
+
+                resultContainer.style.display = 'block';
+            };
+
+            const copyToClipboard = (textarea, feedbackElement) => {
+                if (!textarea.value) return;
+
+                textarea.select();
+                document.execCommand('copy');
+
+                feedbackElement.classList.remove('opacity-0');
+                setTimeout(() => {
+                    feedbackElement.classList.add('opacity-0');
+                }, 2000);
+            };
+
+            // --- EVENT LISTENERS ---
+            generateBtn.addEventListener('click', handleGenerate);
+            addFaqBtn.addEventListener('click', addFaqItem);
+            copyJsonBtn.addEventListener('click', () => copyToClipboard(outputJsonTextarea, copyJsonFeedback));
+            copyHtmlBtn.addEventListener('click', () => copyToClipboard(outputHtmlTextarea, copyHtmlFeedback));
+            formatRadios.forEach(radio => {
+                radio.addEventListener('change', displaySchema);
+            });
+        });
+    </script>
+</body>
+</html>
