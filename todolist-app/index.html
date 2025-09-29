@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sua Homepage Pessoal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+        /* Estilos base */
+        body {
+            background-color: #f5f5f7;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #1d1d1f;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        body.has-bg::before {
+            opacity: 1;
+        }
+
+        /* --- TEMA LIGHT (Padrão) --- */
+        .card {
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #1d1d1f;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        header { background-color: rgba(255, 255, 255, 0.6); border-color: rgba(209, 213, 219, 0.8); }
+        .modal-content { background-color: #fefefe; }
+        #editor { border-color: #d2d2d7; background-color: #fff; }
+        #editor:focus { border-color: #007aff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2); }
+        .editor-toolbar button { background-color: #e9e9eb; color: #1d1d1f; }
+        .editor-toolbar button:hover { background-color: #dcdce0; }
+        .row-wrapper { background-color: rgba(231, 231, 233, 0.3); border-color: rgba(255, 255, 255, 0.5); }
+        .settings-btn { color: #4b5563; }
+        .settings-btn:hover { color: #1d1d1f; background-color: rgba(0, 0, 0, 0.05); }
+
+        /* Estilos da Toolbar do Editor - Light */
+        .editor-toolbar { background-color: #f0f0f0; border-color: #dcdcdc; }
+        .toolbar-separator { background-color: #dcdcdc; }
+        .editor-toolbar button { color: #333; }
+        .editor-toolbar button:hover, .editor-toolbar button.active { background-color: #e0e0e0; }
+
+
+        /* --- TEMA DARK --- */
+        .dark body { background-color: #1c1c1e; color: #f5f5f7; }
+        .dark .card {
+            background-color: rgba(28, 28, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f5f5f7;
+        }
+        .dark .card:hover { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3); }
+        .dark header { background-color: rgba(28, 28, 30, 0.6); border-color: rgba(80, 80, 80, 0.8); }
+        .dark .text-gray-800 { color: #f5f5f7; }
+        .dark .modal-content { background-color: #2c2c2e; }
+        .dark #editor { border-color: #4a4a4c; background-color: #1c1c1e; color: #f5f5f7;}
+        .dark #editor:focus { border-color: #0a84ff; box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.3); }
+        .dark .editor-toolbar { background-color: #3a3a3c; }
+        .dark .editor-toolbar button { background-color: #5a5a5c; color: #f5f5f7; }
+        .dark .editor-toolbar button:hover { background-color: #6a6a6c; }
+        .dark .row-wrapper { background-color: rgba(44, 44, 46, 0.3); border-color: rgba(255, 255, 255, 0.1); }
+        .dark .text-gray-600 { color: #8e8e93; }
+        .dark .bg-white\/80 { background-color: rgba(58, 58, 60, 0.8); }
+        .dark .text-gray-900 { color: #f5f5f7; }
+        .dark .border-gray-300 { border-color: #4a4a4c; }
+        .dark .text-gray-400 { color: #8e8e93; }
+        .dark .text-gray-500 { color: #636366; }
+        .dark .hover\:text-gray-900:hover { color: #f5f5f7; }
+        .dark .bg-gray-100 { background-color: #3a3a3c; }
+        .dark .bg-gray-200 { background-color: #5a5a5c; }
+        .dark .hover\:bg-gray-300:hover { background-color: #6a6a6c; }
+        .dark .text-gray-800 { color: #f5f5f7; }
+        .dark .settings-btn { color: #a1a1a6; }
+        .dark .settings-btn:hover { color: #f5f5f7; background-color: rgba(255, 255, 255, 0.1); }
+        
+        /* Estilos da Toolbar do Editor - Dark */
+        .dark .editor-toolbar { background-color: #2c2c2e; border-color: #4a4a4c; }
+        .dark .toolbar-separator { background-color: #4a4a4c; }
+        .dark .editor-toolbar button { color: #f5f5f7; }
+        .dark .editor-toolbar button:hover, .dark .editor-toolbar button.active { background-color: #5a5a5c; }
+        
+
+        /* Estilos comuns */
+        .card, header, .modal-content, .editor-toolbar button, .row-wrapper { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+        .card { word-wrap: break-word; overflow-wrap: break-word; min-height: 150px; }
+        .editor-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            align-self: center;
+        }
+        .editor-toolbar button {
+            background: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+        .row-handle { cursor: grab; }
+        .sortable-ghost { opacity: 0.4; background: #e5e5e7; }
+        .sortable-chosen { cursor: grabbing; }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3);
+            display: flex; align-items: center; justify-content: center; z-index: 50;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            padding: 2rem; border-radius: 0.75rem; width: 90%; max-width: 700px;
+            max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        #editor { padding: 1rem; min-height: 200px; max-height: 50vh; border-radius: 0.5rem; flex-grow: 1; overflow-y: auto; }
+        .color-palette { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; }
+        .color-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+        .color-swatch:hover { border-color: #007aff; }
+        
+        /* Estilos de lista agora são globais para aplicar nos cards também */
+        ul:not(.checklist) { list-style: disc inside; padding-left: 1.5rem; }
+        ol { list-style: decimal inside; padding-left: 1.5rem; }
+        /* Adicionado para garantir a visibilidade da lista ordenada DENTRO do editor também */
+        #editor ol { list-style: decimal inside; padding-left: 1.5rem; }
+        li { margin-bottom: 0.25rem; }
+
+        /* Estilos para a Checklist (agora globais) */
+        ul.checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+        ul.checklist li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* Espaço entre checkbox e texto */
+        }
+        ul.checklist li.checked {
+            text-decoration: line-through;
+            color: #8e8e93;
+        }
+        ul.checklist input[type="checkbox"] {
+           width: 1rem;
+           height: 1rem;
+           accent-color: #007aff;
+           cursor: pointer; /* Adicionado para indicar que é clicável */
+           /* 'pointer-events: none;' foi removido para permitir o clique direto */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Painel Superior -->
+    <header class="container mx-auto backdrop-blur-lg p-4 rounded-xl shadow-md mb-8 border">
+        <div class="container mx-auto flex justify-between items-center mb-8">
+            <div id="weather-info" class="text-lg text-gray-800">
+                <i class="fa-solid fa-spinner fa-spin"></i> Carregando clima...
+            </div>
+            <div class="text-center text-gray-800">
+                <div id="date-info" class="text-xl font-semibold"></div>
+                <div id="time-info" class="text-3xl font-bold"></div>
+            </div>
+             <!-- Menu de Configurações -->
+            <div class="flex items-center gap-2">
+                <button id="theme-toggle-btn" class="settings-btn p-2 rounded-full" title="Alternar tema">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button id="bg-image-btn" class="settings-btn p-2 rounded-full" title="Imagem de fundo">
+                    <i class="fa-solid fa-image"></i>
+                </button>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="openTimerBtn" class="flex items-center gap-2 py-2 px-4 rounded-lg settings-btn" style="border: 1px solid;">
+                <i class="fa-solid fa-stopwatch"></i>
+                <span>Timer</span>
+            </button>
+            <!-- Outras ferramentas podem ser adicionadas aqui -->
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal - Linhas e Cards -->
+    <main id="board" class="container mx-auto space-y-6"></main>
+
+    <!-- Botão de Adicionar Linha -->
+    <div class="mt-8 text-center">
+        <button id="addRowBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-md">
+            <i class="fa-solid fa-plus mr-2"></i> Adicionar Nova Linha
+        </button>
+    </div>
+
+    <!-- Modal do Editor de Texto -->
+    <div id="editorModal" class="modal-overlay">
+        <div class="modal-content">
+            <div id="editorToolbar" class="editor-toolbar">
+                <div class="toolbar-group">
+                    <button data-command="bold" title="Negrito"><i class="fa-solid fa-bold"></i></button>
+                    <button data-command="italic" title="Itálico"><i class="fa-solid fa-italic"></i></button>
+                    <button data-command="underline" title="Sublinhado"><i class="fa-solid fa-underline"></i></button>
+                    <button data-command="strikeThrough" title="Tachado"><i class="fa-solid fa-strikethrough"></i></button>
+                </div>
+                <div class="toolbar-separator"></div>
+                <div class="toolbar-group">
+                    <button data-command="insertOrderedList" title="Lista Numerada"><i class="fa-solid fa-list-ol"></i></button>
+                    <button data-command="insertUnorderedList" title="Lista com Marcadores"><i class="fa-solid fa-list-ul"></i></button>
+                    <button data-command="insertChecklist" title="Checklist"><i class="fa-solid fa-list-check"></i></button>
+                </div>
+                <div class="toolbar-separator"></div>
+                <div class="toolbar-group">
+                    <button data-command="indent" title="Aumentar Recuo"><i class="fa-solid fa-indent"></i></button>
+                    <button data-command="outdent" title="Diminuir Recuo"><i class="fa-solid fa-outdent"></i></button>
+                </div>
+                 <div class="toolbar-separator"></div>
+                <div class="toolbar-group">
+                    <button data-command="removeFormat" title="Remover Formatação"><i class="fa-solid fa-text-slash"></i></button>
+                    <button id="textColorBtn" title="Cor do Texto"><i class="fa-solid fa-palette"></i></button>
+                    <button id="cardColorBtn" title="Cor do Card"><i class="fa-solid fa-fill-drip"></i></button>
+                </div>
+            </div>
+            <div id="editor" contenteditable="true" class="text-gray-900 bg-white mt-4"></div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button id="closeEditorModal" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancelar</button>
+                <button id="saveCardContent" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">Salvar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal da Paleta de Cores (Genérico) -->
+    <div id="genericColorPaletteModal" class="modal-overlay">
+        <div class="modal-content max-w-xs">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="genericColorPaletteTitle" class="text-lg font-bold">Cor</h3>
+                <button id="closeGenericColorPalette" class="text-gray-500 hover:text-gray-900"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="genericColorPaletteContainer" class="color-palette"><div class="color-swatch" style="background-color: rgb(255, 251, 235);"></div><div class="color-swatch" style="background-color: rgb(254, 242, 242);"></div><div class="color-swatch" style="background-color: rgb(239, 246, 255);"></div><div class="color-swatch" style="background-color: rgb(240, 253, 244);"></div><div class="color-swatch" style="background-color: rgb(245, 243, 255);"></div><div class="color-swatch" style="background-color: rgb(253, 242, 248);"></div><div class="color-swatch" style="background-color: rgb(243, 244, 246);"></div><div class="color-swatch" style="background-color: rgb(254, 243, 199);"></div><div class="color-swatch" style="background-color: rgb(254, 202, 202);"></div><div class="color-swatch" style="background-color: rgb(219, 234, 254);"></div><div class="color-swatch" style="background-color: rgb(209, 250, 229);"></div><div class="color-swatch" style="background-color: rgb(224, 231, 255);"></div><div class="color-swatch" style="background-color: rgb(252, 231, 243);"></div><div class="color-swatch" style="background-color: rgb(229, 231, 235);"></div><div class="color-swatch" style="background-color: rgb(253, 230, 138);"></div><div class="color-swatch" style="background-color: rgb(248, 113, 113);"></div><div class="color-swatch" style="background-color: rgb(147, 197, 253);"></div><div class="color-swatch" style="background-color: rgb(110, 231, 183);"></div><div class="color-swatch" style="background-color: rgb(199, 210, 254);"></div><div class="color-swatch" style="background-color: rgb(251, 207, 232);"></div><div class="color-swatch" style="background-color: rgb(156, 163, 175);"></div><div class="color-swatch" style="background-color: rgb(250, 204, 21);"></div><div class="color-swatch" style="background-color: rgb(220, 38, 38);"></div><div class="color-swatch" style="background-color: rgb(59, 130, 246);"></div><div class="color-swatch" style="background-color: rgb(16, 185, 129);"></div><div class="color-swatch" style="background-color: rgb(129, 140, 248);"></div><div class="color-swatch" style="background-color: rgb(236, 72, 153);"></div><div class="color-swatch" style="background-color: rgb(75, 85, 99);"></div><div class="color-swatch" style="background-color: rgb(202, 138, 4);"></div><div class="color-swatch" style="background-color: rgb(127, 29, 29);"></div><div class="color-swatch" style="background-color: rgb(30, 64, 175);"></div><div class="color-swatch" style="background-color: rgb(6, 95, 70);"></div><div class="color-swatch" style="background-color: rgb(67, 56, 202);"></div><div class="color-swatch" style="background-color: rgb(134, 25, 143);"></div><div class="color-swatch" style="background-color: rgb(31, 41, 55);"></div></div>
+        </div>
+    </div>
+    
+    <!-- Modal para Imagem de Fundo -->
+    <div id="backgroundModal" class="modal-overlay">
+        <div class="modal-content max-w-md">
+            <h3 class="text-xl font-bold mb-4">Imagem de Fundo</h3>
+            <p class="text-sm text-gray-600 mb-4">Cole a URL de uma imagem para usar como plano de fundo.</p>
+            <input type="text" id="backgroundUrlInput" placeholder="https://exemplo.com/imagem.jpg" class="w-full border rounded-md p-2 mb-4 bg-gray-100 dark:bg-gray-800 dark:border-gray-600">
+            <div class="flex justify-end space-x-4">
+                <button id="cancelBackgroundBtn" class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-md hover:bg-gray-300 transition-colors duration-200">Cancelar</button>
+                <button id="saveBackgroundBtn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-200">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal do Timer -->
+    <div id="timerModal" class="modal-overlay">
+        <div class="modal-content max-w-md text-center">
+            <h3 class="text-xl font-bold mb-4">Timer</h3>
+            <div id="timerDisplay" class="text-6xl font-bold my-6">00:00:00</div>
+            
+            <div class="timer-inputs flex justify-center items-center gap-2 mb-4">
+                <input type="number" id="timerHours" placeholder="HH" min="0" max="23" class="w-20 p-2 text-center border rounded-md bg-gray-100 dark:bg-gray-800 dark:border-gray-600">
+                <span>:</span>
+                <input type="number" id="timerMinutes" placeholder="MM" min="0" max="59" class="w-20 p-2 text-center border rounded-md bg-gray-100 dark:bg-gray-800 dark:border-gray-600">
+                <span>:</span>
+                <input type="number" id="timerSeconds" placeholder="SS" min="0" max="59" class="w-20 p-2 text-center border rounded-md bg-gray-100 dark:bg-gray-800 dark:border-gray-600">
+            </div>
+
+            <div class="timer-presets flex flex-wrap justify-center gap-2 mb-6">
+                <button class="preset-btn bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-semibold py-1 px-3 rounded-full" data-seconds="300">5 min</button>
+                <button class="preset-btn bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-semibold py-1 px-3 rounded-full" data-seconds="600">10 min</button>
+                <button class="preset-btn bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-semibold py-1 px-3 rounded-full" data-seconds="900">15 min</button>
+                <button class="preset-btn bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-semibold py-1 px-3 rounded-full" data-seconds="1800">30 min</button>
+                <button class="preset-btn bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-semibold py-1 px-3 rounded-full" data-seconds="3600">1 hora</button>
+            </div>
+
+            <div class="flex justify-center space-x-4">
+                <button id="startTimerBtn" class="bg-green-500 text-white font-bold py-3 px-6 rounded-md hover:bg-green-600 transition-colors duration-200 w-32">Iniciar</button>
+                <button id="resetTimerBtn" class="bg-gray-500 text-white font-bold py-3 px-6 rounded-md hover:bg-gray-600 transition-colors duration-200 w-32">Zerar</button>
+                 <button id="cancelTimerBtn" class="bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-md hover:bg-gray-300 transition-colors duration-200">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Alerta Customizado -->
+    <div id="customAlertModal" class="modal-overlay">
+        <div class="modal-content max-w-sm text-center">
+            <h3 class="text-xl font-bold mb-2">Alarme</h3>
+            <p id="customAlertMessage" class="mb-6">O tempo acabou!</p>
+            <button id="closeCustomAlert" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-md hover:bg-blue-600">Encerrar Alarme</button>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- ELEMENTOS DO DOM ---
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const bgImageBtn = document.getElementById('bg-image-btn');
+    const backgroundModal = document.getElementById('backgroundModal');
+    const backgroundUrlInput = document.getElementById('backgroundUrlInput');
+    const saveBackgroundBtn = document.getElementById('saveBackgroundBtn');
+    const cancelBackgroundBtn = document.getElementById('cancelBackgroundBtn');
+    const body = document.body;
+    const board = document.getElementById('board');
+    const addRowBtn = document.getElementById('addRowBtn');
+    const editorModal = document.getElementById('editorModal');
+    const closeEditorModal = document.getElementById('closeEditorModal');
+    const saveCardContentBtn = document.getElementById('saveCardContent');
+    const editor = document.getElementById('editor');
+    const editorToolbar = document.getElementById('editorToolbar');
+    
+    const colorPaletteModal = document.getElementById('genericColorPaletteModal');
+    const colorPaletteTitle = document.getElementById('genericColorPaletteTitle');
+    const colorPaletteContainer = document.getElementById('genericColorPaletteContainer');
+    const closeColorPalette = document.getElementById('closeGenericColorPalette');
+    const textColorBtn = document.getElementById('textColorBtn');
+    const cardColorBtn = document.getElementById('cardColorBtn');
+
+    // Elementos do Timer
+    const openTimerBtn = document.getElementById('openTimerBtn');
+    const timerModal = document.getElementById('timerModal');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerHoursInput = document.getElementById('timerHours');
+    const timerMinutesInput = document.getElementById('timerMinutes');
+    const timerSecondsInput = document.getElementById('timerSeconds');
+    const startTimerBtn = document.getElementById('startTimerBtn');
+    const resetTimerBtn = document.getElementById('resetTimerBtn');
+    const cancelTimerBtn = document.getElementById('cancelTimerBtn');
+    const presetBtns = document.querySelectorAll('.preset-btn');
+
+    // Elementos do Alerta Customizado
+    const customAlertModal = document.getElementById('customAlertModal');
+    const customAlertMessage = document.getElementById('customAlertMessage');
+    const closeCustomAlert = document.getElementById('closeCustomAlert');
+
+
+    // --- ESTADO DA APLICAÇÃO ---
+    let appState = { rows: [] };
+    let activeCard = { rowId: null, cardId: null, cardElement: null };
+    let colorTarget = null;
+    let savedSelection = null;
+    let timerInterval = null;
+    let timerSecondsRemaining = 0;
+    let alarmSoundInterval = null;
+
+
+    // --- GERENCIAMENTO DE ESTADO E CONFIGURAÇÕES ---
+    function saveState() {
+        localStorage.setItem('homepageData', JSON.stringify(appState));
+    }
+
+    function loadState() {
+        const savedData = localStorage.getItem('homepageData');
+        if (savedData) {
+            appState = JSON.parse(savedData);
+        } else {
+            appState = {
+                rows: [
+                    { id: Date.now() + 1, columns: 3, cards: [{ id: Date.now() + 2, content: 'Clique para editar...' }, { id: Date.now() + 3, content: 'Arraste as linhas...' }, { id: Date.now() + 4, content: 'Mude as colunas...' }] },
+                    { id: Date.now() + 5, columns: 3, cards: [{ id: Date.now() + 6, content: '' }, { id: Date.now() + 7, content: '' }, { id: Date.now() + 8, content: '' }] },
+                    { id: Date.now() + 9, columns: 3, cards: [{ id: Date.now() + 10, content: '' }, { id: Date.now() + 11, content: '' }, { id: Date.now() + 12, content: '' }] }
+                ]
+            };
+        }
+    }
+    
+    function applyTheme(theme) {
+        const icon = themeToggleBtn.querySelector('i');
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            document.documentElement.classList.remove('dark');
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    }
+
+    function loadSettings() {
+        // Tema
+        const savedTheme = localStorage.getItem('homepageTheme') || 'light';
+        applyTheme(savedTheme);
+        // Imagem de fundo
+        const savedBg = localStorage.getItem('homepageBgUrl');
+        if (savedBg) {
+            body.style.backgroundImage = `url('${savedBg}')`;
+            body.classList.add('has-bg');
+        }
+    }
+
+    // --- RENDERIZAÇÃO ---
+    function renderBoard() {
+        board.innerHTML = '';
+        appState.rows.forEach(rowData => {
+            const rowElement = createRowElement(rowData);
+            board.appendChild(rowElement);
+        });
+        setupDragAndDrop();
+    }
+    
+    function createRowElement(rowData) {
+        const rowWrapper = document.createElement('div');
+        rowWrapper.className = 'row-wrapper p-4 backdrop-blur-md rounded-lg border shadow-sm';
+        rowWrapper.dataset.rowId = rowData.id;
+
+        const rowHeader = document.createElement('div');
+        rowHeader.className = 'flex items-center justify-between mb-4';
+
+        const handle = document.createElement('div');
+        handle.className = 'row-handle text-gray-400 hover:text-gray-900 p-2';
+        handle.innerHTML = '<i class="fa-solid fa-grip-vertical text-xl"></i>';
+
+        const controlsContainer = document.createElement('div');
+        controlsContainer.className = 'flex items-center gap-4';
+
+        const columnSelector = document.createElement('div');
+        columnSelector.innerHTML = `
+            <label for="cols-${rowData.id}" class="mr-2 text-sm text-gray-600">Colunas:</label>
+            <select id="cols-${rowData.id}" data-row-id="${rowData.id}" class="bg-white/80 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1.5">
+                <option value="1" ${rowData.columns === 1 ? 'selected' : ''}>1</option>
+                <option value="2" ${rowData.columns === 2 ? 'selected' : ''}>2</option>
+                <option value="3" ${rowData.columns === 3 ? 'selected' : ''}>3</option>
+                <option value="4" ${rowData.columns === 4 ? 'selected' : ''}>4</option>
+                <option value="5" ${rowData.columns === 5 ? 'selected' : ''}>5</option>
+            </select>
+        `;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-row-btn text-gray-500 hover:text-red-500 transition-colors px-2 py-1';
+        deleteButton.dataset.rowId = rowData.id;
+        deleteButton.title = 'Excluir linha';
+        deleteButton.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+
+        controlsContainer.appendChild(columnSelector);
+        controlsContainer.appendChild(deleteButton);
+
+        rowHeader.appendChild(handle);
+        rowHeader.appendChild(controlsContainer);
+        
+        const cardContainer = document.createElement('div');
+        cardContainer.className = `grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-${rowData.columns}`;
+
+        while (rowData.cards.length < rowData.columns) {
+            rowData.cards.push({ id: Date.now() + Math.random(), content: '' });
+        }
+        rowData.cards.length = rowData.columns;
+
+        rowData.cards.forEach(cardData => {
+            const cardElement = createCardElement(cardData, rowData.id);
+            cardContainer.appendChild(cardElement);
+        });
+
+        rowWrapper.appendChild(rowHeader);
+        rowWrapper.appendChild(cardContainer);
+        return rowWrapper;
+    }
+
+    function createCardElement(cardData, rowId) {
+        const card = document.createElement('div');
+        card.className = 'card p-4 rounded-lg cursor-pointer flex flex-col justify-start';
+        card.dataset.cardId = cardData.id;
+        card.dataset.rowId = rowId;
+        card.innerHTML = cardData.content || '<p class="text-gray-500">Vazio...</p>';
+        if (cardData.backgroundColor) {
+            card.style.backgroundColor = cardData.backgroundColor;
+        }
+        if (cardData.textColor) {
+            card.style.color = cardData.textColor;
+        }
+        return card;
+    }
+
+    // --- LÓGICA DE DRAG AND DROP ---
+    function setupDragAndDrop() {
+        new Sortable(board, {
+            animation: 150,
+            handle: '.row-handle',
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: (evt) => {
+                const movedRow = appState.rows.splice(evt.oldIndex, 1)[0];
+                appState.rows.splice(evt.newIndex, 0, movedRow);
+                saveState();
+            },
+        });
+    }
+
+    // --- LÓGICA DO PAINEL SUPERIOR ---
+    function updateDateTime() {
+        const now = new Date();
+        const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Sao_Paulo' };
+        const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Sao_Paulo' };
+        
+        document.getElementById('date-info').textContent = new Intl.DateTimeFormat('pt-BR', optionsDate).format(now);
+        document.getElementById('time-info').textContent = new Intl.DateTimeFormat('pt-BR', optionsTime).format(now);
+    }
+    
+    async function updateWeather() {
+        const lat = -23.5505;
+        const lon = -46.6333;
+        const apiKey = ''; 
+        const weatherInfo = document.getElementById('weather-info');
+
+        if (apiKey === 'SUA_CHAVE_API') {
+            weatherInfo.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> Adicione sua chave de API do clima';
+            return;
+        }
+        
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Falha ao buscar clima');
+            const data = await response.json();
+            
+            const icon = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+            const description = data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1);
+            
+            weatherInfo.innerHTML = `
+                <div class="flex items-center">
+                    <img src="${icon}" alt="Ícone do clima" class="w-12 h-12 -ml-2">
+                    <div>
+                        <span class="font-bold">${Math.round(data.main.temp)}°C</span>
+                        <span class="text-sm">em São Paulo</span>
+                        <div class="text-xs text-gray-600">${description}</div>
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            console.error("Erro no clima:", error);
+            weatherInfo.textContent = 'Não foi possível carregar o clima.';
+        }
+    }
+
+    // --- MODAIS ---
+    function openEditorModal(cardElement) {
+        activeCard.rowId = cardElement.dataset.rowId;
+        activeCard.cardId = cardElement.dataset.cardId;
+        activeCard.cardElement = cardElement;
+        
+        const cardData = appState.rows.find(r => r.id == activeCard.rowId).cards.find(c => c.id == activeCard.cardId);
+        editor.innerHTML = cardData.content || '';
+        editorModal.classList.add('active');
+        editor.focus();
+    }
+
+    function closeEditor() {
+        editorModal.classList.remove('active');
+        activeCard.rowId = null;
+        activeCard.cardId = null;
+        activeCard.cardElement = null;
+    }
+    
+    function saveCard() {
+        if (!activeCard.rowId || !activeCard.cardId) return;
+        const row = appState.rows.find(r => r.id == activeCard.rowId);
+        const card = row.cards.find(c => c.id == activeCard.cardId);
+        card.content = editor.innerHTML;
+        saveState();
+        renderBoard();
+        closeEditor();
+    }
+
+    function formatDoc(command, value = null) {
+        if (savedSelection) {
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(savedSelection);
+        }
+        document.execCommand(command, false, value);
+        editor.focus();
+        savedSelection = null;
+    }
+
+    function insertChecklist() {
+        // Pega a seleção atual
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        const range = selection.getRangeAt(0);
+        
+        // Pega o texto selecionado e divide em linhas
+        const selectedText = selection.toString();
+        const lines = selectedText.split('\n').filter(line => line.trim() !== '');
+
+        // Cria a lista de checklist em HTML
+        let checklistHtml = '<ul class="checklist">';
+        if (lines.length > 0) {
+            lines.forEach(line => {
+                checklistHtml += `<li><input type="checkbox">${line}</li>`;
+            });
+        } else {
+            // Se não houver texto selecionado, insere um item vazio
+            checklistHtml += '<li><input type="checkbox">Novo item</li>';
+        }
+        checklistHtml += '</ul>';
+
+        // Insere o HTML na posição do cursor
+        document.execCommand('insertHTML', false, checklistHtml);
+    }
+
+    function saveSelection() {
+        try {
+            if (window.getSelection) {
+                const sel = window.getSelection();
+                if (sel.getRangeAt && sel.rangeCount && editor.contains(sel.anchorNode)) {
+                    savedSelection = sel.getRangeAt(0).cloneRange();
+                } else {
+                    savedSelection = null;
+                }
+            }
+        } catch (e) {
+            console.error("Erro ao salvar seleção:", e);
+            savedSelection = null;
+        }
+    }
+
+    function openColorPalette(target) {
+        if (target === 'text') saveSelection();
+        colorTarget = target;
+        colorPaletteTitle.textContent = target === 'text' ? 'Cor do Texto' : 'Cor do Card';
+        colorPaletteModal.classList.add('active');
+    }
+    
+    function closeColorPaletteModal() {
+        colorPaletteModal.classList.remove('active');
+        colorTarget = null;
+    }
+    
+    function applyColor(color) {
+        if (colorTarget === 'text') {
+            formatDoc('foreColor', color);
+        } else if (colorTarget === 'card') {
+            const row = appState.rows.find(r => r.id == activeCard.rowId);
+            const card = row.cards.find(c => c.id == activeCard.cardId);
+            card.backgroundColor = color;
+            activeCard.cardElement.style.backgroundColor = color;
+        }
+        closeColorPaletteModal();
+    }
+
+    // --- LÓGICA DO TIMER ---
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+
+    function updateTimerDisplay() {
+        timerDisplay.textContent = formatTime(timerSecondsRemaining);
+    }
+
+    function playAlarmSound() {
+        if (alarmSoundInterval) clearInterval(alarmSoundInterval); // Limpa qualquer alarme anterior
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const playBeep = () => {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(660, audioContext.currentTime); // Um tom mais agudo
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3); // Toca por 0.3s
+        };
+
+        alarmSoundInterval = setInterval(playBeep, 1000); // Toca um "beep" a cada segundo
+    }
+
+    function stopAlarm() {
+        if (alarmSoundInterval) {
+            clearInterval(alarmSoundInterval);
+            alarmSoundInterval = null;
+        }
+    }
+
+    function showCustomAlert(message) {
+        customAlertMessage.textContent = message;
+        customAlertModal.classList.add('active');
+    }
+
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        stopAlarm(); // Para o alarme se um novo timer for iniciado
+        customAlertModal.classList.remove('active');
+
+        const hours = parseInt(timerHoursInput.value) || 0;
+        const minutes = parseInt(timerMinutesInput.value) || 0;
+        const seconds = parseInt(timerSecondsInput.value) || 0;
+        timerSecondsRemaining = (hours * 3600) + (minutes * 60) + seconds;
+
+        if (timerSecondsRemaining <= 0) return;
+
+        updateTimerDisplay();
+        startTimerBtn.textContent = 'Pausar';
+
+        timerInterval = setInterval(() => {
+            timerSecondsRemaining--;
+            updateTimerDisplay();
+            if (timerSecondsRemaining <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                startTimerBtn.textContent = 'Iniciar';
+                playAlarmSound();
+                showCustomAlert('O tempo acabou!');
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        startTimerBtn.textContent = 'Continuar';
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerSecondsRemaining = 0;
+        timerHoursInput.value = '';
+        timerMinutesInput.value = '';
+        timerSecondsInput.value = '';
+        updateTimerDisplay();
+        startTimerBtn.textContent = 'Iniciar';
+        stopAlarm();
+        customAlertModal.classList.remove('active');
+    }
+
+
+    // --- EVENT LISTENERS ---
+    themeToggleBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        const newTheme = isDark ? 'dark' : 'light';
+        localStorage.setItem('homepageTheme', newTheme);
+        applyTheme(newTheme);
+    });
+
+    bgImageBtn.addEventListener('click', () => {
+        backgroundUrlInput.value = localStorage.getItem('homepageBgUrl') || '';
+        backgroundModal.classList.add('active');
+    });
+
+    cancelBackgroundBtn.addEventListener('click', () => backgroundModal.classList.remove('active'));
+
+    saveBackgroundBtn.addEventListener('click', () => {
+        const url = backgroundUrlInput.value.trim();
+        if (url) {
+            localStorage.setItem('homepageBgUrl', url);
+            body.style.backgroundImage = `url('${url}')`;
+            body.classList.add('has-bg');
+        } else {
+            localStorage.removeItem('homepageBgUrl');
+            body.style.backgroundImage = 'none';
+            body.classList.remove('has-bg');
+        }
+        backgroundModal.classList.remove('active');
+    });
+
+    addRowBtn.addEventListener('click', () => {
+        const newRow = {
+            id: Date.now(),
+            columns: 3,
+            cards: [ { id: Date.now() + 1, content: '' }, { id: Date.now() + 2, content: '' }, { id: Date.now() + 3, content: '' } ]
+        };
+        appState.rows.push(newRow);
+        saveState();
+        renderBoard();
+    });
+
+    board.addEventListener('change', (e) => {
+        if (e.target.tagName === 'SELECT') {
+            const rowId = e.target.dataset.rowId;
+            const newColCount = parseInt(e.target.value, 10);
+            const row = appState.rows.find(r => r.id == rowId);
+            if (row) {
+                row.columns = newColCount;
+                saveState();
+                renderBoard();
+            }
+        }
+    });
+    
+    board.addEventListener('click', (e) => {
+        const card = e.target.closest('.card');
+        if (card) {
+            openEditorModal(card);
+            return;
+        }
+        const deleteBtn = e.target.closest('.delete-row-btn');
+        if (deleteBtn) {
+            const rowId = deleteBtn.dataset.rowId;
+            const rowIndex = appState.rows.findIndex(row => row.id == rowId);
+            if (rowIndex > -1) {
+                appState.rows.splice(rowIndex, 1);
+                saveState();
+                renderBoard();
+            }
+        }
+    });
+
+    closeEditorModal.addEventListener('click', closeEditor);
+    saveCardContentBtn.addEventListener('click', saveCard);
+
+    editorToolbar.addEventListener('mousedown', (e) => {
+        const button = e.target.closest('button[data-command]');
+        if (button) {
+            e.preventDefault();
+            const command = button.dataset.command;
+            if (command === 'insertChecklist') {
+                insertChecklist();
+            } else {
+                formatDoc(command);
+            }
+        }
+    });
+
+    // Adiciona um listener para o editor para lidar com o clique NO CHECKBOX
+    editor.addEventListener('click', (e) => {
+        const target = e.target;
+        // Ação acontece SOMENTE se o alvo do clique for o input do checkbox
+        if (target.tagName === 'INPUT' && target.type === 'checkbox' && target.closest('ul.checklist')) {
+            const li = target.closest('li');
+            if (li) {
+                // O navegador já alterna o estado 'checked'. Apenas sincronizamos o visual e o atributo.
+                li.classList.toggle('checked', target.checked);
+                if (target.checked) {
+                    target.setAttribute('checked', '');
+                } else {
+                    target.removeAttribute('checked');
+                }
+            }
+        }
+    });
+
+    // Adicionado de volta o listener de 'keydown' com a lógica corrigida.
+    editor.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+            const currentNode = range.startContainer;
+            
+            const startElement = currentNode.nodeType === Node.ELEMENT_NODE ? currentNode : currentNode.parentElement;
+            const parentLi = startElement.closest('li');
+
+            if (parentLi && parentLi.parentElement?.classList.contains('checklist')) {
+                e.preventDefault(); // Previne o comportamento padrão do Enter para controlar a lista
+
+                // Se o item da lista estiver vazio (sem texto além do checkbox), sai da lista
+                if (parentLi.textContent.trim() === '') {
+                    const list = parentLi.parentElement;
+                    const newParagraph = document.createElement('p');
+                    newParagraph.innerHTML = '<br>'; // Garante que o cursor tenha um lugar para ir
+
+                    list.after(newParagraph); // Insere o novo parágrafo depois da lista
+                    parentLi.remove(); // Remove o item vazio
+
+                    // Se a lista ficar vazia, remove a própria tag da lista
+                    if(list.children.length === 0) {
+                        list.remove();
+                    }
+
+                    // Move o cursor para o novo parágrafo
+                    const newRange = document.createRange();
+                    newRange.setStart(newParagraph, 0);
+                    newRange.collapse(true);
+                    selection.removeAllRanges();
+                    selection.addRange(newRange);
+
+                } else { // Se não estiver vazio, cria um novo item
+                    const newLi = document.createElement('li');
+                    newLi.innerHTML = '<input type="checkbox">';
+                    parentLi.after(newLi); // Insere o novo item depois do atual
+
+                    // Move o cursor para o novo item para permitir digitação imediata
+                    const newRange = document.createRange();
+                    // Adiciona um nó de texto invisível para posicionar o cursor
+                    const zeroWidthSpace = document.createTextNode('\u200B');
+                    newLi.appendChild(zeroWidthSpace);
+                    newRange.setStart(zeroWidthSpace, 1);
+                    newRange.collapse(true);
+                    
+                    selection.removeAllRanges();
+                    selection.addRange(newRange);
+                }
+            }
+        }
+    });
+    
+    textColorBtn.addEventListener('click', () => openColorPalette('text'));
+    cardColorBtn.addEventListener('click', () => openColorPalette('card'));
+    closeColorPalette.addEventListener('click', closeColorPaletteModal);
+    colorPaletteContainer.addEventListener('click', (e) => {
+        const swatch = e.target.closest('.color-swatch');
+        if (swatch) {
+            applyColor(swatch.style.backgroundColor);
+        }
+    });
+
+    // Listeners do Timer
+    openTimerBtn.addEventListener('click', () => timerModal.classList.add('active'));
+    cancelTimerBtn.addEventListener('click', () => timerModal.classList.remove('active'));
+    closeCustomAlert.addEventListener('click', () => {
+        stopAlarm();
+        customAlertModal.classList.remove('active');
+    });
+
+    startTimerBtn.addEventListener('click', () => {
+        if (timerInterval) {
+            pauseTimer();
+        } else {
+            startTimer();
+        }
+    });
+
+    resetTimerBtn.addEventListener('click', resetTimer);
+
+    presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const seconds = parseInt(btn.dataset.seconds, 10);
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            timerHoursInput.value = h > 0 ? h : '';
+            timerMinutesInput.value = m > 0 ? m : '';
+            timerSecondsInput.value = s > 0 ? s : '';
+        });
+    });
+    
+    // --- INICIALIZAÇÃO ---
+    function init() {
+        loadState();
+        loadSettings();
+        renderBoard();
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        updateWeather();
+    }
+
+    init();
+});
+</script>
+
+</body>
+</html>
