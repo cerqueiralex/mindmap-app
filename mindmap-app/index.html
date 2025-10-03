@@ -846,6 +846,7 @@
         let initialPinchDistance = 0; // Para o zoom com os dedos
         let globalLayoutDirection = 'right'; // Direção padrão do layout
         let potentialParentNodeId = null; // ID do nó que pode se tornar o novo pai
+        let reorderIndicator = null; // Para o feedback visual de reordenamento
         let canvasTexture = 'dotted'; // Textura padrão do canvas
 
         // Histórico para Desfazer/Refazer
@@ -941,8 +942,9 @@
                 const ideas = resultText.split('\n').filter(idea => idea.trim() !== '');
                 const depth = getNodeDepth(parentNode.id) + 1;
                 const themeColors = colorThemes[currentTheme];
-                
-                ideas.forEach(ideaText => {
+                const existingChildrenCount = nodes.filter(n => n.parentId === parentNode.id).length;
+
+                ideas.forEach((ideaText, index) => {
                     const colorIndex = Math.min(depth, themeColors.length - 1);
                     const newNode = {
                         id: `node-${Date.now()}-${Math.random()}`,
@@ -954,7 +956,8 @@
                         shape: globalNodeShape,
                         note: '',
                         emojis: [],
-                        isCollapsed: false
+                        isCollapsed: false,
+                        order: existingChildrenCount + index
                     };
                     const newDimensions = calculateNodeDimensions(newNode);
                     newNode.width = newDimensions.width;
@@ -1111,13 +1114,36 @@
                 }
             }
         }, 500);
+        
+        // Garante que todos os nós tenham um atributo 'order'
+        function ensureNodeOrder(loadedNodes) {
+            const parentMap = {};
+            loadedNodes.forEach(node => {
+                if(node.parentId) {
+                    if(!parentMap[node.parentId]) {
+                        parentMap[node.parentId] = [];
+                    }
+                    parentMap[node.parentId].push(node);
+                }
+            });
+
+            for(const parentId in parentMap) {
+                const children = parentMap[parentId];
+                children.forEach((child, index) => {
+                    if(child.order === undefined) {
+                        child.order = index;
+                    }
+                });
+            }
+            return loadedNodes;
+        }
 
         function loadStateFromLocalStorage() {
             const savedData = localStorage.getItem('mindMapProgress');
             if (savedData) {
                 try {
                     const loadedData = JSON.parse(savedData);
-                    nodes = loadedData.nodes || [];
+                    nodes = ensureNodeOrder(loadedData.nodes || []);
                     postits = loadedData.postits || [];
                     appData.notes = loadedData.notes || {};
                     globalNodeShape = loadedData.globalNodeShape || 'square';
@@ -1279,7 +1305,7 @@
                 try {
                     const loadedData = JSON.parse(e.target.result);
                     if (loadedData.nodes && loadedData.notes) {
-                        nodes = loadedData.nodes;
+                        nodes = ensureNodeOrder(loadedData.nodes);
                         postits = loadedData.postits || [];
                         globalNodeShape = loadedData.globalNodeShape || 'square';
                         globalLineType = loadedData.globalLineType || 'line';
@@ -1355,7 +1381,8 @@
                 shape: globalNodeShape, 
                 note: 'Esta é a nota para o nó central.',
                 emojis: [],
-                isCollapsed: false
+                isCollapsed: false,
+                order: 0
             };
             const initialDimensions = calculateNodeDimensions(initialNode);
             initialNode.width = initialDimensions.width;
@@ -2115,7 +2142,8 @@
                 if (globalLayoutDirection === 'right' || globalLayoutDirection === 'left') {
                     function calculateSubtreeHeight(nodeId) {
                         const node = nodes.find(n => n.id === nodeId);
-                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id));
+                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id))
+                                              .sort((a, b) => a.order - b.order);
 
                         if (children.length === 0 || node.isCollapsed) {
                             node.subtreeHeight = node.height;
@@ -2137,12 +2165,13 @@
                         node.x = x;
                         node.y = y;
 
-                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id));
+                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id))
+                                              .sort((a, b) => a.order - b.order);
                         if (children.length === 0 || node.isCollapsed) return;
 
                         const childX = (globalLayoutDirection === 'right') 
-                            ? x + node.width / 2 + 50
-                            : x - node.width / 2 - 50;
+                            ? x + node.width / 2 + 100
+                            : x - node.width / 2 - 100;
 
                         const totalChildrenHeight = children.reduce((sum, child) => sum + child.subtreeHeight, 0) + (children.length - 1) * 20;
                         
@@ -2161,7 +2190,8 @@
                 } else { // Top-down or Bottom-up
                     function calculateSubtreeWidth(nodeId) {
                         const node = nodes.find(n => n.id === nodeId);
-                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id));
+                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id))
+                                             .sort((a, b) => a.order - b.order);
 
                         if (children.length === 0 || node.isCollapsed) {
                             node.subtreeWidth = node.width;
@@ -2183,12 +2213,13 @@
                         node.x = x;
                         node.y = y;
 
-                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id));
+                        const children = nodes.filter(n => n.parentId === nodeId && !isNodeHidden(n.id))
+                                             .sort((a, b) => a.order - b.order);
                         if (children.length === 0 || node.isCollapsed) return;
 
                         const childY = (globalLayoutDirection === 'top-down') 
-                            ? y + node.height / 2 + 20
-                            : y - node.height / 2 - 20;
+                            ? y + node.height / 2 + 50
+                            : y - node.height / 2 - 50;
 
                         const totalChildrenWidth = children.reduce((sum, child) => sum + child.subtreeWidth, 0) + (children.length - 1) * 50;
                         
@@ -2210,6 +2241,7 @@
             redrawCanvas();
         }
 
+
         function updateNodeAndRedraw(node) {
             const newDimensions = calculateNodeDimensions(node);
             node.width = newDimensions.width;
@@ -2226,6 +2258,8 @@
             const depth = getNodeDepth(selectedNode.id);
             const themeColors = colorThemes[currentTheme];
             const colorIndex = Math.min(depth, themeColors.length - 1);
+            const siblingCount = nodes.filter(n => n.parentId === selectedNode.parentId).length;
+
 
             const newNode = {
                 id: `node-${Date.now()}`,
@@ -2237,7 +2271,8 @@
                 shape: globalNodeShape,
                 note: '',
                 emojis: [],
-                isCollapsed: false
+                isCollapsed: false,
+                order: siblingCount
             };
             const newDimensions = calculateNodeDimensions(newNode);
             newNode.width = newDimensions.width;
@@ -2255,6 +2290,8 @@
 
         function deleteNode() {
             if (!selectedNodeId || selectedNodeId === 'root') return;
+            const deletedNode = nodes.find(n => n.id === selectedNodeId);
+            if (!deletedNode) return;
             
             let toDelete = [selectedNodeId];
             let i = 0;
@@ -2267,6 +2304,11 @@
 
             nodes = nodes.filter(n => !toDelete.includes(n.id));
             toDelete.forEach(id => delete appData.notes[id]);
+            
+            // Re-indexar irmãos
+            const siblings = nodes.filter(n => n.parentId === deletedNode.parentId)
+                                  .sort((a,b) => a.order - b.order);
+            siblings.forEach((sibling, index) => sibling.order = index);
 
             selectedNodeId = null;
             notesEditor.classList.add('hidden');
@@ -2402,13 +2444,55 @@
                     }
                 }
 
-                if (isNodeDragging && potentialParentNodeId && draggedNode.id !== potentialParentNodeId) {
+                if (isNodeDragging && reorderIndicator) {
+                     // Lógica de reordenamento
+                    const { parentId, newIndex } = reorderIndicator;
+                    const siblings = nodes.filter(n => n.parentId === parentId);
+                    
+                    const draggedNodeInSiblings = siblings.find(s => s.id === draggedNode.id);
+                    if (draggedNodeInSiblings) {
+                        const oldIndex = draggedNodeInSiblings.order;
+                        
+                        // Remove o nó arrastado da sua posição antiga e ajusta os índices
+                        siblings.forEach(s => {
+                            if (s.order > oldIndex) {
+                                s.order--;
+                            }
+                        });
+
+                        // Insere o nó na nova posição e ajusta os índices
+                        siblings.forEach(s => {
+                            if (s.order >= newIndex) {
+                                s.order++;
+                            }
+                        });
+
+                        draggedNodeInSiblings.order = newIndex;
+                    }
+                    
+                    applyTreeLayout();
+                } else if (isNodeDragging && potentialParentNodeId && draggedNode.id !== potentialParentNodeId) {
+                     // Lógica de re-parenting
                     const nodeToReparent = nodes.find(n => n.id === draggedNode.id);
                     if (nodeToReparent) {
-                        nodeToReparent.parentId = potentialParentNodeId;
+                        const oldParentId = nodeToReparent.parentId;
+                        const newParentId = potentialParentNodeId;
+
+                        nodeToReparent.parentId = newParentId;
+                        const newSiblings = nodes.filter(n => n.parentId === newParentId);
+                        nodeToReparent.order = newSiblings.length; // Coloca no final
+                        
+                        // Re-indexa os irmãos antigos
+                        if(oldParentId) {
+                            const oldSiblings = nodes.filter(n => n.parentId === oldParentId)
+                                                     .sort((a,b) => a.order - b.order);
+                            oldSiblings.forEach((s, i) => s.order = i);
+                        }
+
                         applyTreeLayout();
                     }
                 }
+
 
                 if(isNodeDragging || isCanvasDragging || isPostitDragging) {
                     saveState();
@@ -2419,6 +2503,7 @@
                 draggedNode = null;
                 draggedPostit = null;
                 potentialParentNodeId = null;
+                reorderIndicator = null;
                 canvas.classList.remove('grabbing');
                 redrawCanvas();
             });
@@ -2427,51 +2512,92 @@
             document.addEventListener('mousemove', (e) => {
                 const dx = e.clientX - lastMouseX;
                 const dy = e.clientY - lastMouseY;
+                reorderIndicator = null; // Limpa o indicador a cada movimento
 
                 if (isPostitDragging && draggedPostit) {
                     draggedPostit.x += dx / scale;
                     draggedPostit.y += dy / scale;
                     postitContextMenu.style.display = 'none';
-                    redrawCanvas();
                 } else if (isNodeDragging && draggedNode) {
-                    const deltaX = dx / scale;
-                    const deltaY = dy / scale;
-
-                    function moveSubtree(nodeId, dX, dY) {
-                        const nodeToMove = nodes.find(n => n.id === nodeId);
-                        if(nodeToMove) {
-                            nodeToMove.x += dX;
-                            nodeToMove.y += dY;
-                            const children = nodes.filter(n => n.parentId === nodeId);
-                            children.forEach(child => moveSubtree(child.id, dX, dY));
-                        }
-                    }
-                    moveSubtree(draggedNode.id, deltaX, deltaY);
+                    draggedNode.x += dx / scale;
+                    draggedNode.y += dy / scale;
 
                     potentialParentNodeId = null;
                     const rect = canvas.getBoundingClientRect();
                     const mouseX = (e.clientX - rect.left - originX) / scale;
                     const mouseY = (e.clientY - rect.top - originY) / scale;
 
+                    let foundTarget = false;
                     for (const node of nodes) {
                         if (node.id !== draggedNode.id && isPointInShape(mouseX, mouseY, node)) {
                             if (!isDescendant(draggedNode.id, node.id)) {
                                 potentialParentNodeId = node.id;
+                                foundTarget = true;
                                 break;
                             }
                         }
                     }
-                    redrawCanvas();
+                    
+                    if (!foundTarget && draggedNode.parentId) {
+                        const siblings = nodes.filter(n => n.parentId === draggedNode.parentId && n.id !== draggedNode.id)
+                                              .sort((a, b) => a.order - b.order);
+
+                        let newIndex = siblings.length;
+                        
+                        const isVertical = globalLayoutDirection === 'right' || globalLayoutDirection === 'left';
+                        const mousePos = isVertical ? mouseY : mouseX;
+
+                        for (let i = 0; i < siblings.length; i++) {
+                            const sibling = siblings[i];
+                            const siblingPos = isVertical ? sibling.y : sibling.x;
+                            if (mousePos < siblingPos) {
+                                newIndex = i;
+                                break;
+                            }
+                        }
+                        
+                        if (siblings.length > 0) {
+                            let indicatorX, indicatorY;
+                            if (newIndex === 0) {
+                                const first = siblings[0];
+                                indicatorX = isVertical ? first.x : first.x - first.subtreeWidth / 2 - 25;
+                                indicatorY = isVertical ? first.y - first.subtreeHeight / 2 - 10 : first.y;
+                            } else {
+                                const prev = siblings[newIndex - 1];
+                                const next = siblings[newIndex];
+                                const prevPos = { x: prev.x, y: prev.y, width: prev.subtreeWidth, height: prev.subtreeHeight };
+                                const nextPos = next ? { x: next.x, y: next.y, width: next.subtreeWidth, height: next.subtreeHeight } : null;
+
+                                if (isVertical) {
+                                    indicatorY = nextPos ? (prevPos.y + nextPos.y) / 2 : prevPos.y + prevPos.height / 2 + 10;
+                                    indicatorX = prevPos.x;
+                                } else {
+                                    indicatorX = nextPos ? (prevPos.x + nextPos.x) / 2 : prevPos.x + prevPos.width / 2 + 25;
+                                    indicatorY = prevPos.y;
+                                }
+                            }
+
+                            reorderIndicator = {
+                                parentId: draggedNode.parentId,
+                                newIndex: newIndex,
+                                x: indicatorX,
+                                y: indicatorY,
+                                isVertical: isVertical
+                            };
+                        }
+                    }
+
                 } else if (isCanvasDragging) {
                     originX += dx;
                     originY += dy;
                     postitContextMenu.style.display = 'none';
-                    redrawCanvas();
                 }
 
+                redrawCanvas();
                 lastMouseX = e.clientX;
                 lastMouseY = e.clientY;
             });
+
 
             canvas.addEventListener('dblclick', (e) => {
                 const rect = canvas.getBoundingClientRect();
@@ -2555,6 +2681,7 @@
             const depth = getNodeDepth(parentId) + 1;
             const themeColors = colorThemes[currentTheme];
             const colorIndex = Math.min(depth, themeColors.length - 1);
+            const siblingCount = nodes.filter(n => n.parentId === parentId).length;
 
             const newNode = {
                 id: `node-${Date.now()}`,
@@ -2566,7 +2693,8 @@
                 shape: globalNodeShape,
                 note: '',
                 emojis: [],
-                isCollapsed: false
+                isCollapsed: false,
+                order: siblingCount
             };
             const newDimensions = calculateNodeDimensions(newNode);
             newNode.width = newDimensions.width;
@@ -2594,7 +2722,8 @@
                 shape: globalNodeShape,
                 note: '',
                 emojis: [],
-                isCollapsed: false
+                isCollapsed: false,
+                order: 0
             };
             const newDimensions = calculateNodeDimensions(newNode);
             newNode.width = newDimensions.width;
@@ -2688,6 +2817,74 @@
             }
         }
 
+        function drawReorderIndicator() {
+            if (!reorderIndicator) return;
+
+            const { x, y, isVertical } = reorderIndicator;
+            const length = isVertical ? 100 : 60;
+            const arrowSize = 8;
+
+            ctx.save();
+            ctx.strokeStyle = '#0ea5e9'; // Azul brilhante
+            ctx.fillStyle = '#0ea5e9';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = 'rgba(14, 165, 233, 0.7)';
+            ctx.shadowBlur = 10;
+            ctx.lineCap = 'round';
+
+            if (isVertical) {
+                const lineY = y;
+                const startX = x - length / 2;
+                const endX = x + length / 2;
+
+                // Linha principal
+                ctx.beginPath();
+                ctx.moveTo(startX, lineY);
+                ctx.lineTo(endX, lineY);
+                ctx.stroke();
+
+                // Seta da esquerda (apontando para a direita)
+                ctx.beginPath();
+                ctx.moveTo(startX, lineY - arrowSize);
+                ctx.lineTo(startX + arrowSize, lineY);
+                ctx.lineTo(startX, lineY + arrowSize);
+                ctx.fill();
+
+                // Seta da direita (apontando para a esquerda)
+                ctx.beginPath();
+                ctx.moveTo(endX, lineY - arrowSize);
+                ctx.lineTo(endX - arrowSize, lineY);
+                ctx.lineTo(endX, lineY + arrowSize);
+                ctx.fill();
+            } else {
+                const lineX = x;
+                const startY = y - length / 2;
+                const endY = y + length / 2;
+
+                // Linha principal
+                ctx.beginPath();
+                ctx.moveTo(lineX, startY);
+                ctx.lineTo(lineX, endY);
+                ctx.stroke();
+
+                // Seta de cima (apontando para baixo)
+                ctx.beginPath();
+                ctx.moveTo(lineX - arrowSize, startY);
+                ctx.lineTo(lineX, startY + arrowSize);
+                ctx.lineTo(lineX + arrowSize, startY);
+                ctx.fill();
+
+                // Seta de baixo (apontando para cima)
+                ctx.beginPath();
+                ctx.moveTo(lineX - arrowSize, endY);
+                ctx.lineTo(lineX, endY - arrowSize);
+                ctx.lineTo(lineX + arrowSize, endY);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+
 
         function redrawCanvas() {
             ctx.save();
@@ -2708,6 +2905,9 @@
                     if (parentNode) drawLine(parentNode, node, '#9ca3af');
                 }
             });
+            
+            // Desenha o indicador de reordenamento se houver
+            drawReorderIndicator();
 
             // Desenha os nós
             nodes.forEach(node => {
@@ -2739,7 +2939,7 @@
             
             switch (globalLineType) {
                 case 'angled':
-                    const midX = x1 + 40;
+                    const midX = x1 + (globalLayoutDirection === 'right' ? 50 : -50);
                     ctx.lineTo(midX, y1);
                     ctx.lineTo(midX, y2);
                     ctx.lineTo(x2, y2);
@@ -3172,12 +3372,9 @@
                     container.appendChild(swatch);
                 });
             };
-
             createPalette(bgColorPalette, 'backgroundColor');
             createPalette(textColorPalette, 'textColor');
         }
-
-
         window.onload = init;
     </script>
 </body>
